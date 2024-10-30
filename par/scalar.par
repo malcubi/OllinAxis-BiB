@@ -1,0 +1,55 @@
+# Test parameter file:
+#
+# Real scalar field, 1+log slicing, no shift.
+
+eqsym =  .true.            # Equatorial symmetry
+angmom = .false.           # Do not allocate angular functions
+
+dr0 = 0.1                  # Grid spacing in r
+dz0 = 0.1                  # Grid spacing in z
+
+dtfac = 0.5                # Courant parameter
+
+Nt = 500                   # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+Nrtotal = 100              # Number of grid points in r
+Nztotal = 100              # Number of grid points in z
+
+slicing = 1+log            # Type of slicing condition (1+log,maximal)
+gauge_f = 2.0              # Coefficient for Bona-Masso slicing
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+scalardiss = 0.01          # Dissipation for scalar field
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+mattertype = scalar        # Real scalar field
+scalarpotential = phi2     # Scalar field potential
+scalar_mass = 1.0          # Scalar field mass
+
+idata = scalarpulse        # Scalar field initial data
+scalarpulse_type = shell   # Type of initial lapse 
+scalar_a0 = 0.01	   # Amplitude of initial scalar field
+scalar_r0 = 3.0	      	   # Center of shell on rho
+scalar_z0 = 3.0	      	   # Center of shell on z
+scalar_sr0 = 1.0           # Width of perturbation on rho
+scalar_sz0 = 1.0           # Width of perturbation on z
+
+ELL_solver = wave          # Elliptic solver (wave,sor)
+
+directory = scalar         # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 25                 # How often do we want to output information to screen?
+Noutput0D = 10             # How often do we want 0D output?
+Noutput1D = 25             # How often do we want 1D output?
+Noutput2D = 50             # How often do we want 2D output?
+
+outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,scalar_phi,scalar_xi_r,scalar_xi_z,rho
+outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,scalar_phi,scalar_xi_r,scalar_xi_z,rho
+outvars2D = alpha,trK,psi,phi,A,B,H,C,ham,mom_r,mom_z,scalar_phi,scalar_xi_r,scalar_xi_z,rho

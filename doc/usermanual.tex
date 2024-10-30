@@ -1,0 +1,603 @@
+%$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/doc/usermanual.tex,v 1.2 2022/06/02 17:19:44 malcubi Exp $
+
+%-----------------------------------------------------------------------
+%
+% filename = usermanual.tex
+% 
+%-----------------------------------------------------------------------
+
+\documentclass[12pt]{article}
+
+% Load packages for symbols and figures.
+
+\usepackage{latexsym}
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{shapes}
+
+% Page settings.
+
+\setlength{\textwidth}{170mm}
+\setlength{\oddsidemargin}{-5mm}
+\setlength{\evensidemargin}{-5mm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   BEGIN DOCUMENT   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+% Reference equations with section number.
+
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+
+\parindent 0mm
+
+
+%%%%%%%%%%%%%%%%%
+%%%   TITLE   %%%
+%%%%%%%%%%%%%%%%%
+
+\title{Code \texttt{OllinAxis-BiB} \\ User's manual}
+
+\author{Miguel Alcubierre \\
+Instituto de Ciencias Nucleares, UNAM \\
+malcubi@nucleares.unam.mx}
+
+\date{June, 2022}
+
+\maketitle
+
+\tableofcontents
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   INTRODUCTION   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagebreak
+
+\section{Introduction}
+
+This program solves the Einstein evolution equations in axial symmetry
+using a curvilinear version of the BSSN formulation for the 3+1
+evolution equations, with different types of matter and different
+gauge conditions.
+
+The main difference of this version of the code with respect to
+previous ones is the fact that it uses box-in-box mesh refinement
+(hence the BiB part of the name), and is parallelized with MPI.
+Many parts of this code are based o a previous version written
+by myself and José Manuel Torres.  An even older version was
+written by Milton Ruiz.
+
+Note: This manual is TERRIBLY INCOMPLETE!  I haven't has the
+time to do it.  I will be adding a little bit more every now
+and again. \\
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%%   DOWNLOAD   %%%
+%%%%%%%%%%%%%%%%%%%%
+
+\section{Downloading the code}
+
+If you are reading this it means you probably already downloaded the
+code.  But if for some reason you need to download it here is how. \\
+
+The easiest way to obtain the code is to download it from the CVS
+server of the Ollin group (dulcinea.nucleares.unam.mx).  In order to
+obtain a username and password for this sever you need to contact
+Miguel Alcubierre (malcubi@nucleares.unam.mx). Once you have a
+username and password you first need to log into the repository by
+typing at the terminal: \\
+
+\texttt{\footnotesize cvs -d
+  :pserver:username@dulcinea.nucleares.unam.mx:/usr/local/ollincvs
+  login} \\
+
+where you should change the word ``username'' for your personal
+username! You then need to type your password.  After this you must
+download the code by typing: \\
+
+\texttt{\footnotesize cvs -d
+  :pserver:username@dulcinea.nucleares.unam.mx:/usr/local/ollincvs co
+  Codes/OllinAxis-BiB} \\
+
+This will create a directory \texttt{Codes} and inside it directory
+\texttt{OllinAxis-BiB}. This is the main directory for the code.
+
+\pagebreak
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%   DIRECTORIES   %%%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Directory structure}
+
+The main directory for the code is \texttt{OllinAxis-BiB}.  There are
+several sub-directories inside this main directory:
+
+\begin{list}{}{
+\setlength{\leftmargin}{40mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{25mm}}
+
+\item[\texttt{CVS}] Contains information about the CVS root and server (see
+Sec.~\ref{sec:editing}).
+
+\item[\texttt{doc}] Contains the tex and pdf files for this user's
+  manual.
+
+\item[\texttt{exe}] This directory is created at compile time and
+  contains the executable file.  It also contains a copy of the
+  parameter files found in directory \texttt{par} (see below).
+
+\item[\texttt{fakempi}] Contains fake MPI routines so that the
+  compiler won't complain if MPI is not installed.
+
+\item[\texttt{gnuplot}] Contains a couple of simple gnuplot macros for
+  visualization.
+
+\item[\texttt{objs}] This directory is created at compile time and
+  contains all the object and module files.
+
+\item[\texttt{ollingraph}] Contains the visualization package
+  ``ollingraph'' for convenient ``quick and dirty'' visualization (see
+  Section~\ref{sec:ollingraph} below).
+
+\item[\texttt{par}] Contains examples of parameter files (see
+Section~\ref{sec:parfiles} below).
+
+\item[\texttt{prl}] Contains perl scripts used at compile time to
+  create the subroutines that manage parameters and arrays.
+
+\item[\texttt{src}] Contains the source files for all the code routines.
+
+\end{list}
+
+
+The directory \texttt{src} is itself divided into a series of
+sub-directories in order to better classify the different
+routines. These sub-directories are:
+
+\begin{list}{}{
+\setlength{\leftmargin}{40mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{25mm}}
+
+\item[\texttt{CVS}] Contains information about the CVS root and server.
+
+\item[\texttt{auto}] Contains \texttt{FORTRAN} files that are
+  automatically generated at compile time by the perl scripts.  These
+  files should not be edited manually!
+
+\item[\texttt{base}] Contains the routines that control the basic
+  execution of the code, including the parameter and array
+  declarations, the parameter parser, the output routines, the main
+  evolution controllers, and generic routines for calculating
+  derivatives, dissipation, etc.  The code in fact starts execution at
+  the routine \texttt{main.f90} contained in this directory.
+
+\item[\texttt{elliptic}] Contains routines for solving elliptic
+  equations for initial data and/or maximal slicing for example.
+
+\item[\texttt{geometry}] Contains routines related to initial data,
+  evolution and analysis of the spacetime geometric variables,
+  including sources, gauge conditions, constraints, horizon finders,
+  etc.
+
+\item[\texttt{matter}] Contains routines related to the initial data,
+  evolution and analysis of the different matter models, including a
+  generic routine for calculating the basic matter variables, and
+  routines for evolving scalar fields, electric fields, fluids, etc.
+
+\end{list}
+
+\vspace{3mm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   COMPILING AND RUNNING   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The code is written in \texttt{FORTRAN 90} and is parallelized with
+\texttt{MPI} (Message Passing Interface).  All subroutines are in
+separate files inside the directory \texttt{src} and its
+sub-directories.
+
+\subsection{Compiling}
+\label{sec:compiling}
+
+To compile just move inside the \texttt{OllinSphere-BiB} directory and type: \\
+
+\texttt{make} \\
+
+This will first run some perl scripts that create a series of
+automatically generated \texttt{FORTRAN} files that will be placed
+inside the directory \texttt{src/auto}.  It will then compile all the
+\texttt{FORTRAN} routines that it can find inside any of the
+sub-directories of \texttt{src} (it will attempt to compile any file
+with the extension \texttt{.f90}). \\
+
+The resulting object files and \texttt{FORTRAN} module files will be
+placed inside the sub-directory \texttt{objs}. The Makefile will then
+create a directory \texttt{exe} and will place in it the final
+executable file called \texttt{ollinaxis}.  It will also copy to this
+directory all the sample parameter files inside the sub-directory
+\texttt{par}, and the visualization package \texttt{ollingraph}. \\
+
+Notice that at this time the Makefile can use the compilers
+\texttt{g95}, \texttt{gfortran}, or the Intel compilers \texttt{ifc}
+and \texttt{ifort}, and it will automatically check if they are
+installed. If you have a different compiler then the Makefile will
+have to be modified (hopefully it won't be very difficult). The code
+will also attempt to find an \texttt{MPI} installation (it looks for
+the command \texttt{mpif90}), and if it does not find it it will use
+the fake routines inside the directory \texttt{fakempi}. \\
+
+The Makefile has several other useful targets that can be listed by
+typing: \texttt{make help}. \\
+
+
+\subsection{Running}
+\label{sec:running}
+
+To run the code move into the directory \texttt{exe} and type: \\
+
+\texttt{ollinsphere name.par} \\
+
+Where \texttt{name.par} is the name of your parameter file (more on
+parameter files below).  The code will then read data from the
+parameter file silently and hopefully start producing some output to
+the screen. The code will also create an output directory and will
+write the data files to that directory. \\
+
+For parallel runs using \texttt{MPI} one must use instead the command:
+\\
+
+\texttt{mpirun -np N ollinsphere name.par} \\
+
+where \texttt{N} should be an integer number that specifies the number
+of processors to be used. \\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   PARAMETER FILES   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Parameter files}
+\label{sec:parfiles}
+
+At run time the code reads the parameter values from a parameter file
+(parfile), with a name of the form \texttt{name.par}, that must be
+specified in the command line after the executable: \\
+
+\texttt{ollinaxis  name.par} \\
+
+The data in this parameter file can be given in any order, using the
+format: \\
+
+\texttt{parameter = value} \\
+
+Comments (anything after a \texttt{\#}) and blank lines are ignored.
+Only one parameter is allowed per line, and only one value is allowed
+per parameter, with the exception of the parameters \texttt{outvars0D}
+and \texttt{outvars1D} that control which arrays get output and take
+lists of arrays as values, for example: \\
+
+
+There is in fact one other parameter that can also take multiple
+values as input, it is the parameter \texttt{mattertype} that can
+accept several types of matter at once (see Section~\ref{sec:matter}
+below).\\
+
+Parameters that do not appear in the parfile get the default values
+given in the file \texttt{param.f90}.  Examples of parameter files can
+be found in the subdirectory \texttt{par}. \\
+
+IMPORTANT: Even though \texttt{FORTRAN} does not distinguish between
+upper and lower case in variable names, the names of parameters are
+handled as strings by the parameter parser, so lower and upper case
+are in fact different.  The name of parameters in the parameter file
+should then be identical to the way in which they appear in the file
+\texttt{param.f90}. \\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   OUTPUT FILES   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Output files}
+
+At run time, the codes creates an output directory whose name should
+be given in the parameter file. It then produces a series of output
+files with the data from the run. There are so called \texttt{0D}
+files (with extension \texttt{*.tl}), \texttt{1D} files (with
+extensions \texttt{*.rl}, \texttt{*.zl} and \texttt{*.dl}), and
+\texttt{1D} files (with extension \texttt{*.2D}). \\
+
+The \texttt{OD} files refer to scalar quantities obtained from the
+spatial arrays as functions of time. These scalar quantities include
+the maximum (\texttt{max}), the minimum (\texttt{min}), and three
+different norms of the spatial arrays: maximum absolute value
+(\texttt{nm1}), root mean square (\texttt{nm2}), and total variation
+(\texttt{var}). The value of different variables at the origin is also
+output. \\
+
+The \texttt{1D} files contain the complete arrays along the coordinate
+axis and diagonals at different times, while the \texttt{2D} files
+output the full arrays.  Beware: If you do output very often these
+files can become quite large! \\
+
+Since we can have several grid refinement levels, and grid boxes,
+the file names are appended with a number corresponding to the specific
+box and level (all grid levels have output). For example: \\
+
+\texttt{alphab0l0.rl}: \hspace{5mm} Level 0 (coarsest grid) \\
+\texttt{alphab0l1.rl}: \hspace{5mm} Level 1 \\
+... \\
+
+All files are written in ASCII, and using a format adapted to XGRAPH
+(but other graphic packages should be able to read them).\\
+
+Output is controlled by the following parameters:
+
+\begin{list}{}{
+\setlength{\leftmargin}{35mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{20mm}}
+
+\item[\texttt{directory}] Name of directory for output.
+
+\item[\texttt{Ninfo}] How often do we output information to screen?
+
+\item[\texttt{Noutput0D}] How often do we do 0D output?
+
+\item[\texttt{Noutput1D}] How often do we do 1D output?
+
+\item[\texttt{Noutput2D}] How often do we do 2D output?
+
+\item[\texttt{outvars0D}] Arrays that need 0D output (a list separated by commas).
+
+\item[\texttt{outvars1D}] Arrays that need 1D output (a list separated by commas).
+
+\item[\texttt{outvars2D}] Arrays that need 2D output (a list separated by commas).
+
+\end{list}
+
+\vspace{3mm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%   CHECKPOINT   %%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%
+%%%   GRID   %%%
+%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Numerical grid}
+\label{sec:grid}
+
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%   SPACETIME   %%%
+%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Spacetime and evolution equations}
+
+The code uses cylindrical coordinates $(r,z)$ is space. Notice that
+what the code calls $r$ is frequently called $\rho$. The distance to
+the origin in the code is in fact called $rr:=(r^2 + z^2)^{1/2}$. \\
+
+The spatial metric is written in the following way:
+\begin{align}
+dl^2 &= e^{4 \phi(r,z,t)} \left[ A(r,z,t) dr^2 + B(r,z,t) dz^2 
++ r^2 H(r,z,t) d\varphi^2 \right. \nonumber \\
+&+ 2 \left. r \left( C(r,z,t) dr dz + r^2 C_1(r,z,t) dr d\varphi
++ r C_2(r,z,t) dz d\varphi \right) \right] \; ,
+\label{eq:metric}
+\end{align}
+with $\phi$ the conformal factor.We also define the function $\psi =
+e^\phi$ and use it instead of $\phi$ in many expressions. For the
+lapse function we use the array $\alpha(r,z,t)$, while the shift in
+principle has three components: $\beta^r(r,z,t)$, $\beta^z(r,z,t)$,
+$\beta^\varphi(r,z,t)$. \\
+
+Notice that when there is no angular momentum the metric can be
+simplified since in that case we have $\beta^\varphi=0$, and
+$C_1=C_2=0$.  The code controls this using the logical parameter
+\texttt{angmom}: if this parameter is true then those arrays are
+turned on, while if it is false they are off.  By default the
+parameter is false, so that those arrays are turned off.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   REGULARIZATION   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%
+%%%   MATTER   %%%
+%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Matter}
+\label{sec:matter}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%   CONSTRAINTS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   SLICING CONDITIONS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Slicing conditions}
+\label{sec:slicing}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   SHIFT CONDITIONS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Shift conditions}
+\label{sec:shift}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   BOUNDARY CONDITIONS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   INITIAL DATA   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Initial data}
+\label{sec:initial}
+
+The type of initial data is controlled by the character-type parameter
+\texttt{idata}.  If you add a new type of initial data it should be
+appended to the list of allowed values for this parameter in the file
+\texttt{src/base/param.f90}.  You should also add a corresponding call to your
+initial data routine in the file \texttt{src/base/initial.f90}. \\
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%%   HORIZONS   %%%
+%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   NUMERICAL METHODS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   ELLIPTIC SOLVERS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   LIST OF PARAMETERS   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{List of main code parameters}
+\label{sec:parameters}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   EDITING THE CODE   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Editing the code}
+\label{sec:editing}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%   OLLINGRAPH   %%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Ollingraph}
+\label{sec:ollingraph}
+
+The code includes a simple 1D visualization package called
+``ollingraph''.  It is written in Python and uses Matplotlib to plot
+simple line plots and animations.  At the moment it should work fine
+under python 2.7, but is seems to have problems with python 3 (I will
+try to fix this later). It is supposed to have similar functionality to
+the old xgraph and ygraph packages, and expects the data files in the
+same format (see below). \\
+
+The plots are quite simple, and meant for quick/dirty interactive
+visualization.  These plots are not supposed to be used for figures
+intended for publication (use gnuplot or something similar for
+that). To use the package type: \\
+
+\texttt{ollingraph  file1 file2 ... filen} \\
+
+When plotting several data files at once, they are all assumed to be
+of the same type.  One can also add a custom name for the plot using
+the option --title: \\
+
+\texttt{ollingraph --title="Plot name" file1 file2 ... filen} \\
+
+If this option is not there the plot is just named after the name of
+the data file being plotted, assuming there is only one, or just says
+``Multiple data files'' if there is more than one file. \\
+
+Before using it make sure that \texttt{ollingraph} has execution
+permission: \\
+
+\texttt{chmod +x ollingraph} \\
+
+There is also a package for simple plots of 2D arrays called
+\texttt{ollingraph2D}. It is called in a similar way:
+
+\texttt{ollingraph2D  file} \\
+
+But in this case the file to be plotted must have extension
+\texttt{.2D}.
+
+\vspace{5mm}
+
+The data files are expected to have the following format:
+
+\begin{itemize}
+
+\item 0D files (those ending in .tl):
+
+\begin{enumerate}
+
+\item One comment line starting with \texttt{\#} or \texttt{"} with
+  the file name (this line could be missing and it should still work).
+
+\item A series of lines with the data points, with the x and y values
+  separated by blank spaces.
+
+\end{enumerate}
+
+\item 1D evolution-type files (those ending in .rl):
+
+\begin{enumerate}
+
+\item Each time step begins with a comment line starting with
+  \texttt{\#} or \texttt{"} that contains the time in the format: \\
+
+\texttt{\#Time = (real number)} \\
+
+\item A series of lines with the data points, with the x and y values
+  separated by blank spaces.
+
+\item One or more blank lines to separate the next time step.
+
+\end{enumerate}
+
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%   REFERENCES   %%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%
+%%%   END   %%%
+%%%%%%%%%%%%%%%
+
+\end{document}
+

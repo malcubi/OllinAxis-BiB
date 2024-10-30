@@ -1,0 +1,60 @@
+# Test parameter file:
+#
+# Complex scalar field, 1+log slicing, no shift.
+
+eqsym = .true.             # Equatorial symmetry
+angmom = .false.           # Do not allocate angular functions
+
+dr0 = 0.1                  # Grid spacing in r
+dz0 = 0.1                  # Grid spacing in z
+
+dtfac = 0.5                # Courant parameter
+
+Nt = 100                   # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+Nrtotal = 100              # Number of grid points in r
+Nztotal = 100              # Number of grid points in z
+
+slicing = 1+log            # Type of slicing condition
+gauge_f = 2.0              # Coefficient for Bona-Masso slicing
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+complexdiss = 0.01         # Dissipation for scalar field
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+mattertype = complex       # Complex scalar field
+complexpotential = phi2    # Complex field potential
+complex_mass = 1.0         # Complex field mass
+
+idata = complexpulse       # Complex field initial data
+complexpulse_type = shell  # Type of initial lapse
+complexR_a0 = +0.01	   # Amplitude of initial real part
+complexR_r0 = 2.0	   # Center of shell on rho
+complexR_z0 = 2.0	   # Center of shell on z
+complexR_sr0 = 1.0         # Width of perturbation on rho
+complexR_sz0 = 1.0         # Width of perturbation on z
+complexI_a0 = -0.01	   # Amplitude of initial imaginary part
+complexI_r0 = 3.0	   # Center of shell on rho
+complexI_z0 = 3.0	   # Center of shell on z
+complexI_sr0 = 1.0         # Width of perturbation on rho
+complexI_sz0 = 1.0         # Width of perturbation on z
+
+ELL_solver = wave          # Elliptic solver (wave,sor)
+
+directory = complex        # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 1              # How often do we want 0D output?
+Noutput1D = 10             # How often do we want 1D output?
+Noutput2D = 50             # How often do we want 2D output?
+
+outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_phiI,complex_xiI_r,complex_xiI_z,rho
+outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_phiI,complex_xiI_r,complex_xiI_z,rho
+outvars2D = alpha,trK,psi,phi,A,B,H,C,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_phiI,complex_xiI_r,complex_xiI_z,rho

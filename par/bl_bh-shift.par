@@ -1,0 +1,67 @@
+# Test parameter file:
+#
+# Brill-Lindquist two puncture initial data,
+# 1+log lapse, Gammadriver shift.
+#
+# For identical masses use equatorial symmetry
+# and turn on flag to reflect black holes.
+
+eqsym     = .false.        # Equatorial symmetry
+angmom    = .false.        # Do not allocate angular functions
+chimethod = .true.         # Evolve inverse of conformal factor 
+
+dr0 = 0.1     	           # Grid spacing in rho
+dz0 = 0.1	           # Grid spacing in z
+
+dtfac = 0.5                # Courant parameter
+
+Nt = 250                   # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+Nrtotal = 100              # Number of grid points in r
+Nztotal = 200              # Number of grid points in z
+
+slicing = 1+log            # Type of slicing condition
+gauge_f = 2.0              # Coefficient for harmonic slicing
+ilapse = psiminus4         # Initial lapse
+
+shift = Gammadriver2       # Shift condition
+drivercsi = 0.75           # Speed associated with shift propagation
+drivereta = 2.0	           # Damping coefficient (beware it has units and should be rescaled with mass)
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+idata = BrillLindquist     # Multiple/static punctures initial data
+N_BH = 2		   # Number of black holes (1,2)
+duplicate_bhs = .false.	   # Enforce eqsym by duplicating black holes on -z axis
+BH1mass = 1.0		   # Mass of black hole 1
+BH1Z = +1.0		   # Axis position of black hole 1
+BH2mass = 1.0		   # Mass of black hole 2
+BH2Z = -1.0		   # Axis position of black hole 2
+
+ahfind = .true.            # Look for apparent horizon
+ahverbose = .false.        # Do we output horizon info to screen?
+ahmove = .true.            # Do we move the horizon centers?
+ahfind_every = 25          # How often to look for horizons?
+N_ah = 3                   # Look for 2 horizons (horizon 0 is centered on z=0)
+z_ah1 = +1.0               # Center of horizon 1
+z_ah2 = -1.0               # Center of horizon 2
+
+directory = bl_bh-shift    # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 25  	           # How often do we want to output information to screen?
+Noutput0D = 25	           # How often do we want 0D output?
+Noutput1D = 25	           # How often do we want 1D output?
+Noutput2D = 50	           # How often do we want 2D output?
+
+outvars0D = alpha,beta_r,beta_z,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,mass_sch
+outvars1D = alpha,beta_r,beta_z,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,mass_sch
+outvars2D = alpha,beta_r,beta_z,trK,psi,A,B,H,C,ham,mom_r,mom_z,mass_sch
+

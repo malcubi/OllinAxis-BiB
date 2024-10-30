@@ -1,0 +1,52 @@
+# Test parameter file:
+#
+# Kerr black hole in quasi-isotropic coordinates.
+
+eqsym     = .true.         # Equatorial symmetry
+angmom    = .true.         # Allocate angular functions
+chimethod = .true.         # Use chi method for conformal factor
+
+dr0 = 0.1                  # Grid spacing in r
+dz0 = 0.1                  # Grid spacing in z
+dtfac = 0.5                # Courant parameter
+
+Nt = 100                   # Number of time steps
+
+Nl0 = 1                    # Number of refinement levels for box 0 (centered on origin)
+
+Nrtotal = 200              # Number of grid points in r
+Nztotal = 200              # Number of grid points in z
+
+slicing = static           # Type of slicing condition
+ilapse = quiso_kerr        # Initial lapse
+
+shift = static	           # Shift condition
+ishift = quiso_kerr        # Initial shift
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+idata = kerr               # Type of initial data
+BH1mass = 1.0              # Black hole mass
+BH1spin = 0.25             # Black hole angular momentum parameter
+
+ahfind = .true.            # Look for apparent horizon
+ahverbose = .true.         # Do we output horizon info to screen?
+ahfind_every = 10          # How often to look for horizons?
+N_ah = 1                   # Look for 1 horizon (centered on origin)
+
+directory = kerr           # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 10             # How often do we want 0D output?
+Noutput1D = 10             # How often do we want 1D output?
+Noutput2D = 10             # How often do we want 2D output?
+
+outvars0D = alpha,beta_r,beta_z,beta_p,trK,phi,psi,A,B,H,C,C1,C2,KTA,KTB,KTH,KTC,KTC1,KTC2,Delta_r,Delta_z,Delta_p,ham,mom_r,mom_z,mom_p,CDelta_r,CDelta_z,CDelta_p,mass_sch
+outvars1D = alpha,beta_r,beta_z,beta_p,trK,phi,psi,A,B,H,C,C1,C2,KTA,KTB,KTH,KTC,KTC1,KTC2,Delta_r,Delta_z,Delta_p,ham,mom_r,mom_z,mom_p,CDelta_r,CDelta_z,CDelta_p,mass_sch
+outvars2D = alpha,beta_r,beta_z,beta_p,trK,psi,A,B,H,C,C1,C2

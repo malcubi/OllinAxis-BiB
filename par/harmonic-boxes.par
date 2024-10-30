@@ -1,0 +1,66 @@
+# Test parameter file:
+#
+# Minkowski, harmonic slicing, no shift.  Multiple refinement boxes.
+
+eqsym  = .false.           # Equatorial symmetry
+angmom = .false.           # Do not allocate angular functions
+
+dr0   = 0.1                # Grid spacing in r
+dz0   = 0.1                # Grid spacing in z
+dtfac = 0.5                # Courant parameter
+
+Nt = 100                   # Number of time steps
+
+Nb = 3                     # Number of refinement boxes
+Nl0 = 1                    # Number of refinement levels for box 0 (centered on origin)
+Nl1 = 1                    # Number of refinement levels for box 1
+Nl2 = 1                    # Number of refinement levels for box 2
+Nl3 = 1                    # Number of refinement levels for box 3
+
+rbox1 = 5.0                # r position of box 1
+zbox1 = 0.0                # z position of box 1
+rbox2 = 0.0                # r position of box 2
+zbox2 = +5.0               # z position of box 2
+rbox3 = 0.0                # r position of box 3
+zbox3 = -5.0               # z position of box 3
+
+Nrtotal = 100              # Number of grid points in r
+Nztotal = 200              # Number of grid points in z
+Nrbox1 = 50                # Number of grid points in r for box 1
+Nzbox1 = 50                # Number of grid points in z for box 1
+Nrbox2 = 50                # Number of grid points in r for box 2
+Nzbox2 = 50                # Number of grid points in z for box 2
+Nrbox3 = 50                # Number of grid points in r for box 3
+Nzbox3 = 50                # Number of grid points in z for box 3
+
+slicing = harmonic         # Type of slicing condition
+gauge_f = 1.0              # Coefficient for harmonic slicing
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+idata = minkowski          # Type of initial data
+
+lapsepert = gauss          # Initial perturbation to lapse.
+ilapse = shell             # Type of initial lapse (shell,torus)
+lapse_a0 = 0.1             # Amplitude of initial lapse
+lapse_r0 = 0.0             # Center of perturbation on rho
+lapse_z0 = 0.0             # Center of perturbation on z
+lapse_sr0 = 1.0            # Width of perturbation on rho
+lapse_sz0 = 1.0            # Width of perturbation on z
+
+directory = harmonic       # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 10             # How often do we want 0D output?
+Noutput1D = 10             # How often do we want 1D output?
+Noutput2D = 10             # How often do we want 2D output?
+
+outvars0D = alpha,trK,phi,psi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z
+outvars1D = alpha,trK,phi,psi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z
+outvars2D = alpha,trK,psi,A,B,H,C,ham,mom_r,mom_z
