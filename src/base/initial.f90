@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/initial.f90,v 1.42 2022/10/24 21:58:25 malcubi Exp $
 
   subroutine initial
 
@@ -159,17 +158,19 @@
 !
 ! psi = 1 + M/(2r)
 !
-! Where r is the coordinate distance to the puncture
-!
+! Notice that for this metric the horizon is
+! located (initially) at r=M/2.
+
 ! The isotropic lapse (for which the solution
 ! is static) is given by:
 !
-! alpha  =  (1 - M/(2r)) / (1 + M/(2r))
+! alpha  =  (1 - M/(2r)) / (1 + M/(2r))  =  (2 - psi) / psi
 !
+! But notice that this lapse will cause numerical
+! problems at the origin.
 !
-! Notice that for this metric the horizon is
-! located (initially) at r=M/2, and M is in
-! fact the horizon mass.
+! Also, for this metric the horizon is located
+! initially at r=M/2.
 
   if (idata=="schwarzschild") then
 
@@ -182,23 +183,20 @@
 
            call currentgrid(box,level,grid(box,level))
 
-!          Lapse.
-
-           if (ilapse=="isotropic") then
-              alpha = (one - half*BH1mass/abs(rr))/(one + half*BH1mass/abs(rr))
-           end if
-
 !          Conformal factor.
 
            psi = one + half*BH1mass/abs(rr)
-
-!          Phi,chi,psi2,spi4.
-
            phi = log(psi)
            chi = one/psi**dble(chipower)
 
            psi2 = psi**2
            psi4 = psi**4
+
+!          Lapse.
+
+           if (ilapse=="isotropic") then
+              alpha = (one - half*BH1mass/abs(rr))/(one + half*BH1mass/abs(rr))
+           end if
 
         end do
      end do
