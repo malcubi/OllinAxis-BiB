@@ -108,6 +108,10 @@
 !                  m
 ! d fdriver =  beta d fdriver  -  (2/3) fdriver DIV.beta
 !  t                 m
+!
+! NOTE: For the moment the advection terms are commented out
+! as they seem to make the code unstable.  I need to experiment
+! with this.
 
   else if ((shift=="Gammadriver1").or.(shift=="Gammadrivershock1")) then
 
@@ -115,8 +119,8 @@
 
      if (shift=="Gammadriver1") then
 
-        sbeta_r = drivercsi*Delta_r + beta_r*DAr_beta_r + beta_z*DAz_beta_r
-        sbeta_z = drivercsi*Delta_z + beta_r*DAr_beta_z + beta_z*DAz_beta_z
+        sbeta_r = drivercsi*Delta_r !+ beta_r*DAr_beta_r + beta_z*DAz_beta_r
+        sbeta_z = drivercsi*Delta_z !+ beta_r*DAr_beta_z + beta_z*DAz_beta_z
 
         if (driverD0) then
            sbeta_r = sbeta_r - drivercsi*Delta0_r
@@ -124,7 +128,7 @@
         end if
 
         if (angmom) then
-           sbeta_p = drivercsi*Delta_p + beta_r*DAr_beta_p + beta_z*DAz_beta_p
+           sbeta_p = drivercsi*Delta_p !+ beta_r*DAr_beta_p + beta_z*DAz_beta_p
            if (driverD0) then
               sbeta_p = sbeta_p - drivercsi*Delta0_p
            end if
@@ -132,10 +136,10 @@
 
      else if (shift=="Gammadrivershock1") then
 
-        sfdriver = - two*third*fdriver*DIV_beta + beta_r*DAr_fdriver + beta_z*DAz_fdriver
+        sfdriver = - two*third*fdriver*DIV_beta !+ beta_r*DAr_fdriver + beta_z*DAz_fdriver
 
-        sbeta_r = drivercsi*fdriver*Delta_r + beta_r*Dr_beta_r + beta_z*Dz_beta_r
-        sbeta_z = drivercsi*fdriver*Delta_z + beta_r*Dr_beta_z + beta_z*Dz_beta_z
+        sbeta_r = drivercsi*fdriver*Delta_r !+ beta_r*Dr_beta_r + beta_z*Dz_beta_r
+        sbeta_z = drivercsi*fdriver*Delta_z !+ beta_r*Dr_beta_z + beta_z*Dz_beta_z
 
         if (driverD0) then
            sbeta_r =sbeta_r - drivercsi*fdriver*Delta0_r
@@ -143,7 +147,7 @@
         end if
 
         if (angmom) then
-           sbeta_p = drivercsi*fdriver*Delta_p + beta_r*Dr_beta_p + beta_z*Dz_beta_p
+           sbeta_p = drivercsi*fdriver*Delta_p !+ beta_r*Dr_beta_p + beta_z*Dz_beta_p
            if (driverD0) then
               sbeta_p =sbeta_p - drivercsi*fdriver*Delta0_p
            end if
@@ -204,6 +208,10 @@
 !                  m
 ! d fdriver =  beta d fdriver  -  (2/3) fdriver DIV.beta
 !  t                 m
+!
+! NOTE: For the moment the advection terms are commented out
+! as they seem to make the code unstable.  I need to experiment
+! with this.
 
   else if ((shift=="Gammadriver2").or.(shift=="Gammadrivershock2")) then
 
@@ -213,7 +221,7 @@
      sbeta_z = dtbeta_z !+ beta_r*DAr_beta_z + beta_z*DAz_beta_z
 
      if (angmom) then
-        sbeta_p = dtbeta_p + beta_r*DAr_beta_p + beta_z*DAz_beta_p
+        sbeta_p = dtbeta_p !+ beta_r*DAr_beta_p + beta_z*DAz_beta_p
      end if
 
 !    Source for dtbeta for standard Gamma driver.
@@ -224,17 +232,17 @@
         sdtbeta_z = drivercsi*sDelta_z !+ beta_r*DAr_dtbeta_z + beta_z*DAz_dtbeta_z
 
         if (angmom) then
-           sdtbeta_p = drivercsi*sDelta_p + beta_r*DAr_dtbeta_p + beta_z*DAz_dtbeta_p
+           sdtbeta_p = drivercsi*sDelta_p !+ beta_r*DAr_dtbeta_p + beta_z*DAz_dtbeta_p
         end if
 
 !    Source for dtbeta for shock avoiding Gamma driver.
 
      else if (shift=="Gammadrivershock2") then
 
-        sfdriver = - two*third*fdriver*DIV_beta + beta_r*Dr_fdriver + beta_z*Dz_fdriver
+        sfdriver = - two*third*fdriver*DIV_beta !+ beta_r*Dr_fdriver + beta_z*Dz_fdriver
 
-        sdtbeta_r = drivercsi*(fdriver*sDelta_r + sfdriver*Delta_r) + beta_r*DAr_dtbeta_r + beta_z*DAz_dtbeta_r
-        sdtbeta_z = drivercsi*(fdriver*sDelta_z + sfdriver*Delta_z) + beta_r*DAr_dtbeta_z + beta_z*DAz_dtbeta_z
+        sdtbeta_r = drivercsi*(fdriver*sDelta_r + sfdriver*Delta_r) !+ beta_r*DAr_dtbeta_r + beta_z*DAz_dtbeta_r
+        sdtbeta_z = drivercsi*(fdriver*sDelta_z + sfdriver*Delta_z) !+ beta_r*DAr_dtbeta_z + beta_z*DAz_dtbeta_z
 
         if (driverD0) then
            sdtbeta_r = sdtbeta_r - drivercsi*sfdriver*Delta0_r
@@ -242,7 +250,7 @@
         end if
 
         if (angmom) then
-           sdtbeta_p = drivercsi*(fdriver*sDelta_p + sfdriver*Delta_p) + beta_r*DAr_dtbeta_p + beta_z*DAz_dtbeta_p
+           sdtbeta_p = drivercsi*(fdriver*sDelta_p + sfdriver*Delta_p) !+ beta_r*DAr_dtbeta_p + beta_z*DAz_dtbeta_p
            if (driverD0) then
               sdtbeta_p = sdtbeta_p - drivercsi*sfdriver*Delta0_p
            end if
@@ -250,7 +258,7 @@
 
      end if
 
-!    Damping term.
+!    Damping terms.
 
      sdtbeta_r = sdtbeta_r - drivereta*dtbeta_r
      sdtbeta_z = sdtbeta_z - drivereta*dtbeta_z
