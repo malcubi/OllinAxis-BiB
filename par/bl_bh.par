@@ -38,7 +38,7 @@ duplicate_bhs = .false.	   # Enforce eqsym by duplicating black holes on -z axis
 BH1mass = 1.0		   # Mass of black hole 1
 BH1Z = +1.0		   # Axis position of black hole 1
 BH2mass = 1.0		   # Mass of black hole 2
-BH2Z = -1.0		   # Axis position of black hole 1
+BH2Z = -1.0		   # Axis position of black hole 2
 
 ahfind = .true.            # Look for apparent horizon
 ahverbose = .false.        # Do we output horizon info to screen?
