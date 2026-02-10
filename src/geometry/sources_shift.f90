@@ -207,12 +207,10 @@
 
   else if ((shift=="Gammadriver2").or.(shift=="Gammadrivershock2")) then
 
-!    Shift source.
-!    The advection terms make the expression not tensorial,
-!    but it seems to be much better than not having them.
+!    Source for beta.
 
-     sbeta_r = dtbeta_r + beta_r*DAr_beta_r + beta_z*DAz_beta_r
-     sbeta_z = dtbeta_z + beta_r*DAr_beta_z + beta_z*DAz_beta_z
+     sbeta_r = dtbeta_r !+ beta_r*DAr_beta_r + beta_z*DAz_beta_r
+     sbeta_z = dtbeta_z !+ beta_r*DAr_beta_z + beta_z*DAz_beta_z
 
      if (angmom) then
         sbeta_p = dtbeta_p + beta_r*DAr_beta_p + beta_z*DAz_beta_p
@@ -222,8 +220,8 @@
 
      if (shift=="Gammadriver2") then
 
-        sdtbeta_r = drivercsi*sDelta_r + beta_r*DAr_dtbeta_r + beta_z*DAz_dtbeta_r
-        sdtbeta_z = drivercsi*sDelta_z + beta_r*DAr_dtbeta_z + beta_z*DAz_dtbeta_z
+        sdtbeta_r = drivercsi*sDelta_r !+ beta_r*DAr_dtbeta_r + beta_z*DAz_dtbeta_r
+        sdtbeta_z = drivercsi*sDelta_z !+ beta_r*DAr_dtbeta_z + beta_z*DAz_dtbeta_z
 
         if (angmom) then
            sdtbeta_p = drivercsi*sDelta_p + beta_r*DAr_dtbeta_p + beta_z*DAz_dtbeta_p
@@ -259,26 +257,6 @@
 
      if (angmom) then
         sdtbeta_p = sdtbeta_p - drivereta*dtbeta_p
-     end if
-
-!    Dissipation.
-
-     if (geodiss/=0.d0) then
-
-        evolvevar => dtbeta_r
-        sourcevar => sdtbeta_r
-        call dissipation(-1,+1,geodiss)
-
-        evolvevar => dtbeta_z
-        sourcevar => sdtbeta_z
-        call dissipation(+1,-1,geodiss)
-
-        if (angmom) then
-           evolvevar => dtbeta_p
-           sourcevar => sdtbeta_p
-           call dissipation(+1,+1,geodiss)
-        end if
-
      end if
 
 
