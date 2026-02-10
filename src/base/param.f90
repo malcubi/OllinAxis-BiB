@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/param.f90,v 1.120 2022/10/24 21:59:11 malcubi Exp $
 
 ! ****************************************
 ! ***   PARAMETERS ARE DECLARED HERE   ***
@@ -331,8 +330,9 @@
 ! drivercsi:     Coefficient of Deltar for Gammadriver.
 ! drivereta:     Coefficient of damping term for Gammadriver.
 !
-! shiftpert:     Perturbation to initial shift.
+! driveradv:     Do we include advection terms in driver conditions?
 !
+! shiftpert:     Perturbation to initial shift.
 ! shift_a0:      Amplitude of perturbation.
 ! shift_r0:      Center of perturbation in r.
 ! shift_z0:      Center of perturbation in z.
@@ -343,6 +343,7 @@
   character(30) :: ishift = "zero"  ! range = (zero,shell,torus,quiso_kerr)
 
   logical :: driverD0 = .false.
+  logical :: driveradv = .false.    ! Seems to work better with advection terms off.
 
   real(8) :: shiftafter = 0.0
   real(8) :: drivercsi = 0.75
