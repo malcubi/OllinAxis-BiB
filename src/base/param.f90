@@ -64,7 +64,7 @@
 ! Nrmax:            Local maximum number of grid points in r direction (should not be set in parameter file).
 ! Nzmax:            Local maximum number of grid points in z direction (should not be set in parameter file).
 !
-! Nb:               Number of refinement box (we allow up to 3 at the moment).
+! Nb:               Number of refinement boxes (we allow up to 3 at the moment).
 !
 ! Nl#:              Number of refinement levels for box #.
 ! Nl(#):            Array containing the above numbers to be filled at run time.
