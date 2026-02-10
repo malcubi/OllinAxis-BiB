@@ -105,11 +105,11 @@
 
 !    Dissipation.
 
-     if (geodiss/=0.d0) then
-        evolvevar => dtalpha
-        sourcevar => sdtalpha
-        call dissipation(+1,+1,geodiss)
-     end if
+     !if (geodiss/=0.d0) then
+     !   evolvevar => dtalpha
+     !   sourcevar => sdtalpha
+     !   call dissipation(+1,+1,geodiss)
+     !end if
 
 !    Boundary.
 
