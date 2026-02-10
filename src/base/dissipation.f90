@@ -187,21 +187,19 @@
 !    Loop in r direction adding the operator:  D^6_r.
 
      do i=4-ghost,Nr-3
-        sourcevar(i,:) = sourcevar(i,:) + diss*idt &
-                       *(-20.d0*evolvevar(i,:) &
-                       + 15.d0*(evolvevar(i+1,:) + evolvevar(i-1,:)) &
-                       -  6.d0*(evolvevar(i+2,:) + evolvevar(i-2,:)) &
-                             + (evolvevar(i+3,:) + evolvevar(i-3,:)))
+        sourcevar(i,:) = sourcevar(i,:) - diss*idt*(20.d0*evolvevar(i,:) &
+                       - 15.d0*(evolvevar(i+1,:) + evolvevar(i-1,:)) &
+                       +  6.d0*(evolvevar(i+2,:) + evolvevar(i-2,:)) &
+                       -       (evolvevar(i+3,:) + evolvevar(i-3,:)))
      end do
 
 !    Loop in z direction adding the operator:  D^6_z.
 
      do j=4-ghost,Nz-3
-        sourcevar(:,j) = sourcevar(:,j) + diss*idt &
-                       *(-20.d0*evolvevar(:,j) &
-                       + 15.d0*(evolvevar(:,j+1) + evolvevar(:,j-1)) &
-                       -  6.d0*(evolvevar(:,j+2) + evolvevar(:,j-2)) &
-                             + (evolvevar(:,j+3) + evolvevar(:,j-3)))
+        sourcevar(:,j) = sourcevar(:,j) - diss*idt*(20.d0*evolvevar(:,j) &
+                       - 15.d0*(evolvevar(:,j+1) + evolvevar(:,j-1)) &
+                       +  6.d0*(evolvevar(:,j+2) + evolvevar(:,j-2)) &
+                       -       (evolvevar(:,j+3) + evolvevar(:,j-3)))
      end do
 
 !    Now loop in both directions subtracting the mixed operator:  D^2_z D^4_ r + D^2_r D^4_z.
