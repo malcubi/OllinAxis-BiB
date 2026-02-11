@@ -460,6 +460,10 @@ equatorial symmetry then reduces the use of computational by half.
 The also code uses ``box-in-box'' type grid refinement.  That is, it
 has refinement levels with higher resolution ...
 
+(I NEED TO EXPLAIN THIS IN DETAIL)
+
+\vspace{3mm}
+
 
 %%%%%%%%%%%%%%%%%%%%%
 %%%   SPACETIME   %%%
@@ -485,7 +489,7 @@ dl^2 &= e^{4 \phi(r,z,t)} \left[ A(r,z,t) dr^2 + B(r,z,t) dz^2
 \end{align}
 with $\phi$ the conformal factor. The powers of $r$ in some of the
 terms come from the behaviour of the different metric components close
-to the axis. Factorizong those powers of $r$ exoplicitely allows us to
+to the axis. Factorizing those powers of $r$ explicitly allows us to
 make sure that the functions $(A,B,H,C,C_1,C_2)$ are well behaved at
 $r=0$. Notice that the components of the extrinsic curvature $K_{ij}$
 are also decomposed in a similar way (see below). \\
@@ -587,11 +591,11 @@ The main evolution variables (arrays) are:
 \item[\texttt{KTC2}] Component $(r,\varphi)$ of conformal trace-free extrinsic
   curvature $\tilde{K}^{TF}_{z \varphi} = r \: \texttt{KTC2}$.
 
-\item[\texttt{Delta\_r}] Contravariant component of auxilary BSSN variable $\Delta^r$.
+\item[\texttt{Delta\_r}] Contravariant component of auxiliary BSSN variable $\Delta^r$.
 
-\item[\texttt{Delta\_z}] Contravariant component of auxilary BSSN variable $\Delta^z$.
+\item[\texttt{Delta\_z}] Contravariant component of auxiliary BSSN variable $\Delta^z$.
 
-\item[\texttt{Delta\_p}] Contravariant component of auxilary BSSN variable $\Delta^\varphi$.
+\item[\texttt{Delta\_p}] Contravariant component of auxiliary BSSN variable $\Delta^\varphi$.
 
 \end{list}
 
@@ -635,10 +639,116 @@ defined as:
 \section{Matter}
 \label{sec:matter}
 
+When we write the Einstein equations in 3+1 form, the components of
+the stress-energy tensor that will be important are the energy density,
+momentum density and spatial stress tensor as measured by the
+so-called Eulerian observers, {\em i.e.} those that move along
+the normal direction to the spatial hypersurfaces:
+\begin{eqnarray}
+\rho &=& n^\mu n^\nu T_{\mu \nu} \; , \\
+J_i &=& - n^\mu P_i^\nu T_{\mu \nu} \; , \\
+S_{ij} &=& P_i^\mu P_i^\nu T_{\mu \nu} \; ,
+\end{eqnarray}
+with $n^\mu$ the unit normal vector to the spatial hypersurfaces of
+constant coordinate time, and $P^\mu_\nu$ the projector operator onto
+these hypersurfaces. \\
+
+The code defines as 2D arrays the energy density \texttt{rho}, the
+three components of the momentum density (index up) \texttt{J\_r},
+\texttt{J\_z}, \texttt{J\_p} (where the index ``p'' stands for the
+$\varphi$ component), and the six components of the spatial stress
+tensor which is decomposed in the same way as the metric and
+extrinsic curvature: \texttt{S\_A,S\_B,S\_H,S\_C,S\_C1,S\_C2}.
+Additionally, the trace of the spatial stress tensor is also defines
+as \texttt{trS}.  In the code these quantities are defined even for
+vacuum (they are set to zero), since they are required both in the
+evolution equations and for the calculation of the constraints. \\
+
+The type of matter used by the code is controlled by the
+character-type parameter \texttt{mattertype}.  At the moment it allows
+the following values:
+
+\begin{list}{}{
+\setlength{\leftmargin}{35mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{30mm}}
+
+\item[\texttt{vacuum}] There is no matter (this is the default).
+
+\item[\texttt{scalar}] Real scalar field.  The scalar field is assumed
+  to have a potential whose form is controlled by the parameter
+  \texttt{scalarpotential}, which can take the values
+  (\texttt{none,phi2,phi4}), corresponding to a free scalar field
+  (\texttt{none}), a massive scalar field with a
+  potential of the form $V=m^2 \Phi^2/2$
+  (\texttt{phi2}), where the mass $m$ is give by the
+  parameter \texttt{scalar\_mass}, or a potential of the form
+  $V=m^2 \Phi^2/2 + \lambda \Phi^4 / 4$
+  (\texttt{phi4}), with the coefficient of the
+  self-interaction term given by the parameter
+  \texttt{scalar\_lambda}.
+
+\item[\texttt{complex}] Complex scalar field.  The complex scalar
+  field is assumed to have a potential whose form is controlled by the
+  parameter \texttt{complexpotential}, which can take the values
+  (\texttt{none,phi2,phi4}), corresponding to a free scalar field
+  (\texttt{none}), a massive scalar field with a potential of the form
+  $V=m^2 |\Phi|^2/2$ (\texttt{phi2}), where the mass $m$ is give by
+  the parameter \texttt{complex\_mass}, or a potential of the form
+  $V(\phi)=m^2 |\Phi|^2/2 + \lambda |\Phi|^4 / 4$ (\texttt{phi4}),
+  with the coefficient of the self-interaction term given by the
+  parameter \texttt{complex\_lambda}.
+
+\end{list}
+
+Any new type of matter model should be added to the list of allowed
+values for this parameter in the file \texttt{param.f90}. Notice that
+the code allows one to have several different types of matter at the
+same time, the corresponding stress-energy tensors are just added
+together. For example, if you want to have a real scalar field and a
+complex scalar field evolving together you can add the following line
+to the parameter file: \\
+
+\texttt{mattertype = scalar,complex} \\
+
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%   CONSTRAINTS   %%%
 %%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Constraints}
+\label{sec:constraints}
+
+\subsection{Hamiltonian and momentum constraints}
+
+When required for output, the code calculates the Hamiltonian and the
+three components of the momentum constraints (index up) and saves them
+in the arrays \texttt{ham} and \texttt{mom\_r}, \texttt{mom\_z},
+\texttt{mom\_p} (read the comments in the routine
+\texttt{src/geometry/constraints.f90} to see how they are
+calculated). \\
+
+Notice that for an exact solution both these constraints should be
+zero, so monitoring their behaviour, and particularly how they
+approach zero as we increase the resolution, gives us information
+about the accuracy of the code. \\
+
+\subsection{BSSN extra constraints}
+
+The BSSN formalism requires the introduction of the auxiliary variables
+$\Delta^i$ defined in terms of derivatives of the conformal metric
+components (see~\cite{Alcubierre11}).  These are then promoted
+to independent variables, and their evolution equations are modified
+using the momentum constraints. \\
+
+We therefore end up with a new constraints related to the definition
+of the $\Delta^i$ that are calculated for output in the arrays
+\texttt{CDelta\_r}, \texttt{CDelta\_z} and \texttt{CDelta\_p} (read the
+comments in the routine \texttt{src/geometry/constraints.f90} to see
+how they are calculated).
+
+\vspace{3mm}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -649,6 +759,135 @@ defined as:
 \section{Slicing conditions}
 \label{sec:slicing}
 
+The slicing condition is controlled by the parameter \texttt{slicing},
+which at the moment can take one of the following values (default is
+\texttt{slicing=harmonic}):
+
+\begin{list}{}{
+\setlength{\leftmargin}{35mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{20mm}}
+
+\item[\texttt{static}] The lapse remains static at its initial value and does not evolve.
+
+\item[\texttt{harmonic}] This is a harmonic-type slicing condition of the form:
+\begin{equation}
+\partial_t \alpha = - \alpha^2 f \: {\rm tr} K + \beta^m \partial_m \alpha \; ,
+\end{equation}
+where $f$ is a real positive number controlled by the parameter
+\texttt{gauge\_f} (default is \texttt{gauge\_f=1}). True harmonic
+slicing really corresponds to \texttt{gauge\_f=1}, but here we allow
+any positive real number.  This is a hyperbolic slicing condition
+corresponding to a speed of propagation of the gauge given by
+$\sqrt{f}$.
+
+\item[\texttt{1+log}] This is a slicing condition of the 1+log family,
+  which is very similar to the harmonic family above:
+\begin{equation}
+\partial_t \alpha = - \alpha f \: {\rm tr} K + \beta^m \partial_m \alpha \; ,
+\end{equation}
+where again $f$ is a positive real number controlled by the same
+parameter \texttt{gauge\_f}.  Standard 1+log slicing corresponds to 
+\texttt{gauge\_f=2} (though as mentioned above the default value is 1).
+
+\item[\texttt{shockavoid}] This corresponds to the family of shock
+  avoiding slicing conditions, which is similar to the 1+log
+  condition above but with $f(\alpha)$ a function given by (see
+    comments in file \texttt{src/geometry/auxiliary\_geometry.f90}):
+\begin{equation}
+f(\alpha) = 1 + k/\alpha^2 \; .
+\end{equation}
+The code takes $k=\texttt{gauge\_f}-1$.
+
+\item[\texttt{maximal}] This is maximal slicing which corresponds to
+  the condition that the trace of the extrinsic curvature remains
+  equal to zero during evolution (which guarantees that the spatial
+  volume elements remain constant), and which implies that the lapse
+  must satisfy the following elliptic equation:
+\begin{equation}
+\nabla^2 \alpha = \alpha K_{ij} K^{ij} + 4 \pi \alpha  \left( \rho + {\rm tr} S \right) \; .
+\end{equation}
+
+\end{list}
+
+\vspace{3mm}
+
+Notice that the choices \texttt{harmonic}, \texttt{1+log} and
+\texttt{shockavoid} are special cases of the Bona-Masso family of
+slicing conditions that has the general form:
+\begin{equation}
+\partial_t \alpha = - \alpha^2 f(\alpha) {\rm trK} + \beta^r \partial_r \alpha\; .
+\end{equation}
+with $f(\alpha)$ an arbitrary (positive) function of the lapse.
+ 
+\vspace{5mm}
+
+The initial value of the lapse can also be controlled by the parameter
+\texttt{ilapse} which can take the values (default
+\texttt{ilapse=none}):
+
+\begin{list}{}{
+\setlength{\leftmargin}{35mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{20mm}}
+
+\item[\texttt{none}] The initial lapse it first set to 1, but can
+  later be modified by initial data routines and will not be touched
+  after this.
+
+\item[\texttt{one}] The initial lapse is set to 1 again AFTER all
+  initial data routines have been called.
+
+\item[\texttt{isotropic}] The initial lapse is set to the
+  corresponding isotropic lapse for a single static black hole (useful
+  for testing).
+
+\item[\texttt{psiminus2}] The initial lapse is set to
+  $\alpha=1/\psi^2$ after all initial data routines have been called,
+  with $\psi$ the conformal factor. This is useful for black hole
+  evolutions where $\psi$ becomes infinite at the origin, and results
+  in a ```pre-collapsed'' initial lapse that is already zero and
+  smooth at $r=0$.
+
+\item[\texttt{psiminus4}] Similar to the case above, but sets the
+  initial lapse to $\alpha=1/\psi^4$.
+
+\item[\texttt{maximal}] The maximal slicing condition is solved for
+  the initial lapse, but the lapse can later be evolved using a
+  different condition.
+
+\end{list}
+
+\vspace{5mm}
+
+There is also the possibility of adding a Gaussian to the initial
+value of the lapse. This is useful for perturbing the initial data and
+causing interesting gauge dynamics.  This is controlled by the
+parameters:
+
+\begin{list}{}{
+\setlength{\leftmargin}{35mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{20mm}}
+
+\item[\texttt{lapsegauss}] Logical parameter that if set to
+  \texttt{.true.} adds a Gaussian to the initial lapse (default is
+  \texttt{.false.}).
+
+\item[\texttt{lapse\_a0}] Amplitude of Gaussian.
+
+\item[\texttt{lapse\_r0}] Center of Gaussian in $r$ direction.
+
+\item[\texttt{lapse\_sr0}] Width of Gaussian in $r$ direction.
+
+\item[\texttt{lapse\_z0}] Center of Gaussian in $z$ direction.
+
+\item[\texttt{lapse\_sz0}] Width of Gaussian in $z$ direction.
+
+\end{list}
+
+\vspace{3mm}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   SHIFT CONDITIONS   %%%
@@ -658,10 +897,111 @@ defined as:
 \section{Shift conditions}
 \label{sec:shift}
 
+The shift condition is controlled by the parameter \texttt{shift},
+which at the moment can take one of the following values (default is
+\texttt{shift=none}):
+
+\begin{list}{}{
+\setlength{\leftmargin}{45mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{30mm}}
+
+\item[\texttt{none}] There is no shift, and all shift terms in the
+  evolution equations are ignored.  This is the default.
+
+\item[\texttt{zero}] The shift is set to zero, but all the shift terms
+  in the evolution equations are calculated.  This is useful for
+  testing.
+
+\item[\texttt{static}] The shift is non-zero but it does not evolve in
+  time. Again, useful for testing.
+
+\item[\texttt{Gammadriver1}] Parabolic Gamma-driver shift.  The shift
+  condition is given by:
+\begin{equation}
+\partial_t \beta^i = \xi \partial_t \Delta^i \; .
+\end{equation}
+
+\item[\texttt{Gammadriver2}] Standard second order hyperbolic
+  Gamma-driver shift.  The shift condition is given by:
+\begin{equation}
+\partial^2_t \beta^i = \xi \partial_t \Delta^i - \eta \partial_t \beta^i \; .
+\end{equation}
+In the code this is written in second order form as:
+\begin{eqnarray}
+\partial_t \beta^i &=& \cal{B}^i \; , \\
+\partial_t \cal{B}^i &=& \xi \partial_t \Delta^i - \eta \cal{B}^i \; .
+\end{eqnarray}
+
+This is in fact the standard Gamma-driver used in most BSSN codes.
+Notice that in the code ${\cal B}$ is in fact called \texttt{dtbeta}.
+
+\end{list}
+
+\vspace{3mm}
+
+The Gamma-driver shift conditions above relate the evolution of the
+shift to that of the BSSN auxiliary variables $\Delta^i$. The values
+of the coefficients $\xi$ and $\eta$ are controlled with the real
+parameters \texttt{drivercsi} and \texttt{drivereta}.  There is also
+the logical parameter \texttt{driveradv} which if set to
+\texttt{.true.}  modifies the Gamma driver conditions by adding
+advection terms on the shift (by default it is \texttt{.false.}). \\
+
+Just as in the case of the lapse, there is the possibility of adding a
+Gaussian to the initial value of the shift. This is useful for
+perturbing the initial data and causing interesting gauge dynamics.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   BOUNDARY CONDITIONS   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Boundary conditions}
+\label{sec:boundary}
+
+The outer boundary conditions for the evolution are controlled by the
+character-type parameter \texttt{boundary}, which at the moment can
+take one of the following values (the default is \texttt{flat}):
+
+\begin{list}{}{
+\setlength{\leftmargin}{35mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{25mm}}
+
+\item[\texttt{none}] No boundary condition is applied.  The sources are
+  applied all the way to the boundary using one-sided differences.
+
+\item[\texttt{static}] The sources are set to zero at the boundary.
+  This is done only for evolving arrays that are not declared with the
+  keyword \texttt{NOBOUND}.
+
+\item[\texttt{flat}] The sources at the boundary are copied from their
+  value one grid point in. This is done only for evolving arrays that
+  are not declared with the keyword \texttt{NOBOUND}.
+
+\item[\texttt{radiative}] Outgoing-wave boundary condition. This is
+  somewhat more involved as it uses some information from eigenfields
+  and eigenspeeds, and works quite well in practice.
+
+\end{list}
+
+\vspace{3mm}
+
+Notice that all the boundary conditions are always applied at the
+level of the source terms, and are applied only for some of the
+evolving arrays and not all of them.  In general, evolving arrays that
+are declared with the keyword \texttt{NOBOUND} have no need for a
+boundary condition since their source terms can be calculated all the
+way to the boundary. \\
+
+Static and flat boundary conditions are applied in the automatically
+generated file \linebreak \texttt{src/auto/simpleboundary.f90}.  The
+radiative boundary conditions are explained with more detail below.
+
+\subsection{Radiative boundaries}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -677,6 +1017,33 @@ The type of initial data is controlled by the character-type parameter
 appended to the list of allowed values for this parameter in the file
 \texttt{src/base/param.f90}.  You should also add a corresponding call to your
 initial data routine in the file \texttt{src/base/initial.f90}. \\
+
+Simple types of vacuum initial data already there are:
+
+\begin{list}{}{
+\setlength{\leftmargin}{55mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{50mm}}
+
+\item[\texttt{idata=minkowski}] The initial metric is simply set to
+  Minkowski and the extrinsic curvature is set to zero.  Notice that
+  one can still have non-trivial gauge evolution if one adds a
+  Gaussian perturbation to the initial lapse (see
+  Section~\ref{sec:slicing}).
+
+\item[\texttt{idata=schwarzschild}] The initial metric is set to that
+  corresponding to a Schwarzschild black hole in isotropic coordinates
+  centered at the origin. The mass of the black hole controlled by the
+  parameter \texttt{BH1mass} (default is 1).  The initial extrinsic
+  curvature is set to zero.
+
+\item[\texttt{idata=BrillLindquist}] This is initial data for two black
+  holes in isotropic (conformally flat) coordinates. The masses of the
+  two black holes are controlled by the parameters \texttt{BH1mass}
+  and \texttt{BH2mass}, and their position on the $z$ axis is
+  controlled by the parameters \texttt{BH1Z} and \texttt{BH2Z}.
+
+\end{list}
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -698,10 +1065,87 @@ For the time integration the code uses a method of lines, where the
 time integration and spatial differentiation are considered
 independent of each other. \\
 
+For the evolution of the field variables we can use one of two
+methods:
+
+\begin{enumerate}
+
+\item Standard fourth order Runge-Kutta.
+
+\item 3-step iterative Crank-Nicholson scheme (ICN).  The ICN scheme for
+N iterations is defined as follows (with $S(f)$ the source term of the
+evolution equation):
+\begin{eqnarray}
+f_0  &=&  f(t) \; , \\
+f_{i+1} &=&  f_0 + dt/2 \; S(f_i)  \qquad \textrm{i from 1 to N-1} \; , \\
+f_N &=&  f_0 + dt \; S(f_{N-1}) \; , \\
+f_t+dt &=& f_N
+\end{eqnarray}
+
+That is, we do $N-1$ half steps starting always from $f(t)$ but
+evaluating the source term using the results from the previous step.
+Finally, we do one last full step.  Doing only 2 ($N=2$) steps is
+enough for second order accuracy, but we need to do at least 3 ($N=3$)
+for stability.  ICN is a rather robust method that can be applied to
+non-linear systems of equations, but it is somewhat dissipative.
+
+\end{enumerate}
+
+The choice of the integration method is done through the parameter
+\texttt{integrator} which can take the values \{\texttt{rk4,icn}\}. \\
+
+\subsection{Spatial differencing}
+
+For spatial differentiation we can use either second or fourth order
+differencing (I have also added sixth and eight order, but this is
+usually not needed as the time integration is at most fourth order).
+Close to the outer boundaries we in fact reduce the differencing
+always to second order.  The choice of the differencing order is
+controlled by the parameter \texttt{order} which can take the values
+\{\texttt{two,four}\}. \\
+
+\subsection{Dissipation}
+
+The code uses Kreiss-Oliger type dissipation to improve stability.
+Often one can turn this off and things will still work, but is seems
+to be important for scalar field evolutions and also to keep a black
+hole spacetimes stable for a long time. The dissipation of the
+geometric variables is controlled by the parameter \texttt{geodiss},
+and the dissipation for the scalar field (both real and complex) is
+controlled by the parameter \texttt{scalardiss}. Both are set by
+default to a value of 0.01.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   ELLIPTIC SOLVERS   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Elliptic solvers}
+\label{sec:elliptic}
+
+For solving initial data, as well as some gauge conditions such as
+maximal slicing, we need to have elliptic equation solvers in the code
+At the moment there are only two very simple (and slow) elliptic
+solvers (and they have not been very heavily tested). \\
+
+The choice of elliptic solver is controlled by the parameter \texttt{ELL\_solver}
+which can take the following values:
+
+\begin{list}{}{
+\setlength{\leftmargin}{55mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{50mm}}
+
+\item[\texttt{ELL\_solver=none}] No elliptic solver is active.
+
+\item[\texttt{ELL\_solver=wave}] Solver based on turning the
+elliptic equation into a wave-type hyperbolic equation and
+evolving this in fictitious time until we reach a steady state.
+
+\item[\texttt{ELL\_solver=sor}] Simple elliptic SOR solver. 
+
+\end{list}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -711,6 +1155,177 @@ independent of each other. \\
 \section{List of main code parameters}
 \label{sec:parameters}
 
+Here is a list of the main code parameters with their default values
+and ranges when applicable.  For a list of all declared parameters see
+the file \texttt{src/base/param.f90}.  But do notice that some of the
+``parameters'' declared in \texttt{param.f90} should not be fixed in
+the parameter file since they are in fact defined at run time. \\
+
+There are many more parameters that are not mentioned here,
+particularly related to matter models or initial data routines.  Have
+a look at the file \texttt{src/base/param.f90} where they are defined,
+they are usually explained in the comments).
+
+\begin{itemize}
+
+\item Grid parameters:
+
+\begin{list}{}{
+\setlength{\leftmargin}{60mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{50mm}}
+
+\item[\texttt{dr0 (real)}] Spatial interval along $r$ direction for
+  base (coarsest) grid (default 1.0).
+
+\item[\texttt{dz0 (real)}] Spatial interval along $z$ direction for
+  base (coarsest) grid (default 1.0).
+
+\item[\texttt{Nrtotal (integer)}] Total number of grid points along
+  $r$ direction for base grid (default 10).
+
+\item[\texttt{Nztotal (integer)}] Total number of grid points along
+  $r$ direction for base grid (default 10).
+
+\item[\texttt{Nb (integer)}] Number of refinement boxes other than the
+  main one, as much as 3 (default 0). Notice that this does NOT mean
+  the number of refinement levels, but rather the number of different
+  regions to be refined.
+
+\item[\texttt{Nl0 (integer)}] Number of extra refinement levels on main
+  box centered on the origin (default 0).
+
+\item[\texttt{Nl* (integer)}] Number of extra refinement levels on
+  refinement box *, with *$=(1,2,3)$ (default 0).
+
+\item[\texttt{eqsym} (logical)] Do we have equatorial symmetry?
+  (default \texttt{.false.}).
+
+\item[\texttt{ghost (integer)}] Number of ghost zones (default 0).
+  Should NOT be fixed in the parameter file.
+
+\item[\texttt{interporder (character)}] Order of interpolation
+  (default ``bicubic'').  Don't change this unless you know what you
+  are doing!
+
+\item[\texttt{boundtype (character)}] Type of outer boundary condition.
+  Can take the following values: \texttt{none}, \texttt{static},
+  \texttt{flat}, \texttt{radiative} (default \texttt{radiative}).
+
+\end{list}
+
+\item Time stepping parameters:
+
+\begin{list}{}{
+\setlength{\leftmargin}{60mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{50mm}}
+
+\item[\texttt{dtfac (real)}] Currants parameter (default 0.5).
+
+\item[\texttt{dt0 (real)}] Time step for base (coarsest) grid
+  (default 0.0).  This should NOT be set in the parameter file, as it
+  is calculated at run time based on the value of \texttt{dt0} and
+  \texttt{dtfac}: \texttt{dt0 = dtfac*min(dr0,dz0)}. 
+
+\item[\texttt{adjuststep (logical)}] Dynamically adjust the time step in order
+to satisfy the Courant stability condition (default .false.).
+
+\item[\texttt{Nt (integer)}] Total number of time steps (default 10).
+
+\end{list}
+
+\item Output parameters:
+
+\begin{list}{}{
+\setlength{\leftmargin}{60mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{50mm}}
+
+\item[\texttt{directory (character)}]  Name of output directory (default \texttt{output}).
+
+\item[\texttt{Ninfo (integer)}] Frequency of output to screen (default 1).
+
+\item[\texttt{Noutput0D (integer)}] Frequency of 0D output (default 1).
+
+\item[\texttt{Noutput1D (integer)}] Frequency of 1D output (default 1).
+
+\item[\texttt{Noutput2D (integer)}] Frequency of 2D output (default 1).
+
+\item[\texttt{outvars0D (character)}] Comma separated lists of
+variables that need 0D output (default \texttt{alpha}).
+
+\item[\texttt{outvars1D (character)}] Comma separated lists of
+variables that need 1D output (default \texttt{alpha}).
+
+\item[\texttt{outvars2D (character)}] Comma separated lists of
+variables that need 2D output (default \texttt{alpha}).
+
+\item[\texttt{commentype (character)}] Type of comment lines used on the
+output files \linebreak (range = \{\texttt{xgraph}, \texttt{gnuplot}\}, default
+\texttt{xgraph}).
+
+\item[\texttt{outparallel (character)}] Type of parallel output (range
+  = \{\texttt{singlefile}, \texttt{fileperproc}\}, default
+  \texttt{fileperproc}).
+
+\end{list}
+
+\item Evolution parameters:
+
+\begin{list}{}{
+\setlength{\leftmargin}{60mm}
+\setlength{\labelsep}{10mm}
+\setlength{\labelwidth}{50mm}}
+
+\item[\texttt{spacetime (character)}] Can take the values
+  \texttt{dynamic} or \texttt{background} to choose if we want a
+  dynamic spacetime (evolve the Einstein field equations) or a static
+  background spacetime (default \texttt{dynamic}).
+
+\item[\texttt{formulation (character)}] Defines the formulation of the
+  3+1 equations to use, and can take the values \texttt{bssn} or
+  \texttt{z4c} (default \texttt{bssn}).
+
+\item[\texttt{bssnflavor (character)}] Controls the evolution of the
+  volume element in BSSN, and can take the values \texttt{lagrangian}
+  or \texttt{eulerian} (default \texttt{lagrangian}).
+
+\item[\texttt{integrator (character)}] Method for time
+  integration. Can take the values \texttt{icn} for 3-step
+  iterative Crank-Nicholson, or \texttt{rk4} for fourth order
+  Runge-Kutta (default \texttt{icn}).
+
+\item[\texttt{order (character)}] Order of spatial
+  finite-differencing.  Can take the values \texttt{two} o
+  \texttt{four} (default \texttt{two}).
+
+\item[\texttt{chimethod (logical)}] If true evolve $\chi = \exp(-n
+  \phi)$ instead of $\phi$.  This is useful for black hole evolutions
+  (default \texttt{.false.}).
+
+\item[\texttt{chipower (integer)}] Value of $n$ in the definition
+  $\chi = \exp(-n \phi)$ (default \texttt{2}).
+
+\item[\texttt{eta (real)}] Parameter that controls the multiple of the
+  momentum constraints that is added to the evolution equation for the
+  $\Delta^i$ in the BSSN formulation (default \texttt{2.0}).
+
+\item[\texttt{angmom (logical)}] Do we turn on angular momentum terms
+  (default \texttt{.false.}).
+
+\item[\texttt{idata (character)}] Type of initial data (default ``minkowski'').
+
+\item[\texttt{slicing (character)}] Type of slicing condition (default
+  ``harmonic'').
+
+\item[\texttt{geodiss (real)}] Kreiss-Oliger dissipation coefficient
+  for geometric variables.
+
+\end{list}
+
+\end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   EDITING THE CODE   %%%
@@ -718,6 +1333,51 @@ independent of each other. \\
 
 \section{Editing the code}
 \label{sec:editing}
+
+If you are planning to edit the code and add your own new parameters,
+arrays or routines, here are some details you should know. \\
+
+
+\subsection{Adding parameters}
+
+All parameters for the code should be declared in the file
+\texttt{src/base/param.f90}, using a very specific format: \\
+
+\texttt{type :: name = value} \\
+
+Here \texttt{type} can be any of the standard \texttt{FORTRAN}
+variable types (\texttt{logical}, \texttt{integer}, \texttt{real},
+\texttt{character}), \texttt{name} is the name of the parameter, and
+\texttt{value} is a default initial value that makes some sense for
+the code.  Only one parameter can be declared per line, since this
+file will be read at compilation time by a perl script that expects
+that structure. \\
+
+The following variations are permitted:  Character-type parameters
+that are allowed to receive multiple values at the same time
+(separated by commas) should be declared as: \\
+
+\texttt{character :: name = value     ! multiple} \\
+
+Also, a range can be defined for character-type parameters as: \\
+
+\texttt{character :: name = value     ! range = (value1,value2,...,valuen)} \\
+
+The range is not compulsory.  If it is not there, any value
+is allowed (for example, directory names). \\
+
+REMEMBER: All parameters must have a default value, as otherwise the
+code will not compile.  The initial value should basically correspond
+to the code NOT doing anything weird.  That is, initialize to
+Minkowski, static slicing, no shift, vacuum, and all special features
+turned off. \\
+
+
+\subsection{Adding arrays}
+
+Since this is a 2D code, it works with a series of 2D arrays that have
+all the dynamical and analysis variables. All arrays must be declared
+in the file \texttt{src/base/arrays.config}, using a very specific format. \\
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -791,12 +1451,25 @@ The data files are expected to have the following format:
 
 \texttt{\#Time = (real number)} \\
 
-\item A series of lines with the data points, with the x and y values
+\item A series of lines with two columns, with the x and y values
   separated by blank spaces.
 
 \item One or more blank lines to separate the next time step.
 
 \end{enumerate}
+
+\item 2D evolution-type files (those ending in .2D):
+
+\item Each time step begins with a comment line starting with
+  \texttt{\#} or \texttt{"} that contains the time in the format: \\
+
+\texttt{\#Time = (real number)} \\
+
+\item A series of lines with three columns, with values separated by
+  blank spaces, corresponding to the coordinates $(r,z)$ and the value
+  of the corresponding variable. The values are stored by first
+  looping over the $r$ coordinate with fixed value of $z$, and
+  separating by blank spaces for differen values of $z$.
 
 \end{itemize}
 
