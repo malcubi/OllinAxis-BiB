@@ -73,8 +73,8 @@ Many parts of this code are based on a previous version written
 by myself and José Manuel Torres.  An even older version was
 written by Milton Ruiz. \\
 
-Note: This manual is TERRIBLY INCOMPLETE!  I haven't had the time to
-do it. Still, it should give you a good idea of the basics. I will be
+Note: THIS MANUAL IS STILL INCOMPLETE!  I haven't had the time to
+finish it. Still, it should give you a good idea of the basics. I will be
 adding a little bit more every now and again. \\
 
 
@@ -94,7 +94,6 @@ The easiest way to obtain the code is to download it from GitHub: \\
 Once you have the code, you can get updated versions by just doing
 ``git pull'' inside the code main directory.
 
-\pagebreak
 
 
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -659,7 +658,7 @@ three components of the momentum density (index up) \texttt{J\_r},
 $\varphi$ component), and the six components of the spatial stress
 tensor which is decomposed in the same way as the metric and
 extrinsic curvature: \texttt{S\_A,S\_B,S\_H,S\_C,S\_C1,S\_C2}.
-Additionally, the trace of the spatial stress tensor is also defines
+Additionally, the trace of the spatial stress tensor is also defined
 as \texttt{trS}.  In the code these quantities are defined even for
 vacuum (they are set to zero), since they are required both in the
 evolution equations and for the calculation of the constraints. \\
@@ -929,12 +928,12 @@ which at the moment can take one of the following values (default is
 \end{equation}
 In the code this is written in second order form as:
 \begin{eqnarray}
-\partial_t \beta^i &=& \cal{B}^i \; , \\
-\partial_t \cal{B}^i &=& \xi \partial_t \Delta^i - \eta \cal{B}^i \; .
+\partial_t \beta^i &=& {\cal B}^i \; , \\
+\partial_t {\cal B}^i &=& \xi \partial_t \Delta^i - \eta {\cal B}^i \; .
 \end{eqnarray}
-
 This is in fact the standard Gamma-driver used in most BSSN codes.
-Notice that in the code ${\cal B}$ is in fact called \texttt{dtbeta}.
+Notice that in the code the components of ${\cal B}^i$ are in fact
+called (\texttt{dtbeta\_r}, \texttt{dtbeta\_z}, \texttt{dtbeta\_p}).
 
 \end{list}
 
