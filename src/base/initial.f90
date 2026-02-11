@@ -580,9 +580,9 @@
                  alpha = alpha + lapse_a0*exp(-(rr**4/(r**2*lapse_sr0**2 + z**2*lapse_sz0**2)))
               else
                  alpha = alpha + lapse_a0 &
-                       *(exp(-(rr-(r**2*lapse_r0+z**2*lapse_z0)/rr**2)**2 &
+                       *(exp(-(rr-(r**2*lapse_r0 + z**2*lapse_z0)/rr**2)**2 &
                        *rr**2/(r**2*lapse_sr0**2 + z**2*lapse_sz0**2)) &
-                       + exp(-(rr+(r**2*lapse_r0+z**2*lapse_z0)/rr**2)**2 &
+                       + exp(-(rr+(r**2*lapse_r0 + z**2*lapse_z0)/rr**2)**2 &
                        *rr**2/(r**2*lapse_sr0**2 + z**2*lapse_sz0**2)))
               end if
 
