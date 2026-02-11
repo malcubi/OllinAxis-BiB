@@ -436,9 +436,9 @@
 ! ***   BOUNDARIES   ***
 ! **********************
 
-! boundary:      Type of boundary condition.
+! boundtype      Type of boundary condition.
 
-  character(30) :: boundtype = "radiative"  ! range = (none,static,flat,radiative,constraint)
+  character(30) :: boundtype = "radiative"  ! range = (none,static,flat,radiative)
 
 
 ! ****************************
