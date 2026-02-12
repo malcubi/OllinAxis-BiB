@@ -9,6 +9,7 @@
 #
 # 1/3/21:        It now works with python 3.
 #                Also fixed some bugs plotting multiple data files.
+# 12/2/26:       Added "save" button.
 
 
 #######################
@@ -373,6 +374,7 @@ kinit = 0
 pauseFlag  = True     # Flag to indicate if pause button was pressed.
 rewindFlag = False    # Flag to indicate if we need to rewind data files.
 meshFlag   = False    # Flag to indicate if we are plotting a wiremesh.
+saveFlag   = False    # Flag to indicate if "save"  popoup window is active.
 
 axisFlag   = False    # Flag to indicate if "axis"  popoup window is active.
 strideFlag = False    # Flag to indicate if "stride" popoup window is active.
@@ -874,6 +876,88 @@ class Actions:
             plotdata(kinit)
 
 
+    #######################
+    ###   SAVE BUTTON   ###
+    #######################
+
+    def save(self,event):
+
+        global saveFlag
+
+        # Define function that creates SAVE file.
+
+        def apply(*args):
+
+            global saveFlag
+
+            # Get file name.
+
+            name = filename.get()
+
+            # Save file.
+
+            extent = ax.get_tightbbox(fig.canvas.renderer).transformed(fig.dpi_scale_trans.inverted())
+            fig.savefig(name,bbox_inches=extent.expanded(1.4,1))
+
+            # Close popup window.
+
+            saveFlag = False
+            popup_save.destroy()
+
+        # Define function to close window.
+
+        def back():
+            global saveFlag
+            saveFlag = False
+            popup_save.destroy()
+
+        # On first time it is pressed create popup window.
+
+        if not saveFlag:
+
+            saveFlag = True
+
+            # Create poup window.
+
+            popup_save = tk.Tk()
+            popup_save.title("Save")
+
+            # Catch kill window command.
+
+            popup_save.protocol('WM_DELETE_WINDOW',back)
+
+            # Frame for file name.
+
+            frame1 = tk.Frame(popup_save)
+            frame1.grid(column=0,row=0)
+
+            # Frame for 'apply' and 'back' buttons.
+
+            frame2 = tk.Frame(popup_save,relief=RIDGE,borderwidth=2)
+            frame2.grid(column=0,row=1)
+
+            # Define entry variable and create box.
+
+            filename = tk.StringVar(popup_save)
+            filename.set("outfile")
+
+            box_entry = tk.Entry(frame1,width=20,textvariable=filename)
+            box_entry.grid(column=2,row=0)
+
+            # Plot text and create box.
+
+            tk.Label(frame1,width=15,text="Filename").grid(column=1,row=0)
+
+            # Create 'apply and 'back' buttons.
+
+            tk.Button(frame2,width=15,text="Apply",command=apply).grid(column=1,row=0)
+            tk.Button(frame2,width=15,text="Back",command=back).grid(column=2,row=0)
+
+            # Put cursor on input box.
+
+            box_entry.focus()
+
+
 #######################################
 ###   CALLBACK FOR EVENT HANDLING   ###
 #######################################
@@ -926,6 +1010,10 @@ if (ntmax>0):
     axlast = plt.axes([0.45,0.91,0.1,0.07])
     blast  = Button(axlast,'End >>',color='limegreen',hovercolor='lightgreen')
     blast.on_clicked(callback.last)
+
+    axsave  = plt.axes([0.86,0.125,0.12,0.07])
+    bsave   = Button(axsave,'Save',color='deepskyblue',hovercolor='lightskyblue')
+    bsave.on_clicked(callback.save)
 
 
 #####################
