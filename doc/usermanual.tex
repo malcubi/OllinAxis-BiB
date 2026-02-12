@@ -74,8 +74,8 @@ by myself and José Manuel Torres.  An even older version was
 written by Milton Ruiz. \\
 
 Note: THIS MANUAL IS STILL INCOMPLETE!  I haven't had the time to
-finish it. Still, it should give you a good idea of the basics. I will be
-adding a little bit more every now and again. \\
+finish it. Still, it should give you a good idea of the basics. I will
+be adding a little bit more every now and again. \\
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -93,7 +93,6 @@ The easiest way to obtain the code is to download it from GitHub: \\
 
 Once you have the code, you can get updated versions by just doing
 ``git pull'' inside the code main directory.
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -363,6 +362,60 @@ Output is controlled by the following parameters:
 %%%   CHECKPOINT   %%%
 %%%%%%%%%%%%%%%%%%%%%%
 
+\setcounter{equation}{0}
+\section{Checkpoint}
+\label{sec:checkpoint}
+
+For very long runs, or in cases when we want to save the final state
+of the simulation so we can restart from that point, it is useful to
+have the ability to save the current state of the whole simulation at
+a given time. The code therefore is capable of doing a ``checkpoint''
+every so often. \\
+
+In order for the code to do checkpointing, we must add the following
+to the parameter file: \\
+
+\texttt{checkpoint = .true.} \\
+\texttt{Ncheckpoint = N} \\
+
+\noindent where N is an integer number that specifies how often we
+want to do a checkpoint (it shouldn't be too often, checkpointing is
+slow and produces a lot of data).  This will create a series of
+directories named \texttt{checkpoint\_t=T} inside the output
+directory, with T a real number that indicates the time corresponding
+to the given checkpoint. Each of these directories will contain all
+the data needed to restart the simulation from that point. \\
+
+There is also the possibility of only checkpointing the initial data.
+This is useful in cases when solving for the initial data is ver slow.
+To do this ass the following line to the paramert file (this is on by
+default): \\
+
+\texttt{checkpointinitial = .true.} \\
+
+In order to later restart a simulation from a given checkpoint file,
+one must first move the corresponding checkpoint directory to the main
+directory containing the executable and parameter files.  One then
+deletes the line containing the parameter ``idata'' in the parameter
+file (or simply comments the line with \#), and adds the lines: \\
+
+\texttt{idata = checkpoint} \\
+\texttt{checkpointfile = checkpointfile} \\
+
+\noindent where \texttt{checkpointfile} should correspond to the full
+name of the checkpoint directory from which we want to restart. For
+example, adding the line: \\
+
+\texttt{checkpointfile = checkpoint\_t=0.00000} \\
+
+causes the code to restart from $t=0$ (notice that in that case the code
+will not calculate the initial data again, it will just take the data
+from the checkpoint file). \\
+
+WARNING: When restarting from a checkpoint always remember to change
+the name of the output directory, as otherwise the code will just
+rewrite it and you will loose all your data until that point!
+
 
 %%%%%%%%%%%%%%%%
 %%%   GRID   %%%
@@ -454,12 +507,68 @@ conditions are applied in the $z$ direction in the same way as it is
 done with the axis if symmetry for the coordinate $r$. Having
 equatorial symmetry then reduces the use of computational by half.
 
+
 \subsection{Box-in-box grid refinement}
 
 The also code uses ``box-in-box'' type grid refinement.  That is, it
-has refinement levels with higher resolution ...
+has refinement levels with higher resolution set up at the beginning
+from the parameter file. The code allows one to set up to 4 different
+refinement regions called ``boxes'', number 0 to 3. In each of these
+refinement boxed one can also specify how many refinement levels one
+needs.  Box 0 level 0 always refers to the main coarse grid.  While
+Box 0 levels 1,2,3,...  refer to refinement levels on this main grid,
+always with half the resolution and the same number of grid points.
+So in essence, refinement levels of Box 0 always refine the region
+around the origin. \\
 
-(I NEED TO EXPLAIN THIS IN DETAIL)
+On the other hand, boxes 1,2,3 can be placed in different parts of the
+main grid. This can be useful if one need to refine a specific region
+of the grid know a priori which does not correspond to the origin. \\
+
+The total number of refinement boxes is controlled by the integer
+parameter \texttt{Nb} which tells the code how many extra boxes are
+required.  This parameter can take values from 0 to 3, with 0 (the
+default) referring to having only the main Box 0. The number of
+refinement levels on each box are given, respectively, by the
+parameters \texttt{Nl0,Nl1,Nl2,Nl3}. \\
+
+For example, if we take \texttt{Nb=0} and \texttt{Nl0=2}, meaning only
+the main box with two extra refinement levels, the resulting grid
+structure is shown in Figure~\ref{fig:B0L2}, where we have two extra
+levels of refinement around the origin $r=z=0$ represented by the red
+and green colors.
+
+\begin{figure}[ht]
+\centering 
+\includegraphics[width=0.5\textwidth]{B0L2.png}
+\caption{Schematic grid structure for the case with \texttt{Nb=0} and
+  \texttt{Nl0=2}.}
+\label{fig:B0L2}
+\end{figure}
+
+When we have more than one refinement box, \texttt{Nb=1,2,3}, the
+position and size of the extra boxes is controlled by the parameters
+\texttt{rbox\#,zbox\#,Nrbox\#,Nzbox\#}.  For example, if we take:
+\texttt{Nb=3}, \texttt{Nl0=0}, \texttt{Nl1=Nl2=Nl3=1}, with
+\texttt{(rbox1=5,zbox1=0)}, \texttt{(rbox2=0,zbox2=5)},
+\texttt{(rbox3=0,zbox3=-5)}, and \texttt{(Nrbox1=Nzbox1=50)},
+\texttt{(Nrbox2=Nzbox2=50)}, \texttt{(Nrbox3=Nzbox3=50)}, then we are
+asking for three extra refinement boxes, centered on the points
+$(5,0)$, $(0,5)$ and $(0,-5)$, which sizes $(50 \times 50)$ grid point
+each.  Notice that now box 0 has no refinement levels, while boxes
+1,2,3 have one refinement level each. The resulting grid structure is
+represented in Figure~\ref{fig:B3L1}, with the extra refinement
+boxes shown in different colors.
+
+\begin{figure}[ht]
+\centering 
+\includegraphics[width=0.5\textwidth]{B3L1.png}
+\caption{Schematic grid structure for the case with \texttt{Nb=3} and
+  \texttt{Nl1=Nl2=Nl3=1}.}
+\label{fig:B3L1}
+\end{figure}
+
+\subsection{Domain decomposition paralellization}
 
 \vspace{3mm}
 
@@ -1048,6 +1157,19 @@ Simple types of vacuum initial data already there are:
 %%%%%%%%%%%%%%%%%%%%
 %%%   HORIZONS   %%%
 %%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Horizon finder}
+\label{sec:horizon}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   WAVE EXTRACTION   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{equation}{0}
+\section{Gravitational wave extraction}
+\label{sec:waves}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
