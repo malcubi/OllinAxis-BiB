@@ -907,7 +907,7 @@ f(\alpha) = 1 + k/\alpha^2 \; .
 \end{equation}
 The code takes $k=\texttt{gauge\_f}-1$.
 
-\item[\texttt{maximal}] This is maximal slicing which corresponds to
+\item[\texttt{maximal}] This is maximal slicing, which corresponds to
   the condition that the trace of the extrinsic curvature remains
   equal to zero during evolution (which guarantees that the spatial
   volume elements remain constant), and which implies that the lapse
@@ -924,7 +924,7 @@ Notice that the choices \texttt{harmonic}, \texttt{1+log} and
 \texttt{shockavoid} are special cases of the Bona-Masso family of
 slicing conditions that has the general form:
 \begin{equation}
-\partial_t \alpha = - \alpha^2 f(\alpha) {\rm trK} + \beta^r \partial_r \alpha\; .
+\partial_t \alpha = - \alpha^2 f(\alpha) {\rm trK} + \beta^m \partial_m \alpha\; .
 \end{equation}
 with $f(\alpha)$ an arbitrary (positive) function of the lapse.
  
@@ -1260,9 +1260,10 @@ which can take the following values:
 
 \item[\texttt{ELL\_solver=none}] No elliptic solver is active.
 
-\item[\texttt{ELL\_solver=wave}] Solver based on turning the
-elliptic equation into a wave-type hyperbolic equation and
-evolving this in fictitious time until we reach a steady state.
+\item[\texttt{ELL\_solver=wave}] Solver based on turning the elliptic
+  equation into a wave-type hyperbolic equation and evolving this in
+  fictitious time until we reach a steady state.  Slow, but quite
+  robust.
 
 \item[\texttt{ELL\_solver=sor}] Simple elliptic SOR solver. 
 
@@ -1538,7 +1539,7 @@ permission: \\
 \texttt{chmod +x ollingraph} \\
 
 There is also a package for simple plots of 2D arrays called
-\texttt{ollingraph2D}. It is called in a similar way:
+\texttt{ollingraph2D}. It is called in a similar way: \\
 
 \texttt{ollingraph2D  file} \\
 
