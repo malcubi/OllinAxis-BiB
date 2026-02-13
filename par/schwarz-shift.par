@@ -19,7 +19,7 @@ Nztotal = 100              # Number of grid points in z
 
 slicing = 1+log            # Type of slicing condition
 gauge_f = 2.0              # Coefficient for harmonic slicing
-ilapse = psiminus4         # Initial lapse
+ilapse = psiminus2         # Initial lapse
 
 shift = Gammadriver2       # Shift condition
 drivercsi = 0.75           # speed associated with shift propagation
