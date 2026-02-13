@@ -68,14 +68,6 @@
         salpha = salpha - gauge_eta*log(abs(alpha))
      end if
 
-!    Dissipation.
-
-     !if (geodiss/=0.d0) then
-     !   evolvevar => alpha
-     !   sourcevar => salpha
-     !   call dissipation(+1,+1,geodiss)
-     !end if
-
 !    We don't use dtalpha.
 
      dtalpha = 0.d0
