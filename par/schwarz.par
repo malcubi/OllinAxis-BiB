@@ -1,6 +1,7 @@
 # Test parameter file:
 #
-# Schwarzschild in isotropic coordinates, 1+log slicing, no shift.
+# Schwarzschild in isotropic coordinates,
+# 1+log slicing, no shift.
 
 eqsym     = .true.         # Equatorial symmetry
 chimethod = .true.         # Use chi method for conformal factor
@@ -9,7 +10,7 @@ dr0 = 0.1                  # Grid spacing in r
 dz0 = 0.1                  # Grid spacing in z
 dtfac = 0.5                # Courant parameter
 
-Nt = 100                   # Number of time steps
+Nt = 500                   # Number of time steps
 
 Nl0 = 1                    # Number of refinement levels for box 0 (centered on origin)
 
@@ -18,7 +19,7 @@ Nztotal = 100              # Number of grid points in z
 
 slicing = 1+log            # Type of slicing condition
 gauge_f = 2.0              # Coefficient for harmonic slicing
-ilapse = psiminus4         # Initial lapse
+ilapse = psiminus2         # Initial lapse
 
 integrator = rk4           # Type of integration method (icn,rk4)
 order = four               # Order for spatial finite differencing (two,four)
@@ -32,16 +33,16 @@ BH1mass = 1.0              # Black hole mass
 
 ahfind = .true.            # Look for apparent horizon
 ahverbose = .false.        # Do we output horizon info to screen?
-ahfind_every = 10          # How often to look for horizons?
+ahfind_every = 20          # How often to look for horizons?
 N_ah = 1                   # Look for 1 horizon (centered on origin)
 
 directory = schwarz        # Name of output directory
 outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
 
-Ninfo = 10                 # How often do we want to output information to screen?
-Noutput0D = 1              # How often do we want 0D output?
-Noutput1D = 10             # How often do we want 1D output?
-Noutput2D = 10             # How often do we want 2D output?
+Ninfo = 50                 # How often do we want to output information to screen?
+Noutput0D = 10		   # How often do we want 0D output?
+Noutput1D = 50             # How often do we want 1D output?
+Noutput2D = 50             # How often do we want 2D output?
 
 outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,mass_sch
 outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,mass_sch
