@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/radiative_geometry.f90,v 1.16 2021/03/10 19:07:35 malcubi Exp $
 
   subroutine radiative_geometry
 
@@ -51,6 +50,7 @@
 ! ***********************
 
 ! Find asymptotic eigenspeeds (vl,va,vs).
+!
 ! Notice that here we assume that we are using the
 ! lagrangian formulation.  For the eulerian formulation
 ! the characteristic analysis becomes much more difficult.
@@ -76,9 +76,9 @@
   end if
 
 
-! **********************************************
-! ***   BOUNDARY FOR DIAGONAL KT COMPONENTS  ***
-! **********************************************
+! ***********************************************
+! ***   BOUNDARY FOR DIAGONAL KT COMPONENTS   ***
+! ***********************************************
 
 ! Component KTA (r,r).
 
@@ -99,11 +99,13 @@
 
 ! Component KTH (phi,phi).
 
-  evolvevar => KTH
-  sourcevar => sKTH
-  Dr_var => Dr_KTH
-  Dz_var => Dz_KTH
-  call radbound(vl,var0)
+  if (evolveKTH) then
+     evolvevar => KTH
+     sourcevar => sKTH
+     Dr_var => Dr_KTH
+     Dz_var => Dz_KTH
+     call radbound(vl,var0)
+  end if
 
 ! We need to correct the boundaries since they are
 ! coupled with the slicing gauge mode.
@@ -112,7 +114,10 @@
 
      sKTA(Nr,:) = sKTA(Nr,:) + third*(one - vl/va)*strK(Nr,:)*two
      sKTB(Nr,:) = sKTB(Nr,:) - third*(one - vl/va)*strK(Nr,:)
-     sKTH(Nr,:) = sKTH(Nr,:) - third*(one - vl/va)*strK(Nr,:)
+
+     if (evolveKTH) then
+        sKTH(Nr,:) = sKTH(Nr,:) - third*(one - vl/va)*strK(Nr,:)
+     end if
 
   end if
 
@@ -120,7 +125,10 @@
 
      sKTA(:,1-ghost) = sKTA(:,1-ghost) - third*(one - vl/va)*strK(:,1-ghost)
      sKTB(:,1-ghost) = sKTB(:,1-ghost) + third*(one - vl/va)*strK(:,1-ghost)*two
-     sKTH(:,1-ghost) = sKTH(:,1-ghost) - third*(one - vl/va)*strK(:,1-ghost)
+
+     if (evolveKTH) then
+        sKTH(:,1-ghost) = sKTH(:,1-ghost) - third*(one - vl/va)*strK(:,1-ghost)
+     end if
 
   end if
 
@@ -128,14 +136,17 @@
 
      sKTA(:,Nz) = sKTA(:,Nz) - third*(one - vl/va)*strK(:,Nz)
      sKTB(:,Nz) = sKTB(:,Nz) + third*(one - vl/va)*strK(:,Nz)*two
-     sKTH(:,Nz) = sKTH(:,Nz) - third*(one - vl/va)*strK(:,Nz)
+
+     if (evolveKTH) then
+        sKTH(:,Nz) = sKTH(:,Nz) - third*(one - vl/va)*strK(:,Nz)
+     end if
 
   end if
 
 
-! **************************************************
-! ***   BOUNDARY FOR OFF-DIAGONAL KT COMPONENTS  ***
-! **************************************************
+! ***************************************************
+! ***   BOUNDARY FOR OFF-DIAGONAL KT COMPONENTS   ***
+! ***************************************************
 
 ! Component KTC (r,z).
 
@@ -270,7 +281,6 @@
      Dr_var => Dr_z4theta
      Dz_var => Dz_z4theta
      call radbound(vl,var0)
-
   end if
 
 
