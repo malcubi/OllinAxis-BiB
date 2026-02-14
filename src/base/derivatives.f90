@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/derivatives.f90,v 1.17 2020/10/29 22:36:30 malcubi Exp $
 
   module derivatives
 
@@ -56,10 +55,7 @@
         diff1r(i,:) = hidr*(diffvar(i+1,:) - diffvar(i-1,:))
      end do
 
-!    Boundary with one-sided differences.
-
-     i = 1-ghost
-     diff1r(i,:) = - hidr*(3.d0*diffvar(i,:) - 4.d0*diffvar(i+1,:) + diffvar(i+2,:))
+!    Point Nr:  2nd order fully one-sided.
 
      i = Nr
      diff1r(i,:) = + hidr*(3.d0*diffvar(i,:) - 4.d0*diffvar(i-1,:) + diffvar(i-2,:))
@@ -73,32 +69,22 @@
 
 !    Interior points: fourth order centered first derivative.
 
-     do i=3-ghost,Nr-2
+     do i=1,Nr-2
         diff1r(i,:) = 0.25d0*idr*(8.d0*(diffvar(i+1,:) - diffvar(i-1,:)) &
                     - (diffvar(i+2,:) - diffvar(i-2,:)))/3.d0
      end do
 
-!    Boundary with sixth order one-sided differences.
-
-     i = 2-ghost
-     diff1r(i,:) = - idr*(1.d0/6.d0*diffvar(i-1,:) + 77.d0/60.d0*diffvar(i,:) - 5.d0/2.d0*diffvar(i+1,:) &
-                 + 5.d0/3.d0*diffvar(i+2,:) - 5.d0/6.d0*diffvar(i+3,:) + 0.25d0*diffvar(i+4,:) &
-                 - 1.d0/30.d0*diffvar(i+5,:))
-
-     i = 1-ghost
-     diff1r(i,:) = - idr*(49.d0/20.d0*diffvar(i,:) - 6.d0*diffvar(i+1,:) + 7.5d0*diffvar(i+2,:) &
-                 - 20.d0/3.d0*diffvar(i+3,:) + 15.d0/4.d0*diffvar(i+4,:) - 6.d0/5.d0*diffvar(i+5,:) &
-                 + 1.d0/6.d0*diffvar(i+6,:))
+!    Point Nr-1:  4th order semi one-sided (1 point to the right, 3 to the left).
 
      i = Nr-1
-     diff1r(i,:) = + idr*(1.d0/6.d0*diffvar(i+1,:) + 77.d0/60.d0*diffvar(i,:) - 5.d0/2.d0*diffvar(i-1,:) &
-                 + 5.d0/3.d0*diffvar(i-2,:) - 5.d0/6.d0*diffvar(i-3,:) + 0.25d0*diffvar(i-4,:) &
-                 - 1.d0/30.d0*diffvar(i-5,:))
+     diff1r(i,:) = idr*(3.d0*diffvar(i+1,:) + 10.d0*diffvar(i,:) - 18.d0*diffvar(i-1,:) &
+              + 6.d0*diffvar(i-2,:) - diffvar(i-3,:))/12.d0
+
+!    Point Nr:  4th order fully one-sided.
 
      i = Nr
-     diff1r(i,:) = + idr*(49.d0/20.d0*diffvar(i,:) - 6.d0*diffvar(i-1,:) + 7.5d0*diffvar(i-2,:) &
-                 - 20.d0/3.d0*diffvar(i-3,:) + 15.d0/4.d0*diffvar(i-4,:) - 6.d0/5.d0*diffvar(i-5,:) &
-                 + 1.d0/6.d0*diffvar(i-6,:))
+     diff1r(i,:) = idr*(25.d0*diffvar(i,:) - 48.d0*diffvar(i-1,:) &
+              + 36.d0*diffvar(i-2,:) - 16.d0*diffvar(i-3,:) + 3.d0*diffvar(i-4,:))/12.d0
 
   end if
 
@@ -200,27 +186,29 @@
                     - (diffvar(:,j+2) - diffvar(:,j-2)))/3.d0
      end do
 
-!    Boundary with sixth order one-sided differences.
+!    Point 2-ghost: 4th order semi one-sided (1 point to the left, 3 to the right).
 
      j = 2-ghost
-     diff1z(:,j) = - idz*(1.d0/6.d0*diffvar(:,j-1) + 77.d0/60.d0*diffvar(:,j) - 5.d0/2.d0*diffvar(:,j+1) &
-                 + 5.d0/3.d0*diffvar(:,j+2) - 5.d0/6.d0*diffvar(:,j+3) + 0.25d0*diffvar(:,j+4) &
-                 - 1.d0/30.d0*diffvar(:,j+5))
+     diff1z(:,j) = - idz*(3.d0*diffvar(:,j-1) + 10.d0*diffvar(:,j) - 18.d0*diffvar(:,j+1) &
+              + 6.d0*diffvar(:,j+2) - diffvar(:,j+3))/12.d0
+
+!    Point 1-ghost: 4th order fully one-sided.
 
      j = 1-ghost
-     diff1z(:,j) = - idz*(49.d0/20.d0*diffvar(:,j) - 6.d0*diffvar(:,j+1) + 7.5d0*diffvar(:,j+2) &
-                 - 20.d0/3.d0*diffvar(:,j+3) + 15.d0/4.d0*diffvar(:,j+4) - 6.d0/5.d0*diffvar(:,j+5) &
-                 + 1.d0/6.d0*diffvar(:,j+6))
+     diff1z(:,j) = - idz*(25.d0*diffvar(:,j) - 48.d0*diffvar(:,j+1) &
+              + 36.d0*diffvar(:,j+2) - 16.d0*diffvar(:,j+3) + 3.d0*diffvar(:,j+4))/12.d0
+
+!    Point Nz-1: 4th order semi one-sided (1 point to the right, 3 to the left).
 
      j = Nz-1
-     diff1z(:,j) = + idz*(1.d0/6.d0*diffvar(:,j+1) + 77.d0/60.d0*diffvar(:,j) - 5.d0/2.d0*diffvar(:,j-1) &
-                 + 5.d0/3.d0*diffvar(:,j-2) - 5.d0/6.d0*diffvar(:,j-3) + 0.25d0*diffvar(:,j-4) &
-                 - 1.d0/30.d0*diffvar(:,j-5))
+     diff1z(:,j) = + idz*(3.d0*diffvar(:,j+1) + 10.d0*diffvar(:,j) - 18.d0*diffvar(:,j-1) &
+              + 6.d0*diffvar(:,j-2) - diffvar(:,j-3))/12.d0
+
+!    Point Nz:  4th order fully one-sided.
 
      j = Nz
-     diff1z(:,j) = + idz*(49.d0/20.d0*diffvar(:,j) - 6.d0*diffvar(:,j-1) + 7.5d0*diffvar(:,j-2) &
-                 - 20.d0/3.d0*diffvar(:,j-3) + 15.d0/4.d0*diffvar(:,j-4) - 6.d0/5.d0*diffvar(:,j-5) &
-                 + 1.d0/6.d0*diffvar(:,j-6))
+     diff1z(:,j) = + idz*(25.d0*diffvar(:,j) - 48.d0*diffvar(:,j-1) &
+              + 36.d0*diffvar(:,j-2) - 16.d0*diffvar(:,j-3) + 3.d0*diffvar(:,j-4))/12.d0
 
   end if
 
@@ -323,25 +311,18 @@
 !    Interior points: fourth order centered second derivative.
 
      do i=3-ghost,Nr-2
-        diff2r(i,:) = - 0.25d0*idr2*(30.d0*diffvar(i,:) &
-           - 16.d0*(diffvar(i+1,:) + diffvar(i-1,:)) + diffvar(i+2,:) + diffvar(i-2,:))/3.d0
+        diff2r(i,:) = - idr2*(30.d0*diffvar(i,:) &
+                    - 16.d0*(diffvar(i+1,:) + diffvar(i-1,:))
+                    +        diffvar(i+2,:) + diffvar(i-2,:))/12.d0
      end do
 
-!    Boundary with fourth order one-sided differences.
-
-     i = 2-ghost
-     diff2r(i,:) = 0.25d0*idr2*(10.d0*diffvar(i-1,:) - 15.d0*diffvar(i,:) &
-                 - 4.d0*diffvar(i+1,:) + 14.d0*diffvar(i+2,:) - 6.d0*diffvar(i+3,:) &
-                  + diffvar(i+4,:))/3.d0
-
-     i = 1-ghost
-     diff2r(i,:) = idr2*(45.d0*diffvar(i,:) - 154.d0*diffvar(i+1,:) + 214.d0*diffvar(i+2,:) &
-                 - 156.d0*diffvar(i+3,:) + 61.d0*diffvar(i+4,:) - 10.d0*diffvar(i+5,:))/12.d0
+!    Point Nr-1:  4th order semi one-sided.
 
      i = Nr-1
-     diff2r(i,:) = 0.25d0*idr2*(10.d0*diffvar(i+1,:) - 15.d0*diffvar(i,:) &
-                 - 4.d0*diffvar(i-1,:) + 14.d0*diffvar(i-2,:) - 6.d0*diffvar(i-3,:) &
-                 + diffvar(i-4,:))/3.d0
+     diff2r(i,:) = idr2*(10.d0*diffvar(i+1,:) - 15.d0*diffvar(i,:) - 4.d0*diffvar(i-1,:) &
+                 + 14.d0*diffvar(i-2,:) - 6.d0*diffvar(i-3,:) + diffvar(i-4,:))/12.d0
+
+!    Point Nr:  4th order fully one-sided.
 
      i = Nr
      diff2r(i,:) = idr2*(45.d0*diffvar(i,:) - 154.d0*diffvar(i-1,:) + 214.d0*diffvar(i-2,:) &
@@ -447,25 +428,30 @@
 !    Interior points: fourth order centered second derivative.
 
      do j=3-ghost,Nz-2
-        diff2z(:,j) = - 0.25d0*idz2*(30.d0*diffvar(:,j) &
-           - 16.d0*(diffvar(:,j+1) + diffvar(:,j-1)) + diffvar(:,j+2) + diffvar(:,j-2))/3.d0
+        diff2z(:,j) = - idz2*(30.d0*diffvar(:,j) &
+                    - 16.d0*(diffvar(:,j+1) + diffvar(:,j-1)) &
+                    +        diffvar(:,j+2) + diffvar(:,j-2))/12.d0
      end do
 
-!    Boundary with one-sided differences.
+!    Point Nz-1:  4th order semi one-sided.
 
      j = 2-ghost
-     diff2z(:,j) = 0.25d0*idz2*(10.d0*diffvar(:,j-1) - 15.d0*diffvar(:,j) &
-                 - 4.d0*diffvar(:,j+1) + 14.d0*diffvar(:,j+2) - 6.d0*diffvar(:,j+3) &
-                 + diffvar(:,j+4))/3.d0
+     diff2z(:,j) = idz2*(10.d0*diffvar(:,j-1) - 15.d0*diffvar(:,j) - 4.d0*diffvar(:,j+1) &
+                 + 14.d0*diffvar(:,j+2) - 6.d0*diffvar(:,j+3) + diffvar(:,j+4))/12.d0
+
+!    Point 1-ghost:  4th order fully one-sided.
 
      j = 1-ghost
      diff2z(:,j) = idz2*(45.d0*diffvar(:,j) - 154.d0*diffvar(:,j+1) + 214.d0*diffvar(:,j+2) &
                  - 156.d0*diffvar(:,j+3) + 61.d0*diffvar(:,j+4) - 10.d0*diffvar(:,j+5))/12.d0
 
+!    Point Nz-1:  4th order semi one-sided.
+
      j = Nz-1
-     diff2z(:,j) = 0.25d0*idz2*(10.d0*diffvar(:,j+1) - 15.d0*diffvar(:,j) &
-                 - 4.d0*diffvar(:,j-1) + 14.d0*diffvar(:,j-2) - 6.d0*diffvar(:,j-3) &
-                 + diffvar(:,j-4))/3.d0
+     diff2z(:,j) = idz2*(10.d0*diffvar(:,j+1) - 15.d0*diffvar(:,j) - 4.d0*diffvar(:,j-1) &
+                 + 14.d0*diffvar(:,j-2) - 6.d0*diffvar(:,j-3) + diffvar(:,j-4))/12.d0
+
+!    Point Nz:  4th order fully one-sided.
 
      j = Nz
      diff2z(:,j) = idz2*(45.d0*diffvar(:,j) - 154.d0*diffvar(:,j-1) + 214.d0*diffvar(:,j-2) &
