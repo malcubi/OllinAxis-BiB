@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/sources_geometry.f90,v 1.33 2021/03/23 17:44:43 malcubi Exp $
 
   subroutine sources_geometry
 
@@ -261,19 +260,27 @@
 
   sKTA = alpha*((trK + two*z4theta)*KTA - two*KT2_A)
   sKTB = alpha*((trK + two*z4theta)*KTB - two*KT2_B)
-  sKTH = alpha*((trK + two*z4theta)*KTH - two*KT2_H)
   sKTC = alpha*((trK + two*z4theta)*KTC - two*KT2_C)
+
+  if (evolveKTH) then
+     sKTH = alpha*((trK + two*z4theta)*KTH - two*KT2_H)
+  end if
 
 ! Ricci tensor and derivatives of lapse.
 
   sKTA = sKTA + (-D2cov_alpha_A + alpha*RIC_A)/psi4 &
        - third*A*(-Lapla_alpha + alpha*RSCAL)
+
   sKTB = sKTB + (-D2cov_alpha_B + alpha*RIC_B)/psi4 &
        - third*B*(-Lapla_alpha + alpha*RSCAL)
-  sKTH = sKTH + (-D2cov_alpha_H + alpha*RIC_H)/psi4 &
-       - third*H*(-Lapla_alpha + alpha*RSCAL)
+
   sKTC = sKTC + (-D2cov_alpha_C + alpha*RIC_C)/psi4 &
        - third*C*(-Lapla_alpha + alpha*RSCAL)
+
+  if (evolveKTH) then
+     sKTH = sKTH + (-D2cov_alpha_H + alpha*RIC_H)/psi4 &
+          - third*H*(-Lapla_alpha + alpha*RSCAL)
+  end if
 
 ! Shift terms identical to metric terms taking gamma->KT.
 
@@ -281,13 +288,18 @@
 
      sKTA = sKTA + beta_r*DAr_KTA + beta_z*DAz_KTA + two*(KTA*Dr_beta_r + r*KTC*Dr_beta_z) &
           - two*third*sigma*KTA*DIV_beta
+
      sKTB = sKTB + beta_r*DAr_KTB + beta_z*DAz_KTB + two*(KTB*Dz_beta_z + r*KTC*Dz_beta_r) &
           - two*third*sigma*KTB*DIV_beta
-     sKTH = sKTH + beta_r*DAr_KTH + beta_z*DAz_KTH + two*KTH*beta_r/r &
-          - two*third*sigma*KTH*DIV_beta
+
      sKTC = sKTC + beta_r*DAr_KTC + beta_z*DAz_KTC + KTC*beta_r/r &
           + KTC*(Dr_beta_r + Dz_beta_z) + (KTB*Dr_beta_z + KTA*Dz_beta_r)/r &
           - two*third*sigma*KTC*DIV_beta
+
+     if (evolveKTH) then
+        sKTH = sKTH + beta_r*DAr_KTH + beta_z*DAz_KTH + two*KTH*beta_r/r &
+             - two*third*sigma*KTH*DIV_beta
+     end if
 
      if (angmom) then
         sKTA = sKTA + two*r**3*KTC1*Dr_beta_p
@@ -330,8 +342,11 @@
 
      sKTA = sKTA - 8.d0*smallpi*alpha*(S_A/psi4 - third*A*trS)
      sKTB = sKTB - 8.d0*smallpi*alpha*(S_B/psi4 - third*B*trS)
-     sKTH = sKTH - 8.d0*smallpi*alpha*(S_H/psi4 - third*H*trS)
      sKTC = sKTC - 8.d0*smallpi*alpha*(S_C/psi4 - third*C*trS)
+
+     if (evolveKTH) then
+        sKTH = sKTH - 8.d0*smallpi*alpha*(S_H/psi4 - third*H*trS)
+     end if
 
      if (angmom) then
         sKTC1= sKTC1 - 8.d0*smallpi*alpha*(S_C1/psi4 - third*C1*trS)
@@ -352,13 +367,15 @@
      sourcevar => sKTB
      call dissipation(+1,+1,geodiss)
 
-     evolvevar => KTH
-     sourcevar => sKTH
-     call dissipation(+1,+1,geodiss)
-
      evolvevar => KTC
      sourcevar => sKTC
      call dissipation(+1,-1,geodiss)
+
+     if (evolveKTH) then
+        evolvevar => KTH
+        sourcevar => sKTH
+        call dissipation(+1,+1,geodiss)
+     end if
 
      if (angmom) then
 
