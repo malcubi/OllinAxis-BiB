@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/radbound.f90,v 1.4 2020/01/29 20:18:39 malcubi Exp $
 
   subroutine radbound(v,var0)
 
