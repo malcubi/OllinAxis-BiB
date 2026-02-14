@@ -312,7 +312,7 @@
 
      do i=3-ghost,Nr-2
         diff2r(i,:) = - idr2*(30.d0*diffvar(i,:) &
-                    - 16.d0*(diffvar(i+1,:) + diffvar(i-1,:))
+                    - 16.d0*(diffvar(i+1,:) + diffvar(i-1,:)) &
                     +        diffvar(i+2,:) + diffvar(i-2,:))/12.d0
      end do
 
