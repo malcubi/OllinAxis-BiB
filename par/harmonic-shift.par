@@ -1,0 +1,54 @@
+# Test parameter file:
+#
+# Minkowski, harmonic slicing, no shift.
+
+eqsym  = .true.            # Equatorial symmetry
+angmom = .false.           # Do not allocate angular functions
+
+dr0   = 0.1                # Grid spacing in r
+dz0   = 0.1                # Grid spacing in z
+dtfac = 0.5                # Courant parameter
+
+Nt = 400                   # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+Nrtotal = 100              # Number of grid points in r
+Nztotal = 100              # Number of grid points in z
+
+slicing = harmonic         # Type of slicing condition
+gauge_f = 1.0              # Coefficient for harmonic slicing
+
+shift = Gammadriver2       # Shift condition
+drivercsi = 0.75           # speed associated with shift propagation
+drivereta = 2.0	           # Damping coefficient (beware it has units and should be rescaled with mass)
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+idata = minkowski          # Type of initial data
+
+lapsepert = gauss          # Initial perturbation to lapse
+ilapse = shell             # Type of initial lapse (shell,torus)
+lapse_a0 = 0.1             # Amplitude of initial lapse
+lapse_r0 = 0.0             # Center of perturbation on rho
+lapse_z0 = 0.0             # Center of perturbation on z
+lapse_sr0 = 1.0            # Width of perturbation on rho
+lapse_sz0 = 1.0            # Width of perturbation on z
+
+directory = harmonic-shift # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 1              # How often do we want 0D output?
+Noutput1D = 10             # How often do we want 1D output?
+Noutput2D = 10             # How often do we want 2D output?
+
+outvars0D = alpha,beta_r,beta_z,trK,phi,psi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,CDelta_r,CDelta_z
+outvars1D = alpha,beta_r,beta_z,trK,phi,psi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,CDelta_r,CDelta_z
+outvars2D = alpha,beta_r,beta_z,trK,psi,A,B,H,C,ham,mom_r,mom_z
+
