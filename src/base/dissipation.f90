@@ -124,31 +124,28 @@
 !    Loop in r direction subtracting the operator:  D^4_r.
 
      do i=3-ghost,Nr-2
-        sourcevar(i,:) = sourcevar(i,:) - diss*idt &
-                       *(6.d0*evolvevar(i,:) &
+        sourcevar(i,:) = sourcevar(i,:) - diss*idt*(6.d0*evolvevar(i,:) &
                        - 4.d0*(evolvevar(i+1,:) + evolvevar(i-1,:)) &
-                            + (evolvevar(i+2,:) + evolvevar(i-2,:)))
+                       +      (evolvevar(i+2,:) + evolvevar(i-2,:)))/6.d0
      end do
 
 !    Loop in z direction subtracting the operator:  D^4_z.
 
      do j=3-ghost,Nz-2
-        sourcevar(:,j) = sourcevar(:,j) - diss*idt &
-                       *(6.d0*evolvevar(:,j) &
+        sourcevar(:,j) = sourcevar(:,j) - diss*idt*(6.d0*evolvevar(:,j) &
                        - 4.d0*(evolvevar(:,j+1) + evolvevar(:,j-1)) &
-                            + (evolvevar(:,j+2) + evolvevar(:,j-2)))
+                       +      (evolvevar(:,j+2) + evolvevar(:,j-2)))/6.d0
      end do
 
 !    Now loop in both directions adding the mixed operator: D^2_r D^2_z.
 
      !do j=3-ghost,Nz-2
      !   do i=3-ghost,Nr-2
-     !      sourcevar(i,j) = sourcevar(i,j) + diss*idt &
-     !                     *(4.d0*evolvevar(i,j) &
+     !      sourcevar(i,j) = sourcevar(i,j) + diss*idt*(4.d0*evolvevar(i,j) &
      !                     - 2.d0*(evolvevar(i+1,j  ) + evolvevar(i-1,j  ) &
-     !                          +  evolvevar(i  ,j+1) + evolvevar(i  ,j-1)) &
-     !                          + (evolvevar(i+1,j+1) + evolvevar(i+1,j-1) &
-     !                          +  evolvevar(i-1,j+1) + evolvevar(i-1,j-1)))
+     !                     +       evolvevar(i  ,j+1) + evolvevar(i  ,j-1)) &
+     !                     +      (evolvevar(i+1,j+1) + evolvevar(i+1,j-1) &
+     !                     +       evolvevar(i-1,j+1) + evolvevar(i-1,j-1)))/4.d0
      !   end do
      !end do
 
@@ -190,7 +187,7 @@
         sourcevar(i,:) = sourcevar(i,:) - diss*idt*(20.d0*evolvevar(i,:) &
                        - 15.d0*(evolvevar(i+1,:) + evolvevar(i-1,:)) &
                        +  6.d0*(evolvevar(i+2,:) + evolvevar(i-2,:)) &
-                       -       (evolvevar(i+3,:) + evolvevar(i-3,:)))
+                       -       (evolvevar(i+3,:) + evolvevar(i-3,:)))/20.d0
      end do
 
 !    Loop in z direction adding the operator:  D^6_z.
@@ -199,25 +196,24 @@
         sourcevar(:,j) = sourcevar(:,j) - diss*idt*(20.d0*evolvevar(:,j) &
                        - 15.d0*(evolvevar(:,j+1) + evolvevar(:,j-1)) &
                        +  6.d0*(evolvevar(:,j+2) + evolvevar(:,j-2)) &
-                       -       (evolvevar(:,j+3) + evolvevar(:,j-3)))
+                       -       (evolvevar(:,j+3) + evolvevar(:,j-3)))/20.d0
      end do
 
 !    Now loop in both directions subtracting the mixed operator:  D^2_z D^4_ r + D^2_r D^4_z.
 
      !do j=4-ghost,Nz-3
      !   do i=4-ghost,Nr-3
-     !      sourcevar(i,j) = sourcevar(i,j) - diss*idt &
-     !                     *(-24.d0*evolvevar(i,j) &
+     !      sourcevar(i,j) = sourcevar(i,j) - diss*idt*(-24.d0*evolvevar(i,j) &
      !                     + 14.d0*(evolvevar(i+1,j  ) + evolvevar(i-1,j  )  &
-     !                            + evolvevar(i  ,j+1) + evolvevar(i  ,j-1)) &
+     !                     +        evolvevar(i  ,j+1) + evolvevar(i  ,j-1)) &
      !                     -  8.d0*(evolvevar(i+1,j+1) + evolvevar(i-1,j+1)  &
-     !                            + evolvevar(i+1,j-1) + evolvevar(i-1,j-1)) &
+     !                     +        evolvevar(i+1,j-1) + evolvevar(i-1,j-1)) &
      !                     -  2.d0*(evolvevar(i+2,j  ) + evolvevar(i-2,j  )  &
-     !                            + evolvevar(i  ,j+2) + evolvevar(i  ,j-2)) &
+     !                     +        evolvevar(i  ,j+2) + evolvevar(i  ,j-2)) &
      !                     +       (evolvevar(i+2,j+1) + evolvevar(i-2,j+1)  &
-     !                            + evolvevar(i+2,j-1) + evolvevar(i-2,j-1)  &
-     !                            + evolvevar(i+1,j+2) + evolvevar(i-1,j+2)  &
-     !                            + evolvevar(i+1,j-2) + evolvevar(i-1,j-2)))
+     !                     +        evolvevar(i+2,j-1) + evolvevar(i-2,j-1)  &
+     !                     +        evolvevar(i+1,j+2) + evolvevar(i-1,j+2)  &
+     !                     +        evolvevar(i+1,j-2) + evolvevar(i-1,j-2)))/24.d0
      !   end do
      !end do
 
