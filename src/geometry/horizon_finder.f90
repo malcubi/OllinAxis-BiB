@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/horizon_finder.f90,v 1.83 2021/04/14 22:07:36 malcubi Exp $
 
   subroutine horizon_finder
 
@@ -241,7 +240,7 @@
 !
 ! This version of the integrate_ah routine uses an
 ! adaptive stepsize fourth order Runge-Kutta. The
-! adaptiv parte is quite simple, but it seems to
+! adaptive parte is quite simple, but it seems to
 ! do the job.
 
 ! Include modules.
@@ -792,6 +791,7 @@
 
         if ((rank==0).and.ahverbose) then
            print *, 'Apparent horizon found with initial position in axis: ',zinit
+           print *
         end if
 
 !    If there was an error, the bisections converged to something
