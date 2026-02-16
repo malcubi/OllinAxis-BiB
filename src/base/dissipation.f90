@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/dissipation.f90,v 1.13 2021/03/23 16:16:28 malcubi Exp $
 
   subroutine dissipation(symr,symz,diss)
 
