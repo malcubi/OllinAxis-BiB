@@ -542,7 +542,7 @@
   real(8) :: ahBB = 0.5d0
   real(8) :: aheccentric = 0.d0
 
-  character(30) :: ahmethod = "shoot"  ! range = (shoot,spectral)
+  character(30) :: ahmethod = "shoot"  ! range = (shoot,spectral,both)
 
 
 ! ***********************
