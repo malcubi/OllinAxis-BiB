@@ -537,7 +537,7 @@
   real(8) :: ahrmax  = 0.9d0
   real(8) :: ahafter = 0.d0
   real(8) :: ahepsilon_shoot = 1.d-8
-  real(8) :: ahepsilon_spectral = 1.d-5
+  real(8) :: ahepsilon_spectral = 1.d-6
   real(8) :: ahAA = 0.1d0
   real(8) :: ahBB = 0.5d0
   real(8) :: aheccentric = 0.d0
