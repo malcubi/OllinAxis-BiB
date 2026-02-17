@@ -196,16 +196,35 @@
         if (N_ah==1) then
            print *
            print *, 'Looking for apparent horizon'
+           print *
         else
            print *
            print *, 'Looking for apparent horizon centered on:',zah(k)
+           print *
         end if
      end if
 
+!    Choose method.
+
      if (ahmethod=="shoot") then
+
+!       Shooting method.
+
         call ahshoot(k,zah(k))
+
+!       Spectral method.
+
      else if (ahmethod=="spectral") then
+
+!       Use both methods (for comparisons).
+
         call ahspectral(k,zah(k))
+
+     else if (ahmethod=="both") then
+
+        call ahshoot(k,zah(k))
+        call ahspectral(k,zah(k))
+
      end if
 
   end do
@@ -314,6 +333,12 @@
   half = 0.5d0
 
   smallpi = acos(-1.d0)
+
+! Message to screen.
+
+  if (ahverbose.and.(rank==0)) then
+     print *, 'Horizon finder: shooting method'
+  end if
 
 
 ! **********************
@@ -881,7 +906,7 @@
 
         ack(k,j) = two*dble(iaux)*ack(k,j)/smallpi
 
-        !if (rank==0) print *, "ac(",j,") =",ac(k,j)
+        !if (rank==0) print *, "ac(",j,") =",ack(k,j)
 
      end do
 
@@ -917,10 +942,10 @@
   if (rank==0) then
 
      if (filestatus=='replace') then
-        open(1,file=trim(directory)//'/ah_radius'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_radius_SH'//trim(filen),form='formatted', &
         status=filestatus)
      else
-        open(1,file=trim(directory)//'/ah_radius'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_radius_SH'//trim(filen),form='formatted', &
         status=filestatus,position='append')
      end if
 
@@ -977,10 +1002,10 @@
      end if
 
      if (filestatus=='replace') then
-        open(1,file=trim(directory)//'/ah_area'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_area_SH'//trim(filen),form='formatted', &
         status=filestatus)
      else
-        open(1,file=trim(directory)//'/ah_area'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_area_SH'//trim(filen),form='formatted', &
         status=filestatus,position='append')
      end if
 
@@ -1004,10 +1029,10 @@
         end if
 
         if (filestatus == 'replace') then
-           open(1,file=trim(directory)//'/ah_J'//trim(filen),form='formatted', &
+           open(1,file=trim(directory)//'/ah_J_SH'//trim(filen),form='formatted', &
            status=filestatus)
         else
-           open(1,file=trim(directory)//'/ah_J'//trim(filen),form='formatted', &
+           open(1,file=trim(directory)//'/ah_J_SH'//trim(filen),form='formatted', &
            status=filestatus,position='append')
         end if
 
@@ -1057,10 +1082,10 @@
      end if
 
      if (filestatus == 'replace') then
-        open(1,file=trim(directory)//'/ah_mass'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_mass_SH'//trim(filen),form='formatted', &
         status=filestatus)
      else
-        open(1,file=trim(directory)//'/ah_mass'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_mass_SH'//trim(filen),form='formatted', &
         status=filestatus,position='append')
      end if
 
@@ -1177,6 +1202,12 @@
 
   smallpi = acos(-1.d0)
 
+! Message to screen.
+
+  if (ahverbose.and.(rank==0)) then
+     print *, 'Horizon finder: spectral method'
+  end if
+
 
 ! ***************************
 ! ***   ALLOCATE ARRAYS   ***
@@ -1253,7 +1284,7 @@
 
   ac = zero
 
-  if (firstcall(k)) then
+  if ((firstcall(k)).and.(.not.ahfound(k))) then
      ack(k,:) = zero
   end if
 
@@ -1599,7 +1630,7 @@
 !    ***   FIND RESIDUAL   ***
 !    *************************
 
-!    Remember that this function Ifunc is proportional to
+!    Remember that the function Ifunc is proportional to
 !    the expansion, so it should go to zero (and hence also
 !    its Fourier coefficients) at a horizon.
 
@@ -1668,6 +1699,10 @@
 ! ************************************
 
   100 continue
+
+! Check if the coefficient ac(0) is too small.
+
+  if (ac(0)<dr0+dz0) errorflag=.true.
 
 ! If we got here before the maximum number of iterations,
 ! and we had no error, then we found a horizon.
@@ -1744,10 +1779,10 @@
   if (rank==0) then
 
      if (filestatus=='replace') then
-        open(1,file=trim(directory)//'/ah_radius'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_radius_SP'//trim(filen),form='formatted', &
         status=filestatus)
      else
-        open(1,file=trim(directory)//'/ah_radius'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_radius_SP'//trim(filen),form='formatted', &
         status=filestatus,position='append')
      end if
 
@@ -1820,10 +1855,10 @@
      end if
 
      if (filestatus=='replace') then
-        open(1,file=trim(directory)//'/ah_area'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_area_SP'//trim(filen),form='formatted', &
         status=filestatus)
      else
-        open(1,file=trim(directory)//'/ah_area'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_area_SP'//trim(filen),form='formatted', &
         status=filestatus,position='append')
      end if
 
@@ -1863,10 +1898,10 @@
         end if
 
         if (filestatus == 'replace') then
-           open(1,file=trim(directory)//'/ah_J'//trim(filen),form='formatted', &
+           open(1,file=trim(directory)//'/ah_J_SP'//trim(filen),form='formatted', &
            status=filestatus)
         else
-           open(1,file=trim(directory)//'/ah_J'//trim(filen),form='formatted', &
+           open(1,file=trim(directory)//'/ah_J_SP'//trim(filen),form='formatted', &
            status=filestatus,position='append')
         end if
 
@@ -1916,10 +1951,10 @@
      end if
 
      if (filestatus == 'replace') then
-        open(1,file=trim(directory)//'/ah_mass'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_mass_SP'//trim(filen),form='formatted', &
         status=filestatus)
      else
-        open(1,file=trim(directory)//'/ah_mass'//trim(filen),form='formatted', &
+        open(1,file=trim(directory)//'/ah_mass_SP'//trim(filen),form='formatted', &
         status=filestatus,position='append')
      end if
 
