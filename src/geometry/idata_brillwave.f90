@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/idata_brillwave.f90,v 1.13 2022/10/24 22:00:34 malcubi Exp $
 
   subroutine idata_brillwave
 
@@ -202,6 +201,9 @@
 
         A = exp(two*brillq)
         B = A
+
+        C = 0.d0
+        H = 1.d0
 
 !       Regularization variable.
 
