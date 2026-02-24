@@ -152,7 +152,7 @@
 ! terms that are ambiguous and consistent as long as the sum of the
 ! coefficients of two contributions is equal to one.
 !
-! Then notation here is from the original code from J.M. Torres.
+! The notation here is from the original code from J.M. Torres.
 ! There were in fact more parameters, but several did nothing so
 ! I (Miguel A.) deleted them.
 
@@ -168,30 +168,29 @@
 !
 !    Of these three parameters, ft4 and ft5 don't really affect
 !    the evolutions at all since they just rewrite expressions
-!    that are algrebraically entirely equivalent, their values
+!    that are algebraically entirely equivalent, their values
 !    are then irrelevant.
 !
 !    The parameter ft3 does affect evolutions  since it switches
-!    terms with KTA to terms with KTH. Taking ft3=0.5 seems optimal.
+!    terms with KTA to terms with KTH.
 
-  real(8) :: ft3 = 0.5d0    ! Ambiguous regularization of KT2_lambda.
+  real(8) :: ft3 = 0.d0     ! Ambiguous regularization of KT2_lambda.
   real(8) :: ft4 = 0.d0     ! Ambiguous term in D2cov_alpha_lambda.
   real(8) :: ft5 = 0.d0     ! Ambiguous term in RIC_lambda.
 
 ! 3) Terms that appear in the routines for calculating the conformal
 !    Ricci tensor:  calc_conformalRicci*.f90.
 !
-!    Both these parameters affect evolutions.  ft6 switches a term with
-!    Delta_r/r to a term with Dr_Delta_r.  Its optimal value sems t be 1.
-!    ft7 switches a term with Dz_A to a term with Dz_H.  Its optimal
-!    value seems to be 0.5
+!    Both these parameters affect evolutions.
+!    ft6 switches a term with Delta_r/r to a term with Dr_Delta_r. 
+!    ft7 switches a term with Dz_A to a term with Dz_H.
 
-  real(8) :: ft6 = 1.d0     ! Ambiguous term in RIC_lambda (calc_conformalRicci2.f90).
-  real(8) :: ft7 = 0.5d0    ! Ambiguous term in RIC_lambda (calc_conformalRicci3.f90).
+  real(8) :: ft6 = 0.d0     ! Ambiguous term in RIC_lambda (calc_conformalRicci2.f90).
+  real(8) :: ft7 = 0.d0     ! Ambiguous term in RIC_lambda (calc_conformalRicci3.f90).
 
 ! 4) Terms that are only important with non-zero angular momentum.
 
-  real(8) :: ft8 = 0.5d0    ! Ambiguous term in RIC_C1 (calc_conformalRicci4.f90).
+  real(8) :: ft8 = 0.d0     ! Ambiguous term in RIC_C1 (calc_conformalRicci4.f90).
 
 
 ! *************************
@@ -283,9 +282,9 @@
 
 ! slicing:       Type of slicing condition.
 ! ilapse:        Type of initial lapse:
-!                   one:        initial lapse equal to 1.
+!                   one:        Initial lapse equal to 1.
 !                   shell:      Gaussian perturbation forming a shell.
-!                   torus:      Gaussian perturbation forming a  torus.
+!                   torus:      Gaussian perturbation forming a torus.
 !                   isotropic:  Isotropic lapse for Schwarzschild solution.
 !                   quiso_kerr: Quasi-isotropic lapse for Kerr.
 !                   psiminusN:  Precollapsed lapse (1/psi**N).
@@ -671,12 +670,14 @@
 
 ! wave_extract: Gravitational waves extraction
 ! wavextract_every : How often do we extract gravitational waves.
+!
 ! rad1        : Radius of extraction
 ! rad2        : Radius of extraction
 ! rad3        : Radius of extraction
 
   logical :: wave_extract = .false.
   integer :: wavextract_every = 5
+
   real(8) :: rad1 = 0.0
   real(8) :: rad2 = 0.0
   real(8) :: rad3 = 0.0
@@ -687,21 +688,20 @@
 ! *******************************************
 
 ! convert_to_3D : Transform to 3D.
-! dx,dy       : Cartesian spatial intervals.
-! Nx,Ny       : Cartesian grid size.
-! sgrid       : Do we stagger the cartesian grid?
+! dxx,dyy       : Cartesian spatial intervals.
+! Nxx,Nyy,Nzz   : Cartesian grid size.
+! sgrid         : Do we stagger the cartesian grid?
+
+  logical :: convert_to_3D = .false.
+  logical :: sgrid = .false.
 
   real(8) :: dxx = 0.d0
   real(8) :: dyy = 0.d0
 !  real(8) :: dzz = 0.d0
 
-
   integer :: Nxx = 100
   integer :: Nyy = 100
   integer :: Nzz = 100
-
-  logical :: convert_to_3D = .false.
-  logical :: sgrid = .false.
 
 
 ! ***************
