@@ -89,8 +89,8 @@
 
         if ((shift(1:11)=="Gammadriver").and.(drivercsi/=0.d0)) then
 
-           vs_rp = sqrt(abs(4.d0/3.d0*drivercsi*g_A/psi4))
-           vs_zp = sqrt(abs(4.d0/3.d0*drivercsi*g_B/psi4))
+           vs_rp = sqrt(abs(4.d0/3.d0*drivercsi*g_A))/psi2
+           vs_zp = sqrt(abs(4.d0/3.d0*drivercsi*g_B))/psi2
 
         end if
 
