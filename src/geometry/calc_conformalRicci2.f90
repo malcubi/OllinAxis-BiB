@@ -59,15 +59,15 @@
            + half*(C1*Dz_Delta_p*r**2 + C2*Dr_Delta_p*r)
 
      RIC_C1 = RIC_C1 + half*(Delta_r*Dr_C1 + Delta_z*Dz_C1 + C1*Dr_Delta_r) &
-            + half*(3.0*Delta_r*C1 + H*Dr_Delta_p + Dr_Delta_z*C2)/r
+           + half*(3.0*Delta_r*C1 + H*Dr_Delta_p + Dr_Delta_z*C2)/r
 
      RIC_C2 = RIC_C2 + half*(Delta_r*Dr_C2 + C2*Dz_Delta_z + C1*Dz_Delta_r*r) &
-            + half*(H*Dz_Delta_p + Delta_z*Dz_C2) + Delta_r*C2/r
+           + half*(H*Dz_Delta_p + Delta_z*Dz_C2) + Delta_r*C2/r
 
      RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lambda)/r + Dr_Delta_p*C1*r &
-            + half*(Delta_r*Dr_lambda + Delta_z*Dz_lambda)  &
-            +       ft6*(A*DD_Delta_rr + lambda*Delta_r)/r &
-            + (1.0-ft6)*(H*DD_Delta_rr/r + lambda*Dr_Delta_r)
+           + half*(Delta_r*Dr_lambda + Delta_z*Dz_lambda)  &
+           +       ft6*(A*DD_Delta_rr + lambda*Delta_r)/r &
+           + (1.0-ft6)*(H*DD_Delta_rr/r + lambda*Dr_Delta_r)
 
   else
 
