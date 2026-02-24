@@ -930,7 +930,7 @@
 
      KT2_lambda = (2.0*KTC*g_C2*KTC1 + KTC1**2*g_H + 2.0*KTA*g_C1*KTC1 &
                 - 2.0*KTC1*g_C1*KTH - KTC1**2*g_A - 2.0*KTC1*g_C*KTC2)*r**2 &
-                + 2.0*KTA*g_C*KTC+KTC**2*g_B - 2.0*KTC2*g_C2*KTH - KTC2**2*g_B &
+                + 2.0*KTA*g_C*KTC + KTC**2*g_B - 2.0*KTC2*g_C2*KTH - KTC2**2*g_B &
                 +       ft3*(g_lambda*KTA**2 + g_H*Alambda*(KTA + KTH)) &
                 + (1.0-ft3)*(g_lambda*KTH**2 + g_A*Alambda*(KTA + KTH))
 
@@ -950,8 +950,8 @@
      KT2_C = KTC**2*g_C*r**2 + KTA*g_A*KTC + KTA*g_C*KTB + KTC*g_B*KTB
 
      KT2_lambda = 2.0*KTA*g_C*KTC + KTC**2*g_B &
-                +       ft3*(g_lambda*KTA**2 + Alambda*(KTA+KTH)*g_H) &
-                + (1.0-ft3)*(g_lambda*KTH**2 + Alambda*(KTA+KTH)*g_A)
+                +       ft3*(g_lambda*KTA**2 + g_H*Alambda*(KTA + KTH)) &
+                + (1.0-ft3)*(g_lambda*KTH**2 + g_A*Alambda*(KTA + KTH))
 
 !    KT2 = KT^ij KT_ij
 
@@ -1141,7 +1141,7 @@
            *Dz_H)*r+half*Dr_alpha*g_A*Dr_C2-half*Dz_alpha*g_C2*Dz_H&
            +Dz_alpha*g_C*C2+Dr_alpha*g_A*C2/r
                   
-     D2cov_alpha_lambda = -Dr_alpha*g_C1*Dr_C1*r**2 - (3.0*Dr_alpha&
+     D2cov_alpha_lambda = - Dr_alpha*g_C1*Dr_C1*r**2 - (3.0*Dr_alpha&
            *g_C1*C1+Dz_alpha*g_C2*Dr_C1)*r-Dr_alpha*g_C*Dr_C-3.0&
            *Dz_alpha*g_C2*C1-(Dr_alpha*g_C*C-half*Dr_alpha*g_C*Dz_A&
            +half*Dz_alpha*g_C*Dr_A+Dz_alpha*g_B*Dr_C+half*Dr_alpha&
@@ -1334,12 +1334,9 @@
 
   RIC_A = RIC_A + four*(Dr_phi**2)
   RIC_B = RIC_B + four*(Dz_phi**2)
-! RIC_H = RIC_H + four*(zero)/r**2
   RIC_C = RIC_C + four*(Dr_phi*Dz_phi)/r
 
   RIC_lambda = RIC_lambda + four*(Dr_phi/r)**2
-! RIC_C1 = RIC_C2 + four*(zero)/r**2
-! RIC_C2 = RIC_C2 + four*(zero)/r**2
 
 ! IV) Contracted quadratic derivatives (times -2 for convenience).
 
