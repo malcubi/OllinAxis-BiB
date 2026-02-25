@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/calc_conformalRicci3.f90,v 1.4 2021/03/11 16:05:19 malcubi Exp $
 
   subroutine calc_conformalRicci3
 
@@ -329,7 +328,6 @@
           &*g_B**2*Dz_B**2+g_A**2*Dz_A*C-half*g_A**2*Dz_A**2+g_H**2&
           &*Dz_H*C-half*g_H**2*Dz_H**2
 
-     !RIC_H = RIC_H - g_C*Dz_H + (g_H-g_A)*Dr_H/r
      RIC_H = RIC_H - g_C*Dz_H - r*g_lambda*Dr_H
 
      RIC_C = RIC_C + (g_C**2*Dr_B*Dr_C+g_C*g_B*Dz_C**2+Dz_A*g_C**2&
