@@ -704,11 +704,16 @@
      Alambda = AlamDef
   end if
 
+  !lambda = lamDef
+  !Alambda = AlamDef
+
 ! Derivatives of lambda.
 
   diffvar => lambda
+
   Dr_lambda  = diff1r(+1)
   Dz_lambda  = diff1z(+1)
+
   Drr_lambda = diff2r(+1)
   Dzz_lambda = diff2z(+1)
   Drz_lambda = diff2rz(+1,+1)
@@ -726,6 +731,7 @@
 ! Derivatives of Alambda.
 
   diffvar => Alambda
+
   Dr_Alambda = diff1r(+1)
   Dz_Alambda = diff1z(+1)
 
@@ -740,6 +746,8 @@
   end if
 
 ! g_lambda := (g_A - g_H)/r**2 = (C**2 - B*lambda - C2**2)*ihdet.
+
+  g_lamDef = (g_A - g_H)/r**2
 
   if (angmom) then
      g_lambda = (C**2 - B*lambda - C2**2)*ihdet
@@ -912,7 +920,7 @@
 
      KT2_B = 2.0*KTC*r**4*g_C1*KTC2 + (KTC**2*g_A + 2.0*KTC*g_C*KTB &
            +2.0*KTB*g_C2*KTC2 + KTC2**2*g_H)*r**2 + g_B*KTB**2
-     
+
      KT2_H = (2.0*KTC1*g_C1*KTH + KTC1**2*g_A + 2.0*KTC1*g_C*KTC2)*r**4 &
            + (2.0*KTC2*g_C2*KTH + KTC2**2*g_B)*r**2 + KTH**2*g_H
 
@@ -1140,7 +1148,7 @@
            *g_A*Dz_C1-half*Dz_alpha*g_C*Dr_C2+half*Dr_alpha*g_C1&
            *Dz_H)*r+half*Dr_alpha*g_A*Dr_C2-half*Dz_alpha*g_C2*Dz_H&
            +Dz_alpha*g_C*C2+Dr_alpha*g_A*C2/r
-                  
+
      D2cov_alpha_lambda = - Dr_alpha*g_C1*Dr_C1*r**2 - (3.0*Dr_alpha&
            *g_C1*C1+Dz_alpha*g_C2*Dr_C1)*r-Dr_alpha*g_C*Dr_C-3.0&
            *Dz_alpha*g_C2*C1-(Dr_alpha*g_C*C-half*Dr_alpha*g_C*Dz_A&
@@ -1167,7 +1175,7 @@
 
      D2cov_alpha_C = Drz_alpha/r - half*Dr_alpha*g_C*Dr_B - half*Dz_alpha*g_C*Dz_A &
            - (half*Dr_alpha*g_A*Dz_A + half*Dz_alpha*g_B*Dr_B)/r
-     
+
      D2cov_alpha_lambda = (DD_alphar)/r + Dr_alpha/r*(-ft4*g_lambda*H &
            + (1.0-ft4)*(g_C*C + g_A*lambda)) - Dr_alpha*g_C*Dr_C &
            - (Dz_alpha*g_B*Dr_C + Dr_alpha*g_C*C - half*Dr_alpha*g_C*Dz_A &
@@ -1279,6 +1287,7 @@
            **2*C1*g_C1+C*g_C+g_A*lambda))-half*Dr_phi*g_A*(Dr_A&
            +Dr_H)/r**2+half*Dz_phi*g_B*Dz_lambda+Dz_phi*(g_C&
            *lambda+C1*g_C2))
+
   else
 
      RIC_A = - two*(Drr_phi - Dr_phi*g_C*r**2*Dr_C - (Dz_phi*g_B*Dr_C &
@@ -1295,7 +1304,7 @@
 
      RIC_C = - two*(Drz_phi/r - half*Dr_phi*g_C*Dr_B - half*Dz_phi*g_C*Dz_A &
            - (half*Dr_phi*g_A*Dz_A + half*Dz_phi*g_B*Dr_B)/r)
-     
+
      RIC_lambda = - two*((DD_phir)/r + Dr_phi/r*(-ft5*g_lambda*H &
            + (1.0-ft5)*(g_C*C + g_A*lambda)) - Dr_phi*g_C*Dr_C &
            - (Dz_phi*g_B*Dr_C + Dr_phi*g_C*C - half*Dr_phi*g_C*Dz_A &
