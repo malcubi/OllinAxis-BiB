@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/calc_DIVKTA.f90,v 1.5 2021/03/22 19:20:10 malcubi Exp $
 
   subroutine calc_DIVKTA
 
@@ -221,7 +220,7 @@
           &*KTA)*r-g_B*C*g_H**2*KTH+g_B**2*Dz_KTB+g_B*g_H*KTC-g_C*g_H&
           &*KTH+g_C*g_H*KTA-Delta_z*g_B*KTB-half*Dz_B*g_B**3*KTB+g_B&
           &*g_A*KTC-half*g_B*Dz_H*g_H**2*KTH-g_C*g_H**2*KTH*A-half&
-          &*g_B*Dz_A*g_A**2*KTA    
+          &*g_B*Dz_A*g_A**2*KTA
 
      DIV_KT_p = -r**8*Dz_C1*g_C1**2*g_C2*KTC1+g_H*g_B*g_A*KTC*C2-g_H*C&
           &*g_C2*g_B*KTB-g_H*g_C*g_C2*KTB*A-g_H*g_A*g_C2*KTC*A-g_H&
@@ -642,6 +641,6 @@
 ! ***************
 ! ***   END   ***
 ! ***************
-  
+
   end subroutine calc_DIVKTA
 
