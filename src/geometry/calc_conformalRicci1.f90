@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/calc_conformalRicci1.f90,v 1.8 2021/03/16 20:46:08 malcubi Exp $
 
   subroutine calc_conformalRicci1
 
@@ -88,7 +87,7 @@
 
      RIC_lambda = RIC_lambda - g_C*(r*Drz_lambda + 2.d0*Dz_lambda) &
           - half*g_B*Dzz_lambda - half*g_A*Drr_lambda &
-          - (2.d0*g_A + half*g_H)*Dr_lambda/r ! -g_lambda*lambda cancels with term in ricci3
+          - (2.d0*g_A + half*g_H)*Dr_lambda/r ! -g_lambda*lambda cancels with term in Ricci3
 
   end if
 
