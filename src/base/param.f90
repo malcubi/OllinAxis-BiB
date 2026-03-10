@@ -179,16 +179,16 @@
   real(8) :: ft5 = 0.d0     ! Ambiguous term in RIC_lambda.
 
 ! 3) Terms that appear in the routines for calculating the conformal
-!    Ricci tensor:  calc_conformalRicci*.f90.
+!    Ricci tensor:
 !
 !    Both these parameters affect evolutions.
-!    ft6 switches a term with Delta_r/r to a term with Dr_Delta_r. 
+!    ft6 switches a term with Delta_r/r to a term with Dr_Delta_r.
 !    ft7 switches a term with Dz_A to a term with Dz_H.
 
   real(8) :: ft6 = 0.d0     ! Ambiguous term in RIC_lambda (calc_conformalRicci2.f90).
   real(8) :: ft7 = 0.d0     ! Ambiguous term in RIC_lambda (calc_conformalRicci3.f90).
 
-! 4) Terms that are only important with non-zero angular momentum.
+! 4) Terms that are only important with non-zero angular momentum:
 
   real(8) :: ft8 = 0.d0     ! Ambiguous term in RIC_C1 (calc_conformalRicci4.f90).
 
