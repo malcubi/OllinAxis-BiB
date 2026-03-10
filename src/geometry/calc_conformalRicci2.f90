@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/calc_conformalRicci2.f90,v 1.10 2021/03/23 17:44:57 malcubi Exp $
 
   subroutine calc_conformalRicci2
 
@@ -64,10 +63,10 @@
      RIC_C2 = RIC_C2 + half*(Delta_r*Dr_C2 + C2*Dz_Delta_z + C1*Dz_Delta_r*r) &
            + half*(H*Dz_Delta_p + Delta_z*Dz_C2) + Delta_r*C2/r
 
-     RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lambda)/r + Dr_Delta_p*C1*r &
+     RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lamDef)/r + Dr_Delta_p*C1*r &
            + half*(Delta_r*Dr_lambda + Delta_z*Dz_lambda)  &
-           +       ft6*(A*DD_Delta_rr + lambda*Delta_r)/r &
-           + (1.0-ft6)*(H*DD_Delta_rr/r + lambda*Dr_Delta_r)
+           +       ft6*(A*DD_Delta_rr + lamDef*Delta_r)/r &
+           + (1.0-ft6)*(H*DD_Delta_rr/r + lamDef*Dr_Delta_r)
 
   else
 
@@ -83,10 +82,10 @@
            + half*(Delta_r*Dr_C + Delta_z*Dz_C) &
            + half*(C*Delta_r + A*Dz_Delta_r + B*Dr_Delta_z)/r
 
-     RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lambda)/r &
+     RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lamDef)/r &
            + half*(Delta_r*Dr_lambda + Delta_z*Dz_lambda)  &
-           +       ft6*(A*DD_Delta_rr + lambda*Delta_r)/r &
-           + (1.0-ft6)*(H*DD_Delta_rr/r + lambda*Dr_Delta_r)
+           +       ft6*(A*DD_Delta_rr + lamDef*Delta_r)/r &
+           + (1.0-ft6)*(H*DD_Delta_rr/r + lamDef*Dr_Delta_r)
 
   end if
 
