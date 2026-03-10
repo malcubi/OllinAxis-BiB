@@ -704,9 +704,6 @@
      Alambda = AlamDef
   end if
 
-  !lambda = lamDef
-  !Alambda = AlamDef
-
 ! Derivatives of lambda.
 
   diffvar => lambda
