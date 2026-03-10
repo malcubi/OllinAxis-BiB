@@ -46,14 +46,14 @@
 
      RIC_A = RIC_A + 2.d0*g_C1*Dr_C1*r**3 + (2.0*g_C2*Dz_C1 + 2.0*g_C1*C1)*r**2 &
            - g_C*Drz_A*r - half*g_A*Drr_A - half*g_B*Dzz_A &
-           - half*g_H*Dr_A/r + lambda*g_H
+           - half*g_H*Dr_A/r + lamDef*g_H
 
      RIC_B = RIC_B - g_C*Drz_B*r-half*g_A*Drr_B - half*g_B*Dzz_B &
            - half*g_H*Dr_B/r
 
      RIC_H = RIC_H - 2.d0*g_C1*Dr_C1*r**3 + (-2.0*g_C2*Dz_C1 - 2.0*g_C1*C1)*r**2 &
            - g_C*Drz_H*r - half*g_A*Drr_H - half*g_B*Dzz_H &
-           - half*g_H*Dr_H/r - lambda*g_H
+           - half*g_H*Dr_H/r - lamDef*g_H
 
      RIC_C = RIC_C + (g_C1*Dr_C2-g_C*Drz_C)*r - half*g_A*Drr_C + g_C2*Dz_C2 &
            - half*g_B*Dzz_C - g_C*Dz_C + (-g_A*Dr_C - half*g_H*Dr_C)/r
@@ -74,13 +74,13 @@
   else
 
      RIC_A = RIC_A - g_C*Drz_A*r - half*g_B*Dzz_A - half*g_A*Drr_A &
-           - half*g_H*Dr_A/r + g_H*lambda
+           - half*g_H*Dr_A/r + g_H*lamDef
 
      RIC_B = RIC_B - g_C*Drz_B*r - half*g_A*Drr_B - half*g_B*Dzz_B &
            - half*g_H*Dr_B/r
 
      RIC_H = RIC_H - g_C*Drz_H*r - half*g_B*Dzz_H - half*g_A*Drr_H &
-           - half*g_H*Dr_H/r - g_H*lambda
+           - half*g_H*Dr_H/r - g_H*lamDef
 
      RIC_C = RIC_C - g_C*Drz_C*r - half*g_A*Drr_C - g_C*Dz_C &
            - half*g_B*Dzz_C + (-g_A*Dr_C - half*g_H*Dr_C)/r
