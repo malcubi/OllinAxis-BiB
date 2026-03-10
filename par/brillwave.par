@@ -5,21 +5,22 @@
 eqsym     = .true.         # Equatorial symmetry
 angmom    = .false.        # Do not allocate angular functions
 chimethod = .true.         # Use chi method for conformal factor
+nolambda  = .false.        # Use regularization
 
-dr0 = 0.05                 # Grid spacing in r
-dz0 = 0.05                 # Grid spacing in z
+dr0 = 0.04                 # Grid spacing in r
+dz0 = 0.04                 # Grid spacing in z
 
-dtfac = 0.5                # Courant parameter
-adjuststep = .true.        # Adjust time step during evolution
+dtfac = 0.25               # Courant parameter
+adjuststep = .false.       # Adjust time step during evolution
 
-Nt = 1000                  # Number of time steps
+Nt = 2000                  # Number of time steps
 
-Nrtotal = 200              # Number of grid points in r
-Nztotal = 200              # Number of grid points in z
+Nrtotal = 300              # Number of grid points in r
+Nztotal = 300              # Number of grid points in z
 
-Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+Nl0 = 1                    # Number of refinement levels for box 0 (centered on origin)
 
-slicing = shockavoid       # Type of slicing condition
+slicing = 1+log            # Type of slicing condition (1+log,shockavoid)
 gauge_f = 2.0              # Coefficient for Bona-Masso slicing
 
 integrator = rk4           # Type of integration method (icn,rk4)
@@ -30,13 +31,14 @@ geodiss = 0.01             # Dissipation for geometric variables
 boundtype = radiative      # Boundary condition
 
 idata = BrillWave          # Brill wave initial data
-brill_a0 = 4.7             # Brill wave amplitude
+brill_a0 = 4.0             # Brill wave amplitude
 
 ELL_solver = wave          # Elliptic solver (wave,sor)
 
 ahfind = .true.            # Look for apparent horizon
+ahmethod = spectral        # Horizon finder method (shoot,spectral)
 ahverbose = .false.        # Do we output horizon info to screen?
-ahafter = 18.0             # Start loking for horizons after this time
+ahafter = 0.0              # Start loking for horizons after this time
 ahfind_every = 50          # How often to look for horizons?
 N_ah = 1                   # Look for 1 horizon (centered on origin)
 
@@ -46,12 +48,12 @@ outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
 Ninfo = 50                 # How often do we want to output information to screen?
 Noutput0D = 10             # How often do we want 0D output?
 Noutput1D = 50             # How often do we want 1D output?
-Noutput2D = 50             # How often do we want 2D output?
+Noutput2D = 100            # How often do we want 2D output?
 
 outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,mass_sch
 outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,mass_sch
 outvars2D = alpha,trK,psi,phi,A,B,H,C,ham,mom_r,mom_z,mass_sch
 
 checkpoint = .true.        # Do we output checkpoint files?
-Ncheckpoint = 500          # How often do we do a checkpoint?
+Ncheckpoint = 1000         # How often do we do a checkpoint?
 
