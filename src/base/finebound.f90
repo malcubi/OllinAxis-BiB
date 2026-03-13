@@ -104,8 +104,13 @@
 
 ! How many boundary points get data from interpolation?
 
-  imax = ghost-1
-  jmax = ghost-1
+  if (tp==tl) then
+     imax = ghost+2
+     jmax = ghost+2
+  else
+     imax = ghost-1
+     jmax = ghost-1
+  end if
 
 ! Order of interpolation at boundary.  If we are at the
 ! first or second time steps the order is 1, otherwise
