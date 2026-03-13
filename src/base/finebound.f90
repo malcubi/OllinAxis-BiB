@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/finebound.f90,v 1.28 2021/02/18 15:44:40 malcubi Exp $
 
   subroutine finebound(box,level,dtw,all)
 
