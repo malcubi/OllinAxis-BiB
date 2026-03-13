@@ -5,22 +5,21 @@
 eqsym     = .true.         # Equatorial symmetry
 angmom    = .false.        # Do not allocate angular functions
 chimethod = .true.         # Use chi method for conformal factor
-nolambda  = .false.        # Use regularization
 
 dr0 = 0.04                 # Grid spacing in r
 dz0 = 0.04                 # Grid spacing in z
 
 dtfac = 0.25               # Courant parameter
-adjuststep = .false.       # Adjust time step during evolution
+adjuststep = .true.        # Adjust time step during evolution
 
-Nt = 2000                  # Number of time steps
+Nt = 5000                  # Number of time steps
 
-Nrtotal = 300              # Number of grid points in r
-Nztotal = 300              # Number of grid points in z
+Nrtotal = 250              # Number of grid points in r
+Nztotal = 250              # Number of grid points in z
 
 Nl0 = 1                    # Number of refinement levels for box 0 (centered on origin)
 
-slicing = 1+log            # Type of slicing condition (1+log,shockavoid)
+slicing = shockavoid       # Type of slicing condition (1+log,shockavoid)
 gauge_f = 2.0              # Coefficient for Bona-Masso slicing
 
 integrator = rk4           # Type of integration method (icn,rk4)
