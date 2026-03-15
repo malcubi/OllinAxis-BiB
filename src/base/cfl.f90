@@ -27,6 +27,7 @@
   integer box,level,proc    ! Box, level and processor counters.
 
   real(8) vrmax,vzmax       ! Local maximum speeds.
+  real(8) maxvl,maxva,maxvs ! Maximum of arrays.
   real(8) aux               ! Auxiliary.
 
   real(8) vr_max(0:Nb,0:Nlmax),vz_max(0:Nb,0:Nlmax) ! Arrays with maximum speeds for different boxes and levels.
@@ -56,8 +57,8 @@
 !
 !       vl = alpha sqrt(g^ii / psi^4)
 
-        vl_rp = sqrt(alpha*abs(g_A))/psi2
-        vl_zp = sqrt(alpha*abs(g_B))/psi2
+        vl_rp = abs(alpha)*sqrt(abs(g_A))/psi2
+        vl_zp = abs(alpha)*sqrt(abs(g_B))/psi2
 
 !       Slicing speeds.  For maximal slicing this
 !       is just equal to the speed of light.  For
@@ -122,34 +123,25 @@
 
         if (shift=="none") then
 
-           do j=1-ghost,Nz
-              do i=1-ghost,Nr
+           maxvl = maxval(vl_rp)
+           maxva = maxval(va_rp)
+           vrmax = amax1(maxvl,maxva)
 
-                 if (abs(vl_rp(i,j))>vrmax) vrmax=abs(vl_rp(i,j))
-                 if (abs(vl_zp(i,j))>vzmax) vzmax=abs(vl_zp(i,j))
-
-                 if (abs(va_rp(i,j))>vrmax) vrmax=abs(va_rp(i,j))
-                 if (abs(va_zp(i,j))>vzmax) vzmax=abs(va_zp(i,j))
-
-              end do
-           end do
+           maxvl = maxval(vl_zp)
+           maxva = maxval(va_zp)
+           vzmax = amax1(maxvl,maxva)
 
         else
 
-           do j=1-ghost,Nz
-              do i=1-ghost,Nr
+           maxvl = maxval(vl_rp)
+           maxva = maxval(va_rp)
+           maxvs = maxval(vs_rp)
+           vrmax = amax1(maxvl,maxva,maxvs)
 
-                 if (abs(vl_rp(i,j))>vrmax) vrmax=abs(vl_rp(i,j))
-                 if (abs(vl_zp(i,j))>vzmax) vzmax=abs(vl_zp(i,j))
-
-                 if (abs(va_rp(i,j))>vrmax) vrmax=abs(va_rp(i,j))
-                 if (abs(va_zp(i,j))>vzmax) vzmax=abs(va_zp(i,j))
-
-                 if (abs(vs_rp(i,j))>vrmax) vrmax=abs(vs_rp(i,j))
-                 if (abs(vs_rm(i,j))>vrmax) vrmax=abs(vs_rm(i,j))
-
-              end do
-           end do
+           maxvl = maxval(vl_zp)
+           maxva = maxval(va_zp)
+           maxvs = maxval(vs_zp)
+           vzmax = amax1(maxvl,maxva,maxvs)
 
         end if
 
