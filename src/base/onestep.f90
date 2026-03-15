@@ -416,6 +416,8 @@
 
            call currentgrid(bbox,level-1,grid(bbox,level-1))
 
+!          Symmetries.
+
            if (ownaxis) then
               call symmetries_r
            end if
@@ -423,6 +425,8 @@
            if (eqsym.and.ownequator) then
               call symmetries_z
            end if
+
+!          Sync.
 
            if (size>1) then
               call syncall
