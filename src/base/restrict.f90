@@ -39,6 +39,7 @@
 
   real(8) r0,z0,interp       ! For interpolation.
   real(8) deltar,deltaz      ! Safe distance to boundaries.
+  real(8) rmin,rmax,zmin,zmax
   real(8) aux1,aux2
 
 
@@ -104,8 +105,23 @@
 !       We will only interpolate if point (r0,z0) is well
 !       inside the fine grid.
 
-        if ((r0>rminl(box,level)+deltar).and.(r0<rmaxl(box,level)-deltar).and. &
-            (z0>zminl(box,level)+deltaz).and.(z0<zmaxl(box,level)-deltaz)) then
+        if (rminl(box,level)<0.d0) then
+           rmin = 0.d0
+        else
+           rmin = rminl(box,level)+deltar
+        end if
+
+        if (eqsym.and.(zminl(box,level)<0.d0)) then
+           zmin = 0.d0
+        else
+           zmin = zminl(box,level)+deltaz
+        end if
+
+        rmax = rmaxl(box,level)-deltar
+        zmax = zmaxl(box,level)-deltaz
+
+        if ((r0>rmin).and.(r0<rmax).and. &
+            (z0>zmin).and.(z0<zmax)) then
 
 !          Figure out to which grid point this (r0,z0) values
 !          would correspond in the local processor at the
