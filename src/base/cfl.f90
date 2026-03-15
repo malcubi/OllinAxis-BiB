@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/cfl.f90,v 1.19 2022/10/24 21:57:59 malcubi Exp $
 
   subroutine cfl(step)
 
@@ -195,34 +194,41 @@
   end do
 
 
-! *********************************
-! ***   SAVE TIME STEP TO FILE  ***
-! *********************************
+! **********************************
+! ***   SAVE TIME STEP TO FILE   ***
+! **********************************
 
-! On first call, replace file. Otherwise just append to it.
+! We only save this information if needed.
+! Opening and closing files is slow!
 
-  if (firstcall) then
-     firstcall = .false.
-     filestatus = 'replace'
-  else
-     filestatus = 'old'
-  end if
+  if (savetimestep) then
 
-! Save value of dt0 to file.
+!    On first call, replace file. Otherwise just append to it.
 
-  if (rank==0) then
-
-     if (filestatus == 'replace') then
-        open(1,file=trim(directory)//'/dt0.tl',form='formatted', &
-             status=filestatus)
-        write(1,*) '"dt0.tl'
+     if (firstcall) then
+        firstcall = .false.
+        filestatus = 'replace'
      else
-        open(1,file=trim(directory)//'/dt0.tl',form='formatted', &
-                status=filestatus,position='append')
+        filestatus = 'old'
      end if
+
+!    Save value of dt0 to file.
+
+     if (rank==0) then
+
+        if (filestatus == 'replace') then
+           open(1,file=trim(directory)//'/dt0.tl',form='formatted', &
+                status=filestatus)
+           write(1,*) '"dt0.tl'
+        else
+           open(1,file=trim(directory)//'/dt0.tl',form='formatted', &
+                   status=filestatus,position='append')
+        end if
   
-     write(1,"(2ES14.6)") t(0,0),dt0
-     close(1)
+        write(1,"(2ES14.6)") t(0,0),dt0
+        close(1)
+
+     end if
 
   end if
 
