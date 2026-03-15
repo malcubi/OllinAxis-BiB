@@ -200,11 +200,14 @@
 ! time           Local time (should not be set in parameter file).
 ! dt0:           Time step for base (coarsest) grid.
 ! dt:            Local time step (should not be set in parameter file).
-! adjuststep:    Do we ajust the time step using the CFL condition?
 ! dtfac:         Courant parameter (dtfac=dt/dr).
 ! Nt:            Total number of time steps.
+!
+! adjuststep:    Do we ajust the time step using the CFL condition?
+! savetimestep:  Do we save the adjusted values of dt?  
 
   logical :: adjuststep = .false.
+  logical :: savetimestep = .false.
 
   real(8) :: time  = 0.d0
   real(8) :: dt0   = 0.d0
