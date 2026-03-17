@@ -146,43 +146,85 @@
 
 ! Upper boundary.
 
-  do m=0,imax
-     do n=0,Nzbox(box)+ghost-1
+  if (all) then
 
-!       Figure out (r,z) position for interpolation.
+!    Apply to all evolving variables.
 
-        r0 = rmaxl(box,level) - dble(m)*drl(level)
-        z0 = zminl(box,level) + dble(n)*dzl(level)
+     do m=0,imax
+        do n=0,Nzbox(box)+ghost-1
 
-!       Figure out to which grid point this (r0,z0) values
-!       would correspond in the local processor at the
-!       fine grid level.
+!          Figure out (r,z) position for interpolation.
 
-        i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
-        j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
+           r0 = rmaxl(box,level) - dble(m)*drl(level)
+           z0 = zminl(box,level) + dble(n)*dzl(level)
 
-!       Notice now that the (i,j) values above might be outside
-!       the range of the current processor.  This means that
-!       we should not try to access this location as it belongs
-!       to another processor.
+!          Figure out to which grid point this (r0,z0) values
+!          would correspond in the local processor at the
+!          fine grid level.
 
-        if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
-           flag1 = .true.
-        else
-           flag1 = .false.
-        end if
+           i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
+           j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
 
-!       Now we interpolate all evolving variables at grid level l-1
-!       to inject them to grid level l.
+!          Notice now that the (i,j) values above might be outside
+!          the range of the current processor.  This means that
+!          we should not try to access this location as it belongs
+!          to another processor.
 
-        bd = 'rR'
+           if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
+              flag1 = .true.
+           else
+              flag1 = .false.
+           end if
 
-        if (all) then
+!          Now we interpolate all evolving variables at grid level l-1
+!          to inject them to grid level l.
+
+           bd = 'rR'
+
            include '../auto/bound_interp.inc'
-        else
+
+        end do
+     end do
+
+  else
+
+!    Apply to single variable.
+
+     do m=0,imax
+        do n=0,Nzbox(box)+ghost-1
+
+!          Figure out (r,z) position for interpolation.
+
+           r0 = rmaxl(box,level) - dble(m)*drl(level)
+           z0 = zminl(box,level) + dble(n)*dzl(level)
+
+!          Figure out to which grid point this (r0,z0) values
+!          would correspond in the local processor at the
+!          fine grid level.
+
+           i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
+           j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
+
+!          Notice now that the (i,j) values above might be outside
+!          the range of the current processor.  This means that
+!          we should not try to access this location as it belongs
+!          to another processor.
+
+           if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
+              flag1 = .true.
+           else
+              flag1 = .false.
+           end if
+
+!          Now we interpolate the single variable "coarsevar".
+
+           bd = 'rR'
+
            interpvar => coarsevar
            aux1 = interp(bbox,level-1,r0,z0,flag2)
+
            call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
            if (flag1) then
               if (border==1) then
                  finevar(i,j) = (tl-t0)/(tp-t0)*aux2 + (tl-tp)/(t0-tp)*finevar_p(i,j)
@@ -192,10 +234,11 @@
                               + (tl-tp)*(tl-t0 )/((tm1-tp)*(tm1-t0))*finevar_bound_rR(m,j,1)
               end if
            end if
-        end if
 
+        end do
      end do
-  end do
+
+  end if
 
 ! Lower boundary when applicable. Same comments
 ! apply as above, so I don't repeat them here.
@@ -246,29 +289,58 @@
 
 ! Upper boundary.
 
-  do n=0,jmax
-     do m=0,Nrbox(box)+ghost-1
+  if (all) then
 
-        r0 = rminl(box,level) + dble(m)*drl(level)
-        z0 = zmaxl(box,level) - dble(n)*dzl(level)
+!    Apply to all evolving variables.
 
-        i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
-        j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
+     do n=0,jmax
+        do m=0,Nrbox(box)+ghost-1
 
-        if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
-           flag1 = .true.
-        else
-           flag1 = .false.
-        end if
+           r0 = rminl(box,level) + dble(m)*drl(level)
+           z0 = zmaxl(box,level) - dble(n)*dzl(level)
 
-        bd = 'zR'
+           i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
+           j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
 
-        if (all) then
+           if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
+              flag1 = .true.
+           else
+              flag1 = .false.
+           end if
+
+           bd = 'zR'
+
            include '../auto/bound_interp.inc'
-        else
+
+        end do
+     end do
+
+  else
+
+!    Apply to single variable.
+
+     do n=0,jmax
+        do m=0,Nrbox(box)+ghost-1
+
+           r0 = rminl(box,level) + dble(m)*drl(level)
+           z0 = zmaxl(box,level) - dble(n)*dzl(level)
+
+           i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
+           j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
+
+           if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
+              flag1 = .true.
+           else
+              flag1 = .false.
+           end if
+
+           bd = 'zR'
+
            interpvar => coarsevar
            aux1 = interp(bbox,level-1,r0,z0,flag2)
+
            call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
            if (flag1) then
               if (border==1) then
                  finevar(i,j) = (tl-t0)/(tp-t0)*aux2 + (tl-tp)/(t0-tp)*finevar_p(i,j)
@@ -278,10 +350,11 @@
                               + (tl-tp)*(tl-t0 )/((tm1-tp)*(tm1-t0))*finevar_bound_zR(i,n,1)
               end if
            end if
-        end if
 
+        end do
      end do
-  end do
+
+  end if
 
 ! Lower boundary when applicable.
 
