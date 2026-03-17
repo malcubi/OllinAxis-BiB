@@ -814,7 +814,7 @@
         if (Nlmax>0) then
            evolvevar => ell_v
            sourcevar => sell_v
-           call dissipation(+1,+1,0.01d0)
+           call dissipation(+1,+1,0.02d0)
         end if
 
 !       Symmetries on axis.
