@@ -45,7 +45,7 @@
   integer box,level              ! Box number and level counters.
   integer i,j,n,m                ! Counters.
   integer step                   ! Iteration counter.
-  integer Nlmax_old
+  integer Nlmax_old              ! Original number of levels.
 
   real(8) lres,gres              ! Local and global residuals.
   real(8) r0,z0,interp           ! For interpolation.
