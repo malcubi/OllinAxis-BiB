@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/analysis_geometry.f90,v 1.17 2020/12/05 00:51:19 malcubi Exp $
 
   subroutine analysis_geometry(box,level)
 
@@ -168,14 +167,11 @@
 ! ***   WEYL TENSOR   ***
 ! ***********************
 
+! Calculate Weyl tensor and curvature invariants.
+
   if (curvInv) then
      call weyl
   end if
-
-
-! ***************************
-! ***   WAVE EXTRACTION   ***
-! ***************************
 
 
 ! ***************
