@@ -1,14 +1,13 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/weyl.f90,v 1.4 2020/10/27 23:29:01 malcubi Exp $
 
   subroutine weyl
 
-! **********************************************************
-! ***   ELECTRIC AND MAGNETIC COMPONENTS OF WEYL TENSOR  ***
-! **********************************************************
+! ***********************************************************
+! ***   ELECTRIC AND MAGNETIC COMPONENTS OF WEYL TENSOR   ***
+! ***********************************************************
 
-! This routine calculates the elevtric and magnetic parts
+! This routine calculates the electric and magnetic parts
 ! of the Weyl tensor, the Weyls scalars psi0 to psi4, and
-! the curvature invariantes I and J.
+! the curvature invariantes I, J and S.
 !
 ! Originally written by Erik Jimenez.
 
@@ -89,10 +88,12 @@
 
   if (angmom) then
 
+     print *, 'Calculation of magnetic part of Weyl with non-zero angular momentum not yet implemented.'
+
 !    Matter terms (STILL MISSING).
 
      if (mattertype/='vacuum') then
-
+        print *, 'Matter terms for magnetic part of Weyl not yet implemented.'
      end if
 
 ! Case with no angular momentum.  Because of the
@@ -134,7 +135,7 @@
 !    Matter terms (STILL MISSING).
 
      if (mattertype/='vacuum') then
-
+        print *, 'Matter terms for magnetic part of Weyl not yet implemented.'
      end if
 
   end if
@@ -144,15 +145,17 @@
 ! ***   WEYL SCALARS (PSI's)   ***
 ! ********************************
 
-! At the moment we only have expressions for the case with no
-! angular momentum.  But I need to check them (Miguel).
+! At the moment we only have expressions for the case
+! with no angular momentum.
 
   if (angmom) then
 
+     print *, 'Calculation of Weyl scalar with non-zero angular momentum not yet implemented.'
+
   else
 
-!    As this subroutine is called also for gravitational wave extraction
-!    we need to calculate Psi4, but the other scalars are not always necessary.
+!    As this subroutine is called also for gravitational wave extraction we
+!    need to calculate Psi4, but the other scalars are not always necessary.
 
      WEYL_psi4 = (0.5*((2.*r**2*(-z*A + z*B + (-z**2 + r**2)*C)*(z*WEYL_E_A - &
           z*WEYL_E_B + (z**2 - r**2)*WEYL_E_C))/(rr**4*(A*B - &
