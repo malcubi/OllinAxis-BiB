@@ -44,31 +44,31 @@
 
   if (angmom) then
 
-     RIC_A = RIC_A + 2.d0*g_C1*Dr_C1*r**3 + (2.0*g_C2*Dz_C1 + 2.0*g_C1*C1)*r**2 &
+     RIC_A = RIC_A + 2.d0*g_C1*Dr_C1*r**3 + (2.d0*g_C2*Dz_C1 + 2.d0*g_C1*C1)*r**2 &
            - g_C*Drz_A*r - half*g_A*Drr_A - half*g_B*Dzz_A &
            - half*g_H*Dr_A/r + lamDef*g_H
 
      RIC_B = RIC_B - g_C*Drz_B*r-half*g_A*Drr_B - half*g_B*Dzz_B &
            - half*g_H*Dr_B/r
 
-     RIC_H = RIC_H - 2.d0*g_C1*Dr_C1*r**3 + (-2.0*g_C2*Dz_C1 - 2.0*g_C1*C1)*r**2 &
+     RIC_H = RIC_H - 2.d0*g_C1*Dr_C1*r**3 + (-2.d0*g_C2*Dz_C1 - 2.d0*g_C1*C1)*r**2 &
            - g_C*Drz_H*r - half*g_A*Drr_H - half*g_B*Dzz_H &
            - half*g_H*Dr_H/r - lamDef*g_H
 
      RIC_C = RIC_C + (g_C1*Dr_C2-g_C*Drz_C)*r - half*g_A*Drr_C + g_C2*Dz_C2 &
            - half*g_B*Dzz_C - g_C*Dz_C + (-g_A*Dr_C - half*g_H*Dr_C)/r
 
-     RIC_C1= RIC_C1 - g_C*Drz_C1*r - half*g_B*Dzz_C1 - 2.0*g_C*Dz_C1 &
-           - half*g_A*Drr_C1 + (-2.0*g_A*Dr_C1 + g_C1*Dr_H - half*g_H*Dr_C1 &
+     RIC_C1= RIC_C1 - g_C*Drz_C1*r - half*g_B*Dzz_C1 - 2.d0*g_C*Dz_C1 &
+           - half*g_A*Drr_C1 + (-2.d0*g_A*Dr_C1 + g_C1*Dr_H - half*g_H*Dr_C1 &
            - g_C1*Dr_A)/r + g_C1*lambda - C1*g_lambda - g_C2*Dz_lambda
 
      RIC_C2= RIC_C2 + (-g_C1*Dr_C - g_C*Drz_C2)*r - half*g_A*Drr_C2 &
            - g_C*Dz_C2 - half*g_B*Dzz_C2 - g_C2*Dz_C &
            + (-g_A*Dr_C2 - half*g_H*Dr_C2)/r
 
-     RIC_lambda = RIC_lambda + 4.0*g_C1*Dr_C1*r - half*g_B*Dzz_lambda &
-           + 4.0*g_C2*Dz_C1 - half*g_A*Drr_lambda + 4.0*g_C1*C1 &
-           - g_lambda*lambda - (2.0*g_A + half*g_H)*Dr_lambda/r &
+     RIC_lambda = RIC_lambda + 4.d0*g_C1*Dr_C1*r - half*g_B*Dzz_lambda &
+           + 4.d0*g_C2*Dz_C1 - half*g_A*Drr_lambda + 4.d0*g_C1*C1 &
+           - g_lambda*lambda - (2.d0*g_A + half*g_H)*Dr_lambda/r &
            - g_C*(r*Drz_lambda + 2.d0*Dz_lambda)
 
   else
