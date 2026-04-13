@@ -80,14 +80,14 @@
 ! ****************************************
 
 ! Safe distance to boundaries on fine grid.
-! We need to be suficiently far, as otherwise
+! We need to be sufficiently far, as otherwise
 ! an instability seems to appear.
 !
 ! We add a small number to prevent changes
 ! from round-off error.
 
-  deltar = dble(ghost+1)*drl(level) + 1.d-10
-  deltaz = dble(ghost+1)*dzl(level) + 1.d-10
+  deltar = dble(2*ghost)*drl(level) + 1.d-10
+  deltaz = dble(2*ghost)*dzl(level) + 1.d-10
 
 ! All processors loop over ALL points in the coarse time level,
 ! even if they don't own them.  This is to make sure that all
