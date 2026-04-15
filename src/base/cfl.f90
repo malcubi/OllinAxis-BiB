@@ -63,7 +63,7 @@
 !       is just equal to the speed of light.  For
 !       Bona-Masso type slicings it is:
 !
-!       va = +- alpha sqrt( f(alpha) g^ii / psi^4 )
+!       va = alpha sqrt( f(alpha) g^ii / psi^4 )
 !
 !       But remember that the code defines:
 !
