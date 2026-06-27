@@ -66,6 +66,7 @@
 !       Lapse.
 
         alpha = one
+        dtalpha = zero
 
 !       Shift.
 
