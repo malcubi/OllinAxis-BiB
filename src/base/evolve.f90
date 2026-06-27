@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/evolve.f90,v 1.59 2022/10/02 04:36:54 erik Exp $
 
   subroutine evolve
 
@@ -51,11 +50,11 @@
 !       take a number of ghost zones on the negative side.
 
         if (rbox(box)==0.d0) then
-           do i=1-ghost,Nr
+           do i=1-ghost,Nrmaxl(box)
               r(i,:) = (dble(Nminl_r(box,rank) + i) - 0.5d0)*dr
            end do
         else
-           do i=1-ghost,Nr
+           do i=1-ghost,Nrmaxl(box)
               r(i,:) = rbox(box) + (dble(Nminl_r(box,rank) + i) - 0.5d0*dble(Nrbox(box) - ghost + 1))*dr
            end do
         end if
@@ -63,11 +62,11 @@
 !       Find z coordinate.
 
         if (eqsym.and.(zbox(box)==0.d0)) then
-           do j=1-ghost,Nz
+           do j=1-ghost,Nzmaxl(box)
               z(:,j) = (dble(Nminl_z(box,rank) + j) - 0.5d0)*dz
            end do
         else
-           do j=1-ghost,Nz
+           do j=1-ghost,Nrmaxl(box)
               z(:,j) = zbox(box) + (dble(Nminl_z(box,rank) + j) - 0.5d0*dble(Nzbox(box) - ghost + 1))*dz
            end do
         end if
@@ -314,10 +313,9 @@
   call save2Ddata
 
   if (convert_to_3D) then
-
-     call save3D ('psi',directory)
-
+     call save3D('psi',directory)
   end if
+
 ! Checkpoint initial data, except when we are
 ! restarting from a checkpoint file (since we
 ! already have it).
@@ -382,9 +380,9 @@
      end if
 
 
-!    ****************************
-!    ***   ANALYSIS ROUTINES  ***
-!    ****************************
+!    *****************************
+!    ***   ANALYSIS ROUTINES   ***
+!    *****************************
 
 !    Call the different analysis routines. They are
 !    called only when we need output.
