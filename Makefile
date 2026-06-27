@@ -1,4 +1,3 @@
-#$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/Makefile,v 1.18 2022/06/02 16:45:07 malcubi Exp $
 
 ##############################################
 ###   MAKEFILE FOR PROGRAM OLLINAXIS-BIB   ###
@@ -124,7 +123,7 @@ else
 # -Jobjs               Put module files in subdirectory "objs".
 
 ifeq ($(FC),gfortran)
-FLAGS := -O3 -ffree-form -Jobjs -funroll-loops -fallow-argument-mismatch
+FLAGS := -Ofast -march=native -ffree-form -Jobjs -funroll-loops -fallow-argument-mismatch
 else
 
 # Compiler and compilation flags for the f95 compiler.
