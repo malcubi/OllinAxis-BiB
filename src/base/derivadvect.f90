@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/derivadvect.f90,v 1.3 2019/10/04 15:49:36 malcubi Exp $
 
   module derivadvect
 
@@ -52,7 +51,7 @@
 
      do j=1-ghost,Nz
 
-!       Interior points: second order one-sided derivative.
+!       Interior points: 2nd order one-sided derivative.
 
         do i=3-ghost,Nr-2
 
@@ -64,7 +63,7 @@
 
         end do
 
-!       Point i=2-ghost
+!       Point i=2-ghost.
 
         i = 2-ghost
 
@@ -74,13 +73,13 @@
            diffadvr(i,j) = - hidr*(3.d0*diffvar(i,j) - 4.d0*diffvar(i+1,j) + diffvar(i+2,j))
         end if
 
-!       Point i=1-ghost
+!       Point i=1-ghost.
 
         i = 1-ghost
 
         diffadvr(i,j) = - hidr*(3.d0*diffvar(i,j) - 4.d0*diffvar(i+1,j) + diffvar(i+2,j))
 
-!       Point i=Nr-1
+!       Point i=Nr-1.
 
         i = Nr-1
 
@@ -90,7 +89,7 @@
            diffadvr(i,j) = hidr*(diffvar(i+1,j) - diffvar(i-1,j))
         end if
 
-!       Point i=Nr
+!       Point i=Nr.
 
         i = Nr
 
@@ -107,7 +106,7 @@
 
      do j=1-ghost,Nz
 
-!       Interior points: fourth order semi-one-sided derivative.
+!       Interior points: 4th order semi-one-sided derivative.
 
         do i=4-ghost,Nr-3
 
@@ -121,7 +120,7 @@
 
         end do
 
-!       Point i=3-ghost
+!       Point i=3-ghost.
 
         i = 3-ghost
 
@@ -133,21 +132,21 @@
                 - 18.d0*diffvar(i+1,j) + 6.d0*diffvar(i+2,j) - diffvar(i+3,j))/3.d0
         end if
 
-!       Point i=2-ghost
+!       Point i=2-ghost.
 
         i = 2-ghost
 
         diffadvr(i,j) = - 0.25d0*idr*(3.d0*diffvar(i-1,j) + 10.d0*diffvar(i,j) &
              - 18.d0*diffvar(i+1,j) + 6.d0*diffvar(i+2,j) - diffvar(i+3,j))/3.d0
 
-!       Point i=1-ghost
+!       Point i=1-ghost.
 
         i = 1-ghost
 
         diffadvr(i,j) = - 0.25d0*idr*(25.d0*diffvar(i,j) - 48.d0*diffvar(i+1,j) &
              + 36.d0*diffvar(i+2,j) - 16.d0*diffvar(i+3,j) + 3.d0*diffvar(i+4,j))/3.d0
 
-!       Point i=Nr-2
+!       Point i=Nr-2.
 
         i = Nr-2
 
@@ -251,7 +250,7 @@
 
      do i=1-ghost,Nr
 
-!       Interior points: second order one-sided derivative.
+!       Interior points: 2nd order one-sided derivative.
 
         do j=3-ghost,Nz-2
 
@@ -263,7 +262,7 @@
 
         end do
 
-!       Point j=2-ghost
+!       Point j=2-ghost.
 
         j = 2-ghost
 
@@ -273,13 +272,13 @@
            diffadvz(i,j) = - hidz*(3.d0*diffvar(i,j) - 4.d0*diffvar(i,j+1) + diffvar(i,j+2))
         end if
 
-!       Point j=1-ghost
+!       Point j=1-ghost.
 
         j = 1-ghost
 
         diffadvz(i,j) = - hidz*(3.d0*diffvar(i,j) - 4.d0*diffvar(i,j+1) + diffvar(i,j+2))
 
-!       Point j=Nz-1
+!       Point j=Nz-1.
 
         j = Nz-1
 
@@ -289,7 +288,7 @@
            diffadvz(i,j) = hidz*(diffvar(i,j+1) - diffvar(i,j-1))
         end if
 
-!       Point j=Nz
+!       Point j=Nz.
 
         j = Nz
 
@@ -306,7 +305,7 @@
 
      do i=1-ghost,Nr
 
-!       Interior points: fourth order semi-one-sided derivative.
+!       Interior points: 4th order semi-one-sided derivative.
 
         do j=4-ghost,Nz-3
 
@@ -320,7 +319,7 @@
 
         end do
 
-!       Point j=3-ghost
+!       Point j=3-ghost.
 
         j = 3-ghost
 
@@ -332,21 +331,21 @@
                 - (diffvar(i,j+2) - diffvar(i,j-2)))/3.d0
         end if
 
-!       Point j=2-ghost
+!       Point j=2-ghost.
 
         j = 2-ghost
 
         diffadvz(i,j) = - 0.25d0*idz*(3.d0*diffvar(i,j-1) + 10.d0*diffvar(i,j) &
              - 18.d0*diffvar(i,j+1) + 6.d0*diffvar(i,j+2) - diffvar(i,j+3))/3.d0
 
-!       Point j=1-ghost
+!       Point j=1-ghost.
 
         j = 1-ghost
 
         diffadvz(i,j) = - 0.25d0*idz*(25.d0*diffvar(i,j) - 48.d0*diffvar(i,j+1) &
              + 36.d0*diffvar(i,j+2) - 16.d0*diffvar(i,j+3) + 3.d0*diffvar(i,j+4))/3.d0
 
-!       Point j=Nz-2
+!       Point j=Nz-2.
 
         j = Nz-2
 
@@ -358,14 +357,14 @@
                 - (diffvar(i,j+2) - diffvar(i,j-2)))/3.d0
         end if
 
-!       Point j=Nz-1
+!       Point j=Nz-1.
 
         j = Nz-1
 
         diffadvz(i,j) = 0.25d0*idz*(3.d0*diffvar(i,j+1) + 10.d0*diffvar(i,j) &
              - 18.d0*diffvar(i,j-1) + 6.d0*diffvar(i,j-2) - diffvar(i,j-3))/3.d0
 
-!       Point j=Nz
+!       Point j=Nz.
 
         j = Nz
 

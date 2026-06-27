@@ -49,13 +49,13 @@
 
   if (order=="two") then
 
-!    Interior points: second order centered first derivative.
+!    Interior points: 2nd order centered first derivative.
 
      do i=2-ghost,Nr-1
         diff1r(i,:) = hidr*(diffvar(i+1,:) - diffvar(i-1,:))
      end do
 
-!    Point Nr:  2nd order fully one-sided.
+!    Point Nr: 2nd order fully one-sided.
 
      diff1r(i,:) = hidr*(3.d0*diffvar(Nr,:) - 4.d0*diffvar(Nr-1,:) + diffvar(Nr-2,:))
 
@@ -66,20 +66,20 @@
 
   else if (order=="four") then
 
-!    Interior points: fourth order centered first derivative.
+!    Interior points: 4th order centered first derivative.
 
      do i=1,Nr-2
         diff1r(i,:) = idr*(8.d0*(diffvar(i+1,:) - diffvar(i-1,:)) &
                     -           (diffvar(i+2,:) - diffvar(i-2,:)))/12.d0
      end do
 
-!    Point Nr-1:  4th order semi one-sided (1 point to the right, 3 to the left).
+!    Point Nr-1: 4th order semi one-sided (1 point to the right, 3 to the left).
 
      i = Nr-1
      diff1r(i,:) = idr*(3.d0*diffvar(i+1,:) + 10.d0*diffvar(i,:) - 18.d0*diffvar(i-1,:) &
                  + 6.d0*diffvar(i-2,:) - diffvar(i-3,:))/12.d0
 
-!    Point Nr:  4th order fully one-sided.
+!    Point Nr: 4th order fully one-sided.
 
      i = Nr
      diff1r(i,:) = idr*(25.d0*diffvar(i,:) - 48.d0*diffvar(i-1,:) &
@@ -163,7 +163,7 @@
         diff1z(:,j) = hidz*(diffvar(:,j+1) - diffvar(:,j-1))
      end do
 
-!    Boundary with one-sided differences.
+!    Boundaries with 2nd order fully one-sided.
 
      j = 1-ghost
      diff1z(:,j) = - hidz*(3.d0*diffvar(:,j) - 4.d0*diffvar(:,j+1) + diffvar(:,j+2))
@@ -178,7 +178,7 @@
 
   else if (order=="four") then
 
-!    Interior points: fourth order centered first derivative.
+!    Interior points: 4th order centered first derivative.
 
      do j=3-ghost,Nz-2
         diff1z(:,j) = idz*(8.d0*(diffvar(:,j+1) - diffvar(:,j-1)) &
@@ -203,7 +203,7 @@
      diff1z(:,j) = + idz*(3.d0*diffvar(:,j+1) + 10.d0*diffvar(:,j) - 18.d0*diffvar(:,j-1) &
                  + 6.d0*diffvar(:,j-2) - diffvar(:,j-3))/12.d0
 
-!    Point Nz:  4th order fully one-sided.
+!    Point Nz: 4th order fully one-sided.
 
      j = Nz
      diff1z(:,j) = + idz*(25.d0*diffvar(:,j) - 48.d0*diffvar(:,j-1) &
@@ -307,7 +307,7 @@
 
   else if (order=="four") then
 
-!    Interior points: fourth order centered second derivative.
+!    Interior points: 4th order centered second derivative.
 
      do i=3-ghost,Nr-2
         diff2r(i,:) = - idr2*(30.d0*diffvar(i,:) &
@@ -315,13 +315,13 @@
                     +        diffvar(i+2,:) + diffvar(i-2,:))/12.d0
      end do
 
-!    Point Nr-1:  4th order semi one-sided.
+!    Point Nr-1: 4th order semi one-sided.
 
      i = Nr-1
      diff2r(i,:) = idr2*(10.d0*diffvar(i+1,:) - 15.d0*diffvar(i,:) - 4.d0*diffvar(i-1,:) &
                  + 14.d0*diffvar(i-2,:) - 6.d0*diffvar(i-3,:) + diffvar(i-4,:))/12.d0
 
-!    Point Nr:  4th order fully one-sided.
+!    Point Nr: 4th order fully one-sided.
 
      i = Nr
      diff2r(i,:) = idr2*(45.d0*diffvar(i,:) - 154.d0*diffvar(i-1,:) + 214.d0*diffvar(i-2,:) &
@@ -401,13 +401,13 @@
 
   if (order=="two") then
 
-!    Interior points: second order centered second derivative.
+!    Interior points: 2nd order centered second derivative.
 
      do j=2-ghost,Nz-1
         diff2z(:,j) = idz2*(diffvar(:,j+1) - 2.d0*diffvar(:,j) + diffvar(:,j-1))
      end do
 
-!    Boundary with one-sided diferences.
+!    Boundary with 2nd order one-sided diferences.
 
      j = 1-ghost
      diff2z(:,j) = idz2*(2.d0*diffvar(:,j) - 5.d0*diffvar(:,j+1) &
@@ -432,25 +432,25 @@
                     +        diffvar(:,j+2) + diffvar(:,j-2))/12.d0
      end do
 
-!    Point Nz-1:  4th order semi one-sided.
+!    Point Nz-1: 4th order semi one-sided.
 
      j = 2-ghost
      diff2z(:,j) = idz2*(10.d0*diffvar(:,j-1) - 15.d0*diffvar(:,j) - 4.d0*diffvar(:,j+1) &
                  + 14.d0*diffvar(:,j+2) - 6.d0*diffvar(:,j+3) + diffvar(:,j+4))/12.d0
 
-!    Point 1-ghost:  4th order fully one-sided.
+!    Point 1-ghost: 4th order fully one-sided.
 
      j = 1-ghost
      diff2z(:,j) = idz2*(45.d0*diffvar(:,j) - 154.d0*diffvar(:,j+1) + 214.d0*diffvar(:,j+2) &
                  - 156.d0*diffvar(:,j+3) + 61.d0*diffvar(:,j+4) - 10.d0*diffvar(:,j+5))/12.d0
 
-!    Point Nz-1:  4th order semi one-sided.
+!    Point Nz-1: 4th order semi one-sided.
 
      j = Nz-1
      diff2z(:,j) = idz2*(10.d0*diffvar(:,j+1) - 15.d0*diffvar(:,j) - 4.d0*diffvar(:,j-1) &
                  + 14.d0*diffvar(:,j-2) - 6.d0*diffvar(:,j-3) + diffvar(:,j-4))/12.d0
 
-!    Point Nz:  4th order fully one-sided.
+!    Point Nz: 4th order fully one-sided.
 
      j = Nz
      diff2z(:,j) = idz2*(45.d0*diffvar(:,j) - 154.d0*diffvar(:,j-1) + 214.d0*diffvar(:,j-2) &
@@ -532,7 +532,7 @@
 
   if (order=="two") then
 
-!    Interior points: second order centered mixed derivative.
+!    Interior points: 2nd order centered mixed derivative.
 
      do i=2-ghost,Nr-1
         do j=2-ghost,Nz-1
@@ -605,7 +605,7 @@
 
   else if (order=="four") then
 
-!    Interior points: fourth order centered mixed derivative.
+!    Interior points: 4th order centered mixed derivative.
 
      do j=3-ghost,Nz-2
         do i=3-ghost,Nr-2
