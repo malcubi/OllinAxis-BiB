@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/sync.f90,v 1.4 2019/10/04 15:49:36 malcubi Exp $
 
   subroutine sync(syncvar)
 
@@ -17,7 +16,6 @@
   implicit none
 
   integer i,j,p,Naux
-  integer i0
   integer status(MPI_STATUS_SIZE)
 
   real(8), dimension (1-ghost:Nrmax,1-ghost:Nzmax) :: syncvar
@@ -32,115 +30,112 @@
 ! We only need to synchronize if we have
 ! more than one processor.
 
-  if (size>1) then
 
-!    ***********************
-!    ***   R DIRECTION   ***
-!    ***********************
+! ***********************
+! ***   R DIRECTION   ***
+! ***********************
 
-     if (nprocr>1) then
+  if (nprocr>1) then
 
-        Naux = Nzmax + ghost
+     Naux = Nzmax + ghost
 
-!       Send information to processor on the left
-!       (only if we are not at left boundary).
+!    Send information to processor on the left
+!    (only if we are not at left boundary).
 
-        if (mod(rank,nprocr)/=0) then
-           p = rank-1
-           do i=1,ghost
-              varz = syncvar(i,:)
-              call MPI_SEND(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
-           end do
-        end if
-
-!       Send information to processor on the right
-!       (only if we are not at right boundary).
-
-        if (mod(rank+1,nprocr)/=0) then
-           p = rank+1
-           do i=1,ghost
-              varz = syncvar(Nr-2*ghost+i,:)
-              call MPI_SEND(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
-           end do
-        end if
-
-!       Receive information from processor on the right
-!       (only if we are not at right boundary).
-
-        if (mod(rank+1,nprocr)/=0) then
-           p = rank+1
-           do i=1,ghost
-              call MPI_RECV(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
-              syncvar(Nr-ghost+i,:) = varz
-           end do
-        end if
-
-!       Receive information from processor on the left
-!       (only if we are not at left boundary).
-
-        if (mod(rank,nprocr)/=0) then
-           p = rank-1
-           do i=1,ghost
-              call MPI_RECV(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
-              syncvar(i-ghost,:) = varz
-           end do
-        end if
-
+     if (mod(rank,nprocr)/=0) then
+        p = rank-1
+        do i=1,ghost
+           varz = syncvar(i,:)
+           call MPI_SEND(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
+        end do
      end if
 
+!    Send information to processor on the right
+!    (only if we are not at right boundary).
 
-!    ***********************
-!    ***   Z DIRECTION   ***
-!    ***********************
+     if (mod(rank+1,nprocr)/=0) then
+        p = rank+1
+        do i=1,ghost
+           varz = syncvar(Nr-2*ghost+i,:)
+           call MPI_SEND(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
+        end do
+     end if
 
-     if (nprocz>1) then
+!    Receive information from processor on the right
+!    (only if we are not at right boundary).
 
-        Naux = Nrmax + ghost
+     if (mod(rank+1,nprocr)/=0) then
+        p = rank+1
+        do i=1,ghost
+           call MPI_RECV(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
+           syncvar(Nr-ghost+i,:) = varz
+        end do
+     end if
 
-!       Send information to processor below us
-!       (only if we are not at the lower boundary).
+!    Receive information from processor on the left
+!    (only if we are not at left boundary).
 
-        if (rank>=nprocr) then
-           p = rank - nprocr
-           do j=1,ghost
-              varr = syncvar(:,j)
-              call MPI_SEND(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
-           end do
-        end if
+     if (mod(rank,nprocr)/=0) then
+        p = rank-1
+        do i=1,ghost
+           call MPI_RECV(varz,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
+           syncvar(i-ghost,:) = varz
+        end do
+     end if
 
-!       Send information to processor above us
-!       (only if we are not at the upper boundary).
+  end if
 
-        if (rank<size-nprocr) then
-           p = rank + nprocr
-           do j=1,ghost
-              varr = syncvar(:,Nz-2*ghost+j)
-              call MPI_SEND(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
-           end do
-        end if
 
-!       Receive information from processor above us
-!       (only if we are not at the upper boundary).
+! ***********************
+! ***   Z DIRECTION   ***
+! ***********************
 
-        if (rank<size-nprocr) then
-           p = rank + nprocr
-           do j=1,ghost
-              call MPI_RECV(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
-              syncvar(:,Nz-ghost+j) = varr
-           end do
-        end if
+  if (nprocz>1) then
 
-!       Receive information from processor below us
-!       (only if we are not at the lower boundary).
+     Naux = Nrmax + ghost
 
-        if (rank>=nprocr) then
-           p = rank - nprocr
-           do j=1,ghost
-              call MPI_RECV(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
-              syncvar(:,j-ghost) = varr
-           end do
-        end if
+!    Send information to processor below us
+!    (only if we are not at the lower boundary).
 
+     if (rank>=nprocr) then
+        p = rank - nprocr
+        do j=1,ghost
+           varr = syncvar(:,j)
+           call MPI_SEND(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
+        end do
+     end if
+
+!    Send information to processor above us
+!    (only if we are not at the upper boundary).
+
+     if (rank<size-nprocr) then
+        p = rank + nprocr
+        do j=1,ghost
+           varr = syncvar(:,Nz-2*ghost+j)
+           call MPI_SEND(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,ierr)
+        end do
+     end if
+
+!    Receive information from processor above us
+!    (only if we are not at the upper boundary).
+
+     if (rank<size-nprocr) then
+        p = rank + nprocr
+        do j=1,ghost
+           call MPI_RECV(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
+           syncvar(:,Nz-ghost+j) = varr
+        end do
+     end if
+
+!    Receive information from processor below us
+!    (only if we are not at the lower boundary).
+
+     if (rank>=nprocr) then
+        p = rank - nprocr
+        do j=1,ghost
+           call MPI_RECV(varr,Naux,MPI_REAL8,p,1,MPI_COMM_WORLD,status,ierr)
+           syncvar(:,j-ghost) = varr
+        end do
      end if
 
   end if
