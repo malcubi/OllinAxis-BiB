@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/main.f90,v 1.32 2021/03/08 01:00:27 malcubi Exp $
 
 ! *****************************
 ! ***   PROGRAM OLLINAXIS   ***
