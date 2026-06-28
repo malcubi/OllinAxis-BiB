@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/onestep.f90,v 1.64 2021/03/27 20:55:10 malcubi Exp $
 
   recursive subroutine onestep(level)
 
@@ -80,10 +79,12 @@
 
 !    Before calculating sources, make sure we
 !    have the correct auxiliary quantities.
-!    This step mighti n fact not by needed, and
-!    it makes the code slower, but I need to check.
+!
+!    This step might in fact not by needed, and
+!    it makes the code slower, but I leave it here
+!    commented out in case it is needed later.
 
-     call auxiliary
+     !call auxiliary
 
 
 !    **********************************************
