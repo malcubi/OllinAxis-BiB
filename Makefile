@@ -216,7 +216,7 @@ OBJS := $(notdir $(FILES))
 # since they might very well not exist.
 
 OBJS += assign.o mytypes.o arrays.o accumulate.o allocatearrays.o currentgrid.o grabarray.o \
-        saveold.o simpleboundary.o symmetries_r.o symmetries_z.o syncall.o update.o
+        saveold.o simpleboundary.o symmetries_r.o symmetries_z.o syncgeo.o syncmatt.o update.o
 
 OBJS := $(filter-out $(MODS),$(sort $(OBJS)))
 
@@ -280,7 +280,7 @@ perlscripts : .perl
          src/auto/accumulate.f90 src/auto/allocatearrays.f90 src/auto/currentgrid.f90 \
          src/auto/grabarray.f90 src/auto/mytypes.f90 src/auto/saveold.f90 \
          src/auto/simpleboundary.f90 src/auto/symmetries_r.f90 src/auto/symmetries_z.f90 \
-         src/auto/syncall.f90 src/auto/update.f90
+         src/auto/syncgeo.f90 src/auto/syncmatt.f90 src/auto/update.f90
 	@ /bin/rm -f src/auto/*.f90
 	@ chmod 755 prl/assign.pl
 	@ chmod 755 prl/arrays.pl
