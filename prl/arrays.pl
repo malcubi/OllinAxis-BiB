@@ -1,7 +1,5 @@
 #!/usr/bin/env perl
-
-#$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/prl/arrays.pl,v 1.51 2022/01/11 02:14:45 malcubi Exp $
-
+#
 # This perl script creates the files:
 #
 # arrays.f90
@@ -14,7 +12,8 @@
 # simpleboundary.f90
 # symmetries_r.f90
 # symmetries_z.f90
-# syncall.f90
+# syncgeo.f90
+# syncmatt.f90
 # update.f90
 #
 # Plus the include files:
@@ -37,7 +36,8 @@ open(FILE_SAVEOLD,">src/auto/saveold.f90") or die "Can't open saveold.f90: $!";
 open(FILE_SIMPLEBOUNDARY,">src/auto/simpleboundary.f90") or die "Can't open simpleboundary.f90: $!";
 open(FILE_SYMMETRIES_R,">src/auto/symmetries_r.f90") or die "Can't open symmetries_r.f90: $!";
 open(FILE_SYMMETRIES_Z,">src/auto/symmetries_z.f90") or die "Can't open symmetries_z.f90: $!";
-open(FILE_SYNCALL,">src/auto/syncall.f90") or die "Can't open syncall.f90: $!";
+open(FILE_SYNCGEO,">src/auto/syncgeo.f90") or die "Can't open syncgeo.f90: $!";
+open(FILE_SYNCMATT,">src/auto/syncmatt.f90") or die "Can't open syncmatt.f90: $!";
 open(FILE_UPDATE,">src/auto/update.f90") or die "Can't open update.f90: $!";
 
 open(FILE_BOUNDINTERP,">src/auto/bound_interp.inc") or die "Can't open boundinterp.inc: $!";
@@ -169,13 +169,21 @@ print FILE_SYMMETRIES_Z "  implicit none\n\n";
 print FILE_SYMMETRIES_Z "  integer j\n\n";
 print FILE_SYMMETRIES_Z "  do j=1,ghost\n\n";
 
-# Write beginning of file syncall.f90
+# Write beginning of file syngeo.f90
 
-print FILE_SYNCALL "! Automatically generated file.  Do not edit!\n\n";
-print FILE_SYNCALL "  subroutine syncall\n\n";
-print FILE_SYNCALL "  use param\n";
-print FILE_SYNCALL "  use arrays\n\n";
-print FILE_SYNCALL "  implicit none\n\n";
+print FILE_SYNCGEO "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SYNCGEO "  subroutine syncgeo\n\n";
+print FILE_SYNCGEO "  use param\n";
+print FILE_SYNCGEO "  use arrays\n\n";
+print FILE_SYNCGEO "  implicit none\n\n";
+
+# Write beginning of file syncmatt.f90
+
+print FILE_SYNCMATT "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SYNCMATT "  subroutine syncmatt\n\n";
+print FILE_SYNCMATT "  use param\n";
+print FILE_SYNCMATT "  use arrays\n\n";
+print FILE_SYNCMATT "  implicit none\n\n";
 
 # Write beginning of file update.f90
 
@@ -203,6 +211,16 @@ print FILE_INTERSECTINTERP "! Automatically generated file.  Do not edit!\n\n";
 open(INFILE,"src/base/arrays.config") or die "Can't open arrays.config: $!";
 
 # Parse file arrays.f90 to identify declared arrays
+
+my $line = " ";
+my $nline = 0;
+
+my $angmom = "false";
+my $shift = "false";
+my $shiftangmom = "false";
+
+my $syncold = " ";
+my $synccond = " ";
 
 while ($line=<INFILE>) {
 
@@ -621,9 +639,13 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if ($intent =~ /EVOLVE/i) {
+
             if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
                $cond = $1;
+
                print FILE_SYMMETRIES_R  "     if (",$cond,") then\n";
+
                if ($symr == "+1") {
                   print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
                } elsif ($symr == "-1") {
@@ -631,8 +653,11 @@ while ($line=<INFILE>) {
                } else {
                   print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
                }
+
                print FILE_SYMMETRIES_R  "     end if\n\n";
+
             } else {
+
                if ($symr == "+1") {
 	          print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = + ",$var,"(i,:)\n\n";
                } elsif ($symr == "-1") {
@@ -640,7 +665,9 @@ while ($line=<INFILE>) {
                } elsif ($symr != "0") {
                   print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n\n";
                }
+
             }
+
          }
 
       }
@@ -650,9 +677,13 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if ($intent =~ /EVOLVE/i) {
+
             if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
                $cond = $1;
+
                print FILE_SYMMETRIES_Z  "     if (",$cond,") then\n";
+
                if ($symz == "+1") {
                   print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
                } elsif ($symz == "-1") {
@@ -660,8 +691,11 @@ while ($line=<INFILE>) {
                } else {
                   print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
                }
+
                print FILE_SYMMETRIES_Z  "     end if\n\n";
+
             } else {
+
                if ($symz == "+1") {
 	          print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = + ",$var,"(:,j)\n\n";
                } elsif ($symz == "-1") {
@@ -669,24 +703,171 @@ while ($line=<INFILE>) {
                } elsif ($symr != "0") {
                   print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n\n";
                }
+
+            }
+
+         }
+
+      }
+
+#     Write to FILE_SYNCGEO code to synchronize across processors.
+
+      if ($zerod eq "false") {
+
+         if ($intent =~ /EVOLVE/i) {
+
+            if ($storage !~ (/^CONDITIONAL\s*\((.*)\)/i) && ($shift ne "true") && ($angmom ne "true") && ($shiftangmom ne "true")) {
+
+                $shiftangmom = "false";
+                $shift = "false";
+                $angmom = "false";
+
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
+            } elsif (($storage =~ /shift/i) && ($storage =~ /angmom/i)) {
+
+                if (($shift eq "true") || ($angmom eq "true")) {
+
+                   $shiftangmom = "true";
+                   $shift = "false";
+                   $angmon = "false";
+
+                   print FILE_SYNCGEO  "  end if\n\n";
+                   print FILE_SYNCGEO  "  if (angmom.and.(shift/=\"none\")) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } elsif ($shiftangmom ne "true") {
+
+                   $shiftangmom = "true";
+
+                   print FILE_SYNCGEO  "  if (angmom.and.(shift/=\"none\")) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } else {
+
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                }
+
+            } elsif ($storage =~ /shift/i) {
+
+                if (($shiftangmom eq "true") || ($angmom eq "true")) {
+
+                   $shiftangmom = "false";
+                   $angmon = "false";
+                   $shift = "true";
+
+                   print FILE_SYNCGEO  "  end if\n\n";
+                   print FILE_SYNCGEO  "  if (shift/=\"none\") then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } elsif ($shift ne "true") {
+
+                   $shift = "true";
+
+                   print FILE_SYNCGEO  "  if (shift/=\"none\") then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } else {
+
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                }
+
+            } elsif ($storage =~ /angmom/i) {
+
+                if (($shift eq "true") || ($shiftangmom eq "true")) {
+
+                   $shiftangmom = "false";
+                   $angmon = "true";
+                   $shift = "false";
+
+                   print FILE_SYNCGEO  "  end if\n\n";
+                   print FILE_SYNCGEO  "  if (angmom) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } elsif ($angmom ne "true") {
+
+                   $angmom = "true";
+
+                   print FILE_SYNCGEO  "  if (angmom) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } else {
+
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                }
+
+            } elsif ($shiftangmom eq "true") {
+
+                $shiftangmom = "false";
+
+                print FILE_SYNCGEO  "  end if\n\n";
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
+            } elsif ($shift eq "true") {
+
+                $shift = "false";
+
+                print FILE_SYNCGEO  "  end if\n\n";
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
+            } elsif ($angmom eq "true") {
+
+                $angmom = "false";
+
+                print FILE_SYNCGEO  "  end if\n\n";
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
             }
          }
 
       }
 
-#     Write to FILE_SYNCALL code to synchronize across processors.
+#     Write to FILE_SYNCMATT code to synchronize across processors.
 
       if ($zerod eq "false") {
 
          if ($intent =~ /EVOLVE/i) {
-            if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
-                $cond = $1;
-                print FILE_SYNCALL  "  if (",$cond,") then\n";
-	        print FILE_SYNCALL  "     call sync(",$var,")\n";
-                print FILE_SYNCALL  "  end if\n\n";
-            } else {
-	        print FILE_SYNCALL  "  call sync(",$var,")\n\n";
+
+            if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i && $storage !~ /shift/i) {
+
+               $cond = $1;
+
+               if ($cond ne $syncold && $synccond ne "true" && $cond ne "angmom") {
+
+                  $synccond = "true";
+                  $syncold = $cond;
+
+                  print FILE_SYNCMATT  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYNCMATT  "  if (",$cond,") then\n";
+	          print FILE_SYNCMATT  "     call sync(",$var,")\n";
+
+               } elsif ($cond ne $syncold && $synccond eq "true" && $cond ne "angmom") {
+
+                  $syncold = $cond;
+
+                  print FILE_SYNCMATT  "  end if\n\n";
+                  print FILE_SYNCMATT  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYNCMATT  "  if (",$cond,") then\n";
+	          print FILE_SYNCMATT  "     call sync(",$var,")\n";
+
+               } elsif ($cond ne "angmom") {
+
+	          print FILE_SYNCMATT  "     call sync(",$var,")\n";
+
+               }
+
+            } elsif ($synccond eq "true") {
+
+                $synccond = " ";
+                $syncold  = " ";
+
+                print FILE_SYNCMATT  "  end if\n\n";
+
             }
+
          }
 
       }
@@ -878,9 +1059,17 @@ print FILE_SYMMETRIES_R  "  end subroutine symmetries_r\n\n";
 print FILE_SYMMETRIES_Z  "  end do\n\n";
 print FILE_SYMMETRIES_Z  "  end subroutine symmetries_z\n\n";
 
-# Write ending of file syncall.f90.
+# Write ending of file syncgeo.f90.
 
-print FILE_SYNCALL  "  end subroutine syncall\n\n";
+print FILE_SYNCGEO  "  end subroutine syncgeo\n\n";
+
+# Write ending of file syncmatt.f90.
+
+if ($synccond eq "true") {
+   print FILE_SYNCMATT  "  end if\n\n";
+}
+
+print FILE_SYNCMATT  "  end subroutine syncmatt\n\n";
 
 # Write ending of file update.f90.
 
@@ -898,7 +1087,8 @@ close(FILE_SAVEOLD);
 close(FILE_SIMPLEBOUNDARY);
 close(FILE_SYMMETRIES_R);
 close(FILE_SYMMETRIES_Z);
-close(FILE_SYNCALL);
+close(FILE_SYNCGEO);
+close(FILE_SYNCMATT);
 close(FILE_UPDATE);
 
 close(FILE_BOUNDINTERP);
