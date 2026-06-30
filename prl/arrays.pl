@@ -410,18 +410,49 @@ while ($line=<INFILE>) {
 
             } elsif (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
 
-               print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+               if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
+                  $cond = $1;
+
+                  print FILE_CURRENTGRID  "  if (",$cond,") then\n";
+                  print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n";
+                  print FILE_CURRENTGRID  "  end if\n\n";
+
+               } else {
+
+                  print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+
+               }
 
             } else {
 
-               print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
-               print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
-               print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
-               print FILE_CURRENTGRID  "  ",$var,"_a => localgrid%",$var,"_a\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+               if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
+                  $cond = $1;
+
+                  print FILE_CURRENTGRID  "  if (",$cond,") then\n";
+                  print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                  print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                  print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                  print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                  print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                  print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                  print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                  print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n";
+                  print FILE_CURRENTGRID  "  end if\n\n";
+
+               } else {
+
+                  print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
+                  print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_a => localgrid%",$var,"_a\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+
+              }
 
 	    }
 
