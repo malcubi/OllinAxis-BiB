@@ -17,17 +17,41 @@
   implicit none
 
   logical contains
+  logical firstcall
+  logical icn,rk4
+  logical matter,dynamic
 
   integer i            ! Counter.
   integer box,level    ! Box number and level counters.
-  integer k            ! Auxiliary counter.
   integer iter         ! Counter for internal iterations.
+  integer k            ! Auxiliary counter.
   integer niter        ! Number of internal iterations.
   integer bmax         ! Number of boxes at this level.
   integer bbox         ! Auxiliary for restriction.
 
   real(8) dtw          ! Internal time step.
   real(8) weight       ! Weight for rk4.
+
+  data firstcall / .true. /
+
+  save firstcall,icn,rk4,matter,dynamic
+
+
+! *************************
+! ***   LOGICAL FLAGS   ***
+! *************************
+
+  if (firstcall) then
+
+      firstcall = .false.
+
+      icn = (integrator=="icn")
+      rk4 = (integrator=="rk4")
+
+      matter  = (mattertype/="vacuum")
+      dynamic = (spacetime=="dynamic")
+
+  end if
 
 
 ! ******************************************
@@ -112,22 +136,9 @@
 !       Find out weights for each iteration for the
 !       different time integration schemes.
 
-!       Iterative Crank-Nicholson (ICN).
-
-        if (integrator=="icn") then
-
-!          In ICN all iterations except the last one
-!          jump only half a time step.
-
-           if (iter<niter) then
-              dtw = 0.5d0*dt
-           else
-              dtw = dt
-           end if
-
 !       Fourth order Runge-Kutta.
 
-        else if (integrator=="rk4") then
+        if (rk4) then
 
 !          In fourth order Runge-Kutta the first two iterations
 !          jump half a time step and the last two a full time step.
@@ -135,18 +146,32 @@
 !          results contribute to final answer: 1/6 for first and
 !          last intermediate results and 1/3 for the two middle ones.
 
-           if (iter==1) then
+           select case(iter)
+              case(1)
+                 dtw = 0.5d0*dt
+                 weight = 1.d0/6.d0
+              case(2)
+                 dtw = 0.5d0*dt
+                 weight = 1.d0/3.d0
+              case(3) 
+                 dtw = dt
+                 weight = 1.d0/3.d0
+              case(4)
+                 dtw = dt
+                 weight = 1.d0/6.d0
+           end select
+
+!       Iterative Crank-Nicholson (ICN).
+
+        else if (icn) then
+
+!          In normal ICN, all iterations except the last one
+!          jump only half a time step.
+
+           if (iter<niter) then
               dtw = 0.5d0*dt
-              weight = 1.d0/6.d0
-           else if (iter==2) then
-              dtw = 0.5d0*dt
-              weight = 1.d0/3.d0
-           else if (iter==3) then
-              dtw = dt
-              weight = 1.d0/3.d0
            else
               dtw = dt
-              weight = 1.d0/6.d0
            end if
 
         end if
@@ -156,7 +181,7 @@
 !       ***   SOURCES FOR SPACETIME   ***
 !       *********************************
 
-        if (spacetime=="dynamic") then
+        if (dynamic) then
 
 !          Sources for geometry.
 
@@ -184,7 +209,7 @@
 !       ***   SOURCES FOR MATTER   ***
 !       ******************************
 
-        if (mattertype/="vacuum") then
+        if (matter) then
            call sources_matter
         end if
 
@@ -199,22 +224,13 @@
 
         if (level==0) then
 
-!          Static and flat boundaries.  The routine "simpleboundary"
-!          applies either static or flat boundaries to the sources
-!          of all those arrays that are not declared with the
-!          attribute NOBOUND.
-
-           if ((boundtype=="static").or.(boundtype=="flat")) then
-
-              call simpleboundary
-
 !          Radiative boundaries for geometry. The routine "radiative_geometry"
 !          applies outgoing wave boundary conditions to the geometric variables.
 !          These boundary conditions take into account the characteristic structure,
 !          but not the constraints. Notice that matter variables should define
 !          their own radiative boundaries in their source routines.
 
-           else if (boundtype=="radiative") then
+           if (boundtype=="radiative") then
 
               call radiative_geometry
 
@@ -224,6 +240,15 @@
 
               call radiative_geometry
               call constraintbound
+
+!          Static and flat boundaries.  The routine "simpleboundary"
+!          applies either static or flat boundaries to the sources
+!          of all those arrays that are not declared with the
+!          attribute NOBOUND.
+
+           else if ((boundtype=="static").or.(boundtype=="flat")) then
+
+              call simpleboundary
 
            end if
 
@@ -280,12 +305,12 @@
 
 !       Symmetries on axis and equator.
 
-        if (eqsym.and.ownequator) then
-           call symmetries_z
-        end if
-
         if (ownaxis) then
            call symmetries_r
+        end if
+
+        if (eqsym.and.ownequator) then
+           call symmetries_z
         end if
 
 
