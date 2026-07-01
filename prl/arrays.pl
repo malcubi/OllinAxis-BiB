@@ -133,8 +133,11 @@ print FILE_ACCUMULATE "  subroutine accumulate(k,niter,w)\n\n";
 print FILE_ACCUMULATE "  use param\n";
 print FILE_ACCUMULATE "  use arrays\n\n";
 print FILE_ACCUMULATE "  implicit none\n\n";
+print FILE_ACCUMULATE "  logical first,last\n\n";
 print FILE_ACCUMULATE "  integer k,niter\n\n";
 print FILE_ACCUMULATE "  real(8) w\n\n";
+print FILE_ACCUMULATE "  first = (k==1)\n";
+print FILE_ACCUMULATE "  last  = (k==niter)\n\n";
 
 # Write beginning of file saveold.f90
 
@@ -227,6 +230,15 @@ my $nline = 0;
 my $angmom = "false";
 my $shift = "false";
 my $shiftangmom = "false";
+
+my $saveold = " ";
+my $saveecond = " ";
+
+my $updateold = " ";
+my $updatecond = " ";
+
+my $accumold = " ";
+my $accumcond = " ";
 
 my $symrold = " ";
 my $symrcond = " ";
@@ -468,22 +480,58 @@ while ($line=<INFILE>) {
 
             $cond = $1;
 
-            print FILE_ACCUMULATE  "  if (",$cond,") then\n";
-            print FILE_ACCUMULATE  "     if (k==1) then\n";
-            print FILE_ACCUMULATE  "        ",$var,"_a = w*s",$var,"\n";
-            print FILE_ACCUMULATE  "     else if (k<niter) then\n";
-            print FILE_ACCUMULATE  "        ",$var,"_a = ",$var,"_a + w*s",$var,"\n";
-            print FILE_ACCUMULATE  "     else\n";
-            print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
-            print FILE_ACCUMULATE  "     end if\n";
+            if ($cond ne $accumold && $accumcond ne "true") {
+
+               $accumcond = "true";
+               $accumold = $cond;
+
+               print FILE_ACCUMULATE  "! Condition: ",$cond,"\n\n";
+               print FILE_ACCUMULATE  "  if (",$cond,") then\n\n";
+               print FILE_ACCUMULATE  "     if (.not.last) then\n";
+               print FILE_ACCUMULATE  "        ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+               print FILE_ACCUMULATE  "     else\n";
+               print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+               print FILE_ACCUMULATE  "     end if\n\n";
+
+            } elsif ($cond ne $accumold && $accumcond eq "true") {
+
+               $accumold = $cond;
+
+               print FILE_ACCUMULATE  "  end if\n\n";
+               print FILE_ACCUMULATE  "! Condition: ",$cond,"\n\n";
+               print FILE_ACCUMULATE  "  if (",$cond,") then\n\n";
+               print FILE_ACCUMULATE  "     if (.not.last) then\n";
+               print FILE_ACCUMULATE  "        ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+               print FILE_ACCUMULATE  "     else\n";
+               print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+               print FILE_ACCUMULATE  "     end if\n\n";
+
+            } else {
+
+               print FILE_ACCUMULATE  "     if (.not.last) then\n";
+               print FILE_ACCUMULATE  "        ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+               print FILE_ACCUMULATE  "     else\n";
+               print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+               print FILE_ACCUMULATE  "     end if\n\n";
+
+            }
+
+         } elsif ($accumcond eq "true") {
+
+            $accumcond = " ";
+            $accumold  = " ";
+
+            print FILE_ACCUMULATE  "  end if\n\n";
+            print FILE_ACCUMULATE  "  if (.not.last) then\n";
+            print FILE_ACCUMULATE  "     ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+            print FILE_ACCUMULATE  "  else\n";
+            print FILE_ACCUMULATE  "     s",$var,"  = ",$var,"_a + w*s",$var,"\n";
             print FILE_ACCUMULATE  "  end if\n\n";
 
          } else {
 
-            print FILE_ACCUMULATE  "  if (k==1) then\n";
-            print FILE_ACCUMULATE  "     ",$var,"_a = w*s",$var,"\n";
-            print FILE_ACCUMULATE  "  else if (k<niter) then\n";
-            print FILE_ACCUMULATE  "     ",$var,"_a = ",$var,"_a + w*s",$var,"\n";
+            print FILE_ACCUMULATE  "  if (.not.last) then\n";
+            print FILE_ACCUMULATE  "     ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
             print FILE_ACCUMULATE  "  else\n";
             print FILE_ACCUMULATE  "     s",$var,"  = ",$var,"_a + w*s",$var,"\n";
             print FILE_ACCUMULATE  "  end if\n\n";
@@ -664,23 +712,93 @@ while ($line=<INFILE>) {
 
             $cond = $1;
 
-            print FILE_SAVEOLD  "  if (",$cond,") then\n";
-            print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
-            print FILE_SAVEOLD  "     do i=0,ghost-1\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
-            print FILE_SAVEOLD  "     end do\n";
+            if ($cond ne $saveold && $savecond ne "true") {
+
+               $savecond = "true";
+               $saveold = $cond;
+
+               print FILE_SAVEOLD  "! Condition: ",$cond,"\n\n";
+               print FILE_SAVEOLD  "  if (",$cond,") then\n\n";
+               print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
+               print FILE_SAVEOLD  "     do i=0,ghost-1\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+               print FILE_SAVEOLD  "     end do\n";
+
+            } elsif ($cond ne $saveold && $savecond eq "true") {
+
+               $saveold = $cond;
+
+               print FILE_SAVEOLD  "  end if\n\n";
+               print FILE_SAVEOLD  "! Condition: ",$cond,"\n\n";
+               print FILE_SAVEOLD  "  if (",$cond,") then\n\n";
+               print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
+               print FILE_SAVEOLD  "     do i=0,ghost-1\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+               print FILE_SAVEOLD  "     end do\n\n";
+
+           } else {
+
+               print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
+               print FILE_SAVEOLD  "     do i=0,ghost-1\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+               print FILE_SAVEOLD  "     end do\n\n";
+
+            }
+
+         } elsif ($savecond eq "true") {
+
+            $savecond = " ";
+            $saveold  = " ";
+
             print FILE_SAVEOLD  "  end if\n\n";
+            print FILE_SAVEOLD  "  ",$var,"_p = ",$var,"\n";
+            print FILE_SAVEOLD  "  do i=0,ghost-1\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+            print FILE_SAVEOLD  "  end do\n\n";
 
          } else {
 
@@ -1117,9 +1235,37 @@ while ($line=<INFILE>) {
 
             $cond = $1;
 
-            print FILE_UPDATE  "  if (",$cond,") then\n";
-            print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+            if ($cond ne $updateold && $updatecond ne "true") {
+
+               $updatecond = "true";
+               $updateold = $cond;
+
+               print FILE_UPDATE  "! Condition: ",$cond,"\n\n";
+               print FILE_UPDATE  "  if (",$cond,") then\n";
+               print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            } elsif ($cond ne $updateold && $updatecond eq "true") {
+
+               $updateold = $cond;
+
+               print FILE_UPDATE  "  end if\n\n";
+               print FILE_UPDATE  "! Condition: ",$cond,"\n\n";
+               print FILE_UPDATE  "  if (",$cond,") then\n";
+               print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            } else {
+
+               print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            }
+
+         } elsif ($updatecond eq "true") {
+
+            $updatecond = " ";
+            $updateold  = " ";
+
             print FILE_UPDATE  "  end if\n\n";
+            print FILE_UPDATE  "  ",$var," = ",$var,"_p + dtw*s",$var,"\n\n";
 
          } else {
 
@@ -1273,10 +1419,6 @@ close(INFILE);
 
 print FILE_ARRAYS "\n  end module arrays\n\n";
 
-# Write ending of file accumulate.f90.
-
-print FILE_ACCUMULATE "  end subroutine accumulate\n\n";
-
 # Write ending of file allocatearrays.f90
 
 print FILE_ALLOCATEARRAYS "  end subroutine allocatearrays\n\n";
@@ -1304,7 +1446,19 @@ print FILE_MYTYPES "\n";
 print FILE_MYTYPES "  end type gridfuncs\n\n";
 print FILE_MYTYPES "  end module mytypes\n\n";
 
+# Write ending of file accumulate.f90.
+
+if ($accumcond eq "true") {
+   print FILE_ACCUMULATE "  end if\n\n";
+}
+
+print FILE_ACCUMULATE "  end subroutine accumulate\n\n";
+
 # Write ending of file saveold.f90.
+
+if ($savecond eq "true") {
+   print FILE_SAVEOLD  "  end if\n\n";
+}
 
 print FILE_SAVEOLD "  end subroutine saveold\n\n";
 
@@ -1344,6 +1498,10 @@ if ($synccond eq "true") {
 print FILE_SYNCMATT  "  end subroutine syncmatt\n\n";
 
 # Write ending of file update.f90.
+
+if ($updatecond eq "true") {
+   print FILE_UPDATE  "  end if\n\n";
+}
 
 print FILE_UPDATE "  end subroutine update\n\n";
 
