@@ -231,6 +231,9 @@ my $angmom = "false";
 my $shift = "false";
 my $shiftangmom = "false";
 
+my $gridold = " ";
+my $gridcond = " ";
+
 my $saveold = " ";
 my $saveecond = " ";
 
@@ -287,14 +290,6 @@ while ($line=<INFILE>) {
 	  $zerod = "true";
       } else {
 	  $zerod = "false";
-      }
-
-#     Check if the array has only one grid level.
-
-      if ($line =~ /ONELEVEL/i) {
-	  $onelevel = "true";
-      } else {
-	  $onelevel = "false";
       }
 
 #     Check if the array does not require boundary conditions.
@@ -418,29 +413,17 @@ while ($line=<INFILE>) {
 
          if ($intent !~ /^POINTER$/i) {
 
-            if ($onelevel eq "true") {
+            if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
 
-            } elsif (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+               $cond = $1;
 
-               if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
-
-                  $cond = $1;
+               if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
 
                   print FILE_CURRENTGRID  "  if (",$cond,") then\n";
                   print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n";
                   print FILE_CURRENTGRID  "  end if\n\n";
 
                } else {
-
-                  print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
-
-               }
-
-            } else {
-
-               if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
-
-                  $cond = $1;
 
                   print FILE_CURRENTGRID  "  if (",$cond,") then\n";
                   print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
@@ -453,6 +436,14 @@ while ($line=<INFILE>) {
                   print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n";
                   print FILE_CURRENTGRID  "  end if\n\n";
 
+               }
+
+            } else {
+
+               if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+
+                  print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+
                } else {
 
                   print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
@@ -464,7 +455,7 @@ while ($line=<INFILE>) {
                   print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
                   print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
 
-              }
+               }
 
 	    }
 
@@ -631,18 +622,12 @@ while ($line=<INFILE>) {
                print FILE_ALLOCATEARRAYS  $space,"     checkvars = trim(checkvars) // ',",$var,"'\n";
             }
 
-            if ($onelevel eq "true") {
-
-            } else {
-
-               print FILE_ALLOCATEARRAYS  $space,"     do box=0,Nb\n";
-               print FILE_ALLOCATEARRAYS  $space,"        do level=min(1,box),Nl(box)\n";
-               print FILE_ALLOCATEARRAYS  $space,"           allocate(grid(box,level)%",$var,"(1-ghost:Nrmaxl(box),1-ghost:Nzmaxl(box)))\n";
-               print FILE_ALLOCATEARRAYS  $space,"           grid(box,level)%",$var," = ",$zero,"\n";
-               print FILE_ALLOCATEARRAYS  $space,"        end do\n";
-               print FILE_ALLOCATEARRAYS  $space,"     end do\n";
-
-            }
+            print FILE_ALLOCATEARRAYS  $space,"     do box=0,Nb\n";
+            print FILE_ALLOCATEARRAYS  $space,"        do level=min(1,box),Nl(box)\n";
+            print FILE_ALLOCATEARRAYS  $space,"           allocate(grid(box,level)%",$var,"(1-ghost:Nrmaxl(box),1-ghost:Nzmaxl(box)))\n";
+            print FILE_ALLOCATEARRAYS  $space,"           grid(box,level)%",$var," = ",$zero,"\n";
+            print FILE_ALLOCATEARRAYS  $space,"        end do\n";
+            print FILE_ALLOCATEARRAYS  $space,"     end do\n";
 
             print FILE_ALLOCATEARRAYS  $space,"  end if\n",$newline;;
 
@@ -1424,6 +1409,10 @@ print FILE_ARRAYS "\n  end module arrays\n\n";
 print FILE_ALLOCATEARRAYS "  end subroutine allocatearrays\n\n";
 
 # Write ending of file currentgrid.f90.
+
+if ($gridcond eq "true") {
+   print FILE_CURRENTGRID  "  end if\n\n";
+}
 
 print FILE_CURRENTGRID "  end subroutine currentgrid\n\n";
 
