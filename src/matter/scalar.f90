@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/matter/scalar.f90,v 1.14 2021/03/05 23:01:56 malcubi Exp $ 
 
   subroutine sources_scalar
 
