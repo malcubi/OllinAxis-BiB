@@ -123,7 +123,7 @@ else
 # -Jobjs               Put module files in subdirectory "objs".
 
 ifeq ($(FC),gfortran)
-FLAGS := -Ofast -march=native -ffree-form -Jobjs -funroll-loops -fallow-argument-mismatch
+FLAGS := -Ofast -march=native -ffree-form -Jobjs -funroll-loops -fallow-argument-mismatch -openmp #-fcheck=all
 else
 
 # Compiler and compilation flags for the f95 compiler.
