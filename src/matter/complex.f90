@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/matter/complex.f90,v 1.5 2021/03/05 23:02:31 malcubi Exp $ 
 
   subroutine sources_complex
 
