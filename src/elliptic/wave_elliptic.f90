@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/elliptic/wave_elliptic.f90,v 1.35 2021/02/26 18:35:59 malcubi Exp $
 
   subroutine wave_elliptic(type,init)
 
@@ -306,7 +305,7 @@
   step = 0
 
 ! Start iterations.  Notice that we do at least 100 iterations.
-! This is because since we start with ell_v=0, the first few
+! This is because since we start with ell_v=0, for the first few
 ! time steps the change in ell_u might be very small.
 
   do while ((step<100).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
@@ -342,8 +341,11 @@
 
 !    Find global residual.
 
-     call MPI_Allreduce(lres,gres,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
-
+     if (size>1) then
+        call MPI_Allreduce(lres,gres,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+     else
+        gres = lres
+     end if
 
 !    ******************
 !    ***   OUTPUT   ***
@@ -355,9 +357,9 @@
 
 !       Data to screen.
 
-        if (rank==0) then
-           write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
-        end if
+        !if (rank==0) then
+        !   write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
+        !end if
 
 !       Save data to file.
 
@@ -386,19 +388,23 @@
 ! ***   DID WE CONVERGE?   ***
 ! ****************************
 
-  if ((rank==0).and.(ELL_verbose)) then
+  if (rank==0) then
 
      if (step==ELL_maxiter) then
         write (*,'(A,i6,A)') ' WaveElliptic:   Iterations did not converge after ',ELL_maxiter,' iterations.'
+        print *
      else
         if (Nlmax_old>0) then
            if (Nlmax_old/=Nlmax) then
               write (*,'(A,i5,A)') ' WaveElliptic:   Coarse grid solution converged after ',step,' iterations!'
+              print *
            else
               write (*,'(A,i5,A)') ' WaveElliptic:   Finer grids solution converged after ',step,' iterations!'
+              print *
            end if
         else
            write (*,'(A,i5,A)') ' WaveElliptic:   Solution converged after ',step,' iterations!'
+           print *
         end if
      end if
 
@@ -562,6 +568,9 @@
 
   implicit none
 
+  logical firstcall
+  logical icn,rk4
+
   integer box,level    ! Box number and level counters.
   integer i,j,k        ! Counters.
   integer iter         ! Counter for internal iterations.
@@ -575,6 +584,24 @@
 
   character(*) type    ! Type of Laplacian (flat,conformal,physical)
   character(*) method  ! Time integration method.
+
+  data firstcall / .true. /
+
+  save firstcall,icn,rk4
+
+
+! *************************
+! ***   LOGICAL FLAGS   ***
+! *************************
+
+  if (firstcall) then
+
+      firstcall = .false.
+
+      icn = (integrator=="icn")
+      rk4 = (integrator=="rk4")
+
+  end if
 
 
 ! ******************************************
@@ -621,6 +648,7 @@
      if (level>0) then
 
         do i=0,ghost-1
+
            ell_u_bound_rL(i,:,2) = ell_u_bound_rL(i,:,1)
            ell_u_bound_rL(i,:,1) = ell_u_bound_rL(i,:,0)
            ell_u_bound_rL(i,:,0) = ell_u(1-ghost+i,:)
@@ -633,9 +661,7 @@
            ell_u_bound_zR(:,i,2) = ell_u_bound_zR(:,i,1)
            ell_u_bound_zR(:,i,1) = ell_u_bound_zR(:,i,0)
            ell_u_bound_zR(:,i,0) = ell_u(:,Nz-i)
-        end do
 
-        do i=0,ghost-1
            ell_v_bound_rL(i,:,2) = ell_v_bound_rL(i,:,1)
            ell_v_bound_rL(i,:,1) = ell_v_bound_rL(i,:,0)
            ell_v_bound_rL(i,:,0) = ell_v(1-ghost+i,:)
@@ -648,6 +674,7 @@
            ell_v_bound_zR(:,i,2) = ell_v_bound_zR(:,i,1)
            ell_v_bound_zR(:,i,1) = ell_v_bound_zR(:,i,0)
            ell_v_bound_zR(:,i,0) = ell_v(:,Nz-i)
+
         end do
 
      end if
@@ -657,10 +684,10 @@
 !    ***   FIND NUMBER OF INTERNAL ITERATIONS   ***
 !    **********************************************
 
-     if (method=="icn") then
-        niter = 3
-     else if (method=="rk4") then
+     if (rk4) then
         niter = 4
+     else if (icn) then
+        niter = icniter
      end if
 
 
@@ -678,9 +705,34 @@
 !       Find out weights for each iteration for the
 !       different time integration schemes.
 
+!       Fourth order Runge-Kutta.
+
+        if (rk4) then
+
+!          In fourth order Runge-Kutta the first two iterations
+!          jump half a time step and the last two a full time step.
+!          Here we also set the weights with which intermediate
+!          results contribute to final answer: 1/6 for first and
+!          last intermediate results and 1/3 for the two middle ones.
+
+           select case(iter)
+              case(1)
+                 dtw = 0.5d0*dt
+                 weight = 1.d0/6.d0
+              case(2)
+                 dtw = 0.5d0*dt
+                 weight = 1.d0/3.d0
+              case(3) 
+                 dtw = dt
+                 weight = 1.d0/3.d0
+              case(4)
+                 dtw = dt
+                 weight = 1.d0/6.d0
+           end select
+
 !       Iterative Crank-Nicholson (ICN).
 
-        if (method=="icn") then
+        else if (icn) then
 
 !          In ICN all iterations except the last one
 !          jump only half a time step.
@@ -689,30 +741,6 @@
               dtw = 0.5d0*dt
            else
               dtw = dt
-           end if
-
-!       Fourth order Runge-Kutta.
-
-        else if (method=="rk4") then
-
-!          In fourth order Runge-Kutta the first two iterations
-!          jump half a time step and the last two a full time step.
-!          Here we also set the weights with which intermediate
-!          results contribute to final answer: 1/6 for first and
-!          last intermediate results and 1/3 for the two middle ones.
-
-           if (iter==1) then
-              dtw = 0.5d0*dt
-              weight = 1.d0/6.d0
-           else if (iter==2) then
-              dtw = 0.5d0*dt
-              weight = 1.d0/3.d0
-           else if (iter==3) then
-              dtw = dt
-              weight = 1.d0/3.d0
-           else
-              dtw = dt
-              weight = 1.d0/6.d0
            end if
 
         end if
@@ -806,16 +834,11 @@
 
         sell_v = sell_v - waveeta*ell_v/dtl(level)
 
-!       And add some dissipation.  This is mostly because when
-!       we have refinement levels the boundaries of the fine
-!       grids introduce high frequency reflections that we
-!       need to dissipate away.
+!       And add some dissipation to reduce high frequency noise.
 
-        if (Nlmax>0) then
-           evolvevar => ell_v
-           sourcevar => sell_v
-           call dissipation(+1,+1,0.02d0)
-        end if
+        evolvevar => ell_v
+        sourcevar => sell_v
+        call dissipation(+1,+1,0.05d0)
 
 !       Symmetries on axis.
 
@@ -855,7 +878,7 @@
 !       ***   FOR RUNGE-KUTTA ADD TO ACCUMULATOR ARRAYS   ***
 !       *****************************************************
 
-        if (method=="rk4") then
+        if (rk4) then
            if (iter==1) then
               ell_u_a = weight*sell_u
               ell_v_a = weight*sell_v
