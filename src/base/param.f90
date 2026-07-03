@@ -366,7 +366,7 @@
 
 ! idata:         Type of initial data.
 
-  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw)
+  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar)
 
 
 ! *********************
@@ -462,11 +462,11 @@
   character(30) :: ELL_solver = "wave"  ! range = (none,wave,sor)
 
   logical :: ELL_verbose = .false.
-  integer :: ELL_Noutput = 1
+  integer :: ELL_Noutput = 10
   integer :: ELL_maxiter = 100000
-  real(8) :: ELL_epsilon = 1.d-5
+  real(8) :: ELL_epsilon = 1.d-6
 
-  real(8) :: WE_eta = 1.d-2
+  real(8) :: WE_eta = 0.d0
 
 
 ! ***********************
