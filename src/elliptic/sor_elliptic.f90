@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/elliptic/sor_elliptic.f90,v 1.13 2021/02/24 22:35:01 malcubi Exp $
 
   subroutine sor_elliptic(type,init)
 
@@ -73,6 +72,7 @@
   if (order=='four') then
      if (rank==0) then
         print *, 'WARNING: The SOR solver is only second order accurate!'
+        print *
      end if
   end if
 
@@ -356,8 +356,7 @@
               end do
            end do
 
-!          Now loop over current grid to find coefficients
-!          of elliptic equation.
+!          Now loop over current grid to find coefficients of elliptic equation.
 
            imax = Nr+ghost
            jmax = Nz+ghost
@@ -527,6 +526,8 @@
 ! ***************
 
   end subroutine sor_elliptic
+
+
 
 
 
@@ -771,6 +772,7 @@
      if (ganorm<ELL_epsilon) then
         if (rank==0) then
            write (*,'(A,i5,A)') ' SOR:   Solution converged after ',n,' iterations!'
+           print *
         end if
         return
      end if
@@ -782,8 +784,6 @@
   if (rank==0) then
      write (*,'(A,i6,A)') ' SOR:   Iterations did not converge after ',ELL_maxiter,' iterations.'
   end if
-
-  !call die
 
 
 ! ***************
