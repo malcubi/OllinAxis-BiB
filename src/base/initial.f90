@@ -401,6 +401,42 @@
   end if
 
 
+! **********************
+! ***   BOSON STAR   ***
+! **********************
+
+! Boson star initial data.
+
+  if (idata=="bosonstar") then
+
+     if (contains(mattertype,"complex")) then
+
+        if (complexpotential=="none") then
+           if (rank==0) then
+              print *, 'For boson star initial data we need a massive scalar field.'
+              print *, 'Aborting! (subroutine initial)'
+              print *
+           end if
+           call die
+        else
+           call idata_BosonstarCF
+        end if
+
+     else
+
+        if (rank==0) then
+           print *, 'Boson star initial data needs "complex" type matter ...'
+           print *, 'Aborting! (subroutine initial)'
+           print *
+        end if
+
+        call die
+
+     end if
+
+  end if
+
+
 ! *************************************************
 ! ***   NO MORE INITIAL DATA AFTER THIS POINT   ***
 ! *************************************************
