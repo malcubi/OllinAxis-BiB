@@ -115,10 +115,10 @@
 !    ***   FIND NUMBER OF INTERNAL ITERATIONS   ***
 !    **********************************************
 
-     if (integrator=="icn") then
-        niter = icniter
-     else if (integrator=="rk4") then
+     if (rk4) then
         niter = 4
+     else if (icn) then
+        niter = icniter
      end if
 
 
@@ -272,7 +272,7 @@
 !          weight, but stores the result back into the source arrays so
 !          that the last update will work correctly.
 
-        if (integrator=="rk4") then
+        if (rk4) then
            call accumulate(iter,niter,weight)
         end if
 
