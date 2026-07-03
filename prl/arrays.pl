@@ -86,6 +86,7 @@ print FILE_ALLOCATEARRAYS "  end if\n\n";
 # Write beginning of file currentgrid.f90
 
 print FILE_CURRENTGRID "! Automatically generated file.  Do not edit!\n\n";
+print FILE_CURRENTGRID "! This subroutine points grid variables to the current box and level.\n\n";
 print FILE_CURRENTGRID "  subroutine currentgrid(box,level,localgrid)\n\n";
 print FILE_CURRENTGRID "  use param\n";
 print FILE_CURRENTGRID "  use arrays\n";
@@ -94,6 +95,7 @@ print FILE_CURRENTGRID "  use mytypes\n\n";
 print FILE_CURRENTGRID "  implicit none\n\n";
 print FILE_CURRENTGRID "  integer box,level\n\n";
 print FILE_CURRENTGRID "  type(gridfuncs) :: localgrid\n\n";
+print FILE_CURRENTGRID "! Parameters.\n\n";
 print FILE_CURRENTGRID "  ownaxis = (axis(box,rank)/=-1)\n";
 print FILE_CURRENTGRID "  ownequator = (eqz(box,rank)/=-1)\n";
 print FILE_CURRENTGRID "  ownorigin = (origin(box,rank)/=-1)\n\n";
@@ -105,6 +107,7 @@ print FILE_CURRENTGRID "  time = t(box,level)\n\n";
 print FILE_CURRENTGRID "  dt = dtl(level)\n";
 print FILE_CURRENTGRID "  dr = drl(level)\n";
 print FILE_CURRENTGRID "  dz = dzl(level)\n\n";
+print FILE_CURRENTGRID "! Arrays.\n\n";
 
 # Write beginning of file grabarray.f90
 
@@ -417,35 +420,77 @@ while ($line=<INFILE>) {
 
                $cond = $1;
 
-               if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+               if ($cond ne $gridold && $gridcond ne "true") {
 
-                  print FILE_CURRENTGRID  "  if (",$cond,") then\n";
-                  print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n";
+                  $gridcond = "true";
+                  $gridold = $cond;
+
+                  print FILE_CURRENTGRID  "! Condition: ",$cond,"\n\n";
+                  print FILE_CURRENTGRID  "  if (",$cond,") then\n\n";
+
+                  if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                     print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n\n";
+                  } else {
+                     print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                     print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+                 }
+
+               } elsif ($cond ne $gridold && $gridcond eq "true") {
+
+                  $gridold = $cond;
+
                   print FILE_CURRENTGRID  "  end if\n\n";
+                  print FILE_CURRENTGRID  "! End of previous condition.\n\n";
+                  print FILE_CURRENTGRID  "! Condition: ",$cond,"\n\n";
+                  print FILE_CURRENTGRID  "  if (",$cond,") then\n\n";
+
+                  if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                     print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n\n";
+                  } else {
+                     print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                     print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+                  }
 
                } else {
 
-                  print FILE_CURRENTGRID  "  if (",$cond,") then\n";
-                  print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
-                  print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
-                  print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
-                  print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
-                  print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
-                  print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
-                  print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
-                  print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n";
-                  print FILE_CURRENTGRID  "  end if\n\n";
+                  if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                     print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n\n";
+                  } else {
+                     print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                     print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+                  }
 
                }
 
-            } else {
+            } elsif ($gridcond eq "true") {
+
+               $gridcond = " ";
+               $gridold  = " ";
+
+               print FILE_CURRENTGRID  "  end if\n\n";
+               print FILE_CURRENTGRID  "! End of previous condition.\n\n";
 
                if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
-
                   print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
-
                } else {
-
                   print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
                   print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
                   print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
@@ -454,7 +499,21 @@ while ($line=<INFILE>) {
                   print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
                   print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
                   print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+               }
 
+            } else {
+
+               if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                  print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+               } else {
+                  print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
+                  print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_a => localgrid%",$var,"_a\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
                }
 
 	    }
