@@ -88,6 +88,9 @@
         phi = zero
         chi = one
 
+        psi2 = one
+        psi4 = one
+
 !       Metric Functions.
 
         A = one
@@ -95,9 +98,19 @@
         H = one
         C = zero
 
+        g_A = one
+        g_B = one
+        g_H = one
+        g_C = zero
+
         if (angmom) then
+
            C1 = zero
            C2 = zero
+
+           g_C1 = zero
+           g_C2 = zero
+
         end if
 
 !       Extrinsic curvature.
