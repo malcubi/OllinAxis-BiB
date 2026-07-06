@@ -657,7 +657,7 @@
                     + sor_g(i,j)*sor_u(i+1,j+1) + sor_h(i,j)*sor_u(i-1,j-1) &
                     + sor_i(i,j)*sor_u(i+1,j-1) + sor_j(i,j)*sor_u(i-1,j+1) &
                     + sor_e(i,j)*sor_u(i,j) - sor_f(i,j)
-              anorm = anorm + abs(resid)
+              anorm = anorm + resid**2
               sor_u(i,j) = sor_u(i,j) - omega*resid/sor_e(i,j)
            end do
 
@@ -666,6 +666,12 @@
         end do
 
         isw = 3 - isw
+
+!       We take as the true residual the root mean square across all grid points.
+!       The reason is that otherwise if we have more points (larger grid for example),
+!       and similar errors at each point, the total residual would just increase.
+
+        anorm = sqrt(anorm/dble(imax*jmax))
 
 !       Overrelaxation factor.
 
