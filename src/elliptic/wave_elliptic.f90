@@ -45,6 +45,7 @@
   integer i,j,n,m                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
+  integer NNtot
 
   real(8) lres,gres              ! Local and global residuals.
   real(8) r0,z0,interp           ! For interpolation.
@@ -52,7 +53,7 @@
   real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) zero,one               ! Numbers.
-  real(8) NNtot,aux1,aux2
+  real(8) aux1,aux2
 
   character(*) type              ! Type of Laplacian (flat,conformal,physical).
   character(*) init              ! Initial guess.
