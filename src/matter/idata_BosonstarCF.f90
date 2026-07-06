@@ -463,7 +463,6 @@
 ! *****************************
 
 
-
 ! ************************************************************
 ! ***   SET BACK TO ZERO THE TIME AND TIME STEP COUNTERS   ***
 ! ************************************************************
@@ -533,6 +532,16 @@
         diffvar => complex_phiR
         complex_xiR_r = diff1r(+1)
         complex_xiR_z = diff1z(+1)
+
+!       Set the imaginary part of the scalar field and its spatial derivatives to zero.
+
+        complex_phiI  = 0.d0
+        complex_xiI_r = 0.d0
+        complex_xiI_z = 0.d0
+
+!       Set time derivative of the real part of phi to zero.
+
+        complex_piR  = 0.d0
 
 !       Set time derivative of imaginary part to (omega/alpha)*phiR.
 
