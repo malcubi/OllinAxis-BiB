@@ -665,6 +665,26 @@
   real(8) :: complexI_sr0 = 1.0
   real(8) :: complexI_sz0 = 1.0
 
+! Boson star initial data:
+!
+! boson_phi0:        Boson star parameter for value at origin (see boson_factor).
+! boson_factor:      Normalization factor:
+!                         * physical:  phi(r<<1) ~ phi0
+!                         * harmonic:  phi(r<<1) ~ phi0/sqrt(4pi*(2l+1))
+! boson_omega:       Frequency of the boson star.
+
+  real(8) :: boson_phi0  = 0.d0
+
+  real(8) :: boson_omega = 0.d0
+
+  character(1000) :: boson_factor = "physical" ! range=(physical,harmonic)
+
+! Boson star perturbation.
+!
+! bosongauss:        Do we add an initial perturbation to the boson star solution?
+
+  logical :: bosongauss = .false.
+
 
 ! ********************************
 ! ***   CURVATURE INVARIANTS   ***
