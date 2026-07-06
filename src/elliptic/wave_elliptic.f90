@@ -59,6 +59,7 @@
   character(3) method            ! Time integration method.
 
   integer s_ext(0:Nb,0:Nlmax)    ! External values of step counter.
+
   real(8) t_ext(0:Nb,0:Nlmax)    ! External values of time counter.
   real(8) t1_ext(0:Nb,0:Nlmax)   ! External values of t1 counter.
   real(8) t2_ext(0:Nb,0:Nlmax)   ! External values of t2 counter.
@@ -103,8 +104,8 @@
 
 ! We always initialize ell_v to 0.
 !
-! By default we initialize ell_u to 1, but we can
-! overrdide this depending on the value of 'init'.
+! The initial value of ell_u is set to either
+! 0 or 1 depending on the value of 'init'.
 
   do box=0,Nb
      do level=min(1,box),Nl(box)
@@ -382,6 +383,11 @@
 
      end if
 
+
+! *************************************
+! ***   END OF ITERATIONS DO LOOP   ***
+! *************************************
+
   end do
 
 
@@ -644,7 +650,7 @@
      ell_u_p = ell_u
      ell_v_p = ell_v
 
-!    Save old values of boundaries.
+!    Save old values of internal boundaries.
 
      if (level>0) then
 
@@ -845,7 +851,6 @@
 
         if (ownaxis) then
            do i=1,ghost
-              sell_u(1-i,:) = sell_u(i,:)
               sell_v(1-i,:) = sell_v(i,:)
            end do
         end if
@@ -854,7 +859,6 @@
 
         if (eqsym.and.ownequator) then
            do j=1,ghost
-              sell_u(:,1-j) = sell_u(:,j)
               sell_v(:,1-j) = sell_v(:,j)
            end do
         end if
