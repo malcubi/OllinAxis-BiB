@@ -457,16 +457,24 @@
 ! ELL_maxiter    Maximum number of iterations for elliptic solver.
 ! ELL_epsilon    Tolerance for elliptic solver.
 !
+! WE_method      Integration method for WaveElliptic.
 ! WE_eta         Damping coefficient for WaveElliptic.
+! WE_diss        Dissipation coefficient for WaveElliptic.
+! WE_dtfac       Courant factor for WaveElliptic.
 
   character(30) :: ELL_solver = "wave"  ! range = (none,wave,sor)
+  character(30) :: WE_method = "icn"    ! range = (icn,rk4)
 
   logical :: ELL_verbose = .false.
+
   integer :: ELL_Noutput = 10
   integer :: ELL_maxiter = 100000
-  real(8) :: ELL_epsilon = 1.d-6
 
-  real(8) :: WE_eta = 0.d0
+  real(8) :: ELL_epsilon = 1.d-10
+
+  real(8) :: WE_eta   = 0.d0
+  real(8) :: WE_diss  = 0.1d0
+  real(8) :: WE_dtfac = 0.6d0
 
 
 ! ***********************
