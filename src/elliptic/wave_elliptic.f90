@@ -52,7 +52,7 @@
   real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) zero,one               ! Numbers.
-  real(8) aux1,aux2
+  real(8) NNtot,aux1,aux2
 
   character(*) type              ! Type of Laplacian (flat,conformal,physical).
   character(*) init              ! Initial guess.
@@ -173,35 +173,28 @@
 ! ***   COURANT PARAMETER   ***
 ! *****************************
 
-! Internal time integration method.  Since we evolve to
-! stationary solution, it doesn't really matter if the
-! time evolution is second (icn) or fourth (rk4) order.
-! By default I set rk4.
+! Internal time integration method.
 
-  method = "rk4"
+  method = WE_method
 
-! Courant parameter:  For rk4 we set the Courant
-! parameter to 0.7, and for icn to 0.5 (it goes
-! unstable otherwise).
+! Courant parameter.
 
-  if (method=="icn") then
-     cfac = 0.5d0
-  else if (method=="rk4") then
-     cfac = 0.7d0
-  end if
+  cfac = WE_dtfac
 
 ! Choose time step.
 
   if (type=='flat') then
 
+!    Flat Laplacian.
+
      dt0 = cfac*min(dr0,dz0)
 
   else
 
-! For a curved Laplacian we need to adapt the Courant
-! parameter to the physical metric.
+!    For a curved Laplacian we need to adapt the Courant
+!    parameter to the physical metric.
 !
-! First we find the maximum speeds in each box and level.
+!    First we find the maximum speeds in each box and level.
 
      do box=0,Nb
         do level=min(1,box),Nl(box)
@@ -335,9 +328,16 @@
 
      do j=1,Nzl(0,rank)-ghost
         do i=1,Nrl(0,rank)-ghost
-           lres = lres + abs(grid(0,0)%ell_u(i,j)-grid(0,0)%ell_u_p(i,j))
+           lres = lres + (grid(0,0)%ell_u(i,j)-grid(0,0)%ell_u_p(i,j))**2
         end do
      end do
+
+!    We take as the true residual the root mean square across all grid points.
+!    The reason is that otherwise if we have more points (larger grid for example),
+!    and similar errors at each point, the total residual would just increase.
+
+     NNtot = Nrl(0,rank)*Nzl(0,rank)
+     lres = sqrt(lres/dble(NNtot))
 
 !    Find global residual.
 
@@ -346,6 +346,7 @@
      else
         gres = lres
      end if
+
 
 !    ******************
 !    ***   OUTPUT   ***
@@ -598,8 +599,8 @@
 
       firstcall = .false.
 
-      icn = (integrator=="icn")
-      rk4 = (integrator=="rk4")
+      icn = (method=="icn")
+      rk4 = (method=="rk4")
 
   end if
 
@@ -838,7 +839,7 @@
 
         evolvevar => ell_v
         sourcevar => sell_v
-        call dissipation(+1,+1,0.05d0)
+        call dissipation(+1,+1,WE_diss)
 
 !       Symmetries on axis.
 
@@ -1131,7 +1132,6 @@
 !          Point to grid on level-1.
 
            call currentgrid(bbox,level-1,grid(bbox,level-1))
-
 
            if (ownaxis) then
               do i=1,ghost
