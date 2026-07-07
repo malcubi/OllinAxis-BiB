@@ -121,15 +121,20 @@
 
   implicit none
 
+  logical flag1,flag2            ! Interpolation flags.
+
   integer box,level              ! Box number and level counters.
-  integer i,j                    ! Counters.
+  integer i,j,m,n                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
-  real(8) NNtot
+  integer miniter,NNtot
 
   real(8) lres,gres              ! Local and global residuals.
+  real(8) r0,z0,interp           ! For interpolation.
+  real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) one,half,smallpi       ! Numbers.
+  real(8) aux1,aux2
 
   character(3) method            ! Time integration method.
 
@@ -331,6 +336,20 @@
 ! ***   START ITERATIONS   ***
 ! ****************************
 
+! If we have refinement boxes, we first solve on the coarse
+! grid, and then we use this as initial guess for the full
+! solution. This should speed up the solver considerably.
+
+  Nlmax_old = Nlmax
+
+  if (Nlmax>0) then
+     Nlmax = 0
+  end if
+
+! Initialize damping parameter.
+
+  waveeta = 0.1d0
+
 ! Initialize residuals and iteration number.
 
   100 continue
@@ -340,11 +359,11 @@
 
   step = 0
 
-! Start iterations.  Notice that we do at least 100 iterations.
-! This is because since we start with ell_v=0, for the first few
-! time steps the change in ell_u might be very small.
+! Start iterations.
 
-  do while ((step<100).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
+  miniter = 100
+
+  do while ((step<miniter).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
 
 !    ******************************************
 !    ***   ADVANCE ONE INTERNAL TIME STEP   ***
@@ -356,7 +375,7 @@
 
 !    Advance one time step.
 
-     call bosonstep(0,method)
+     call bosonstep(0,waveeta,method)
 
 
 !    *************************
@@ -440,24 +459,35 @@
   if (rank==0) then
 
      if (step==ELL_maxiter) then
+
         write (*,'(A,i6,A)') ' BosonStarCF:   Iterations did not converge after ',ELL_maxiter,' iterations.'
         print *
+
      else
+
         if (Nlmax_old>0) then
+
            if (Nlmax_old/=Nlmax) then
               write (*,'(A,i5,A)') ' BosonStarCF:   Coarse grid solution converged after ',step,' iterations!'
               print *
            else
               write (*,'(A,i5,A)') ' BosonStarCF:   Finer grids solution converged after ',step,' iterations!'
               print *
+              write(*,'(A,ES23.16)') ' Final residual = ',gres
+              write(*,'(A,ES23.16)') ' Omega          = ', boson_omega
+              print *
            end if
+
         else
+
            write (*,'(A,i5,A)') ' BosonStarCF:   Solution converged after ',step,' iterations!'
            print *
            write(*,'(A,ES23.16)') ' Final residual = ',gres
            write(*,'(A,ES23.16)') ' Omega          = ', boson_omega
            print *
+
         end if
+
      end if
 
   end if
@@ -466,6 +496,109 @@
 ! *****************************
 ! ***   REFINEMENT LEVELS   ***
 ! *****************************
+
+! If we converged and we have refinement levels, inject the
+! coarse solution into fine grids and solve again.
+
+  if ((step/=ELL_maxiter).and.(Nlmax/=Nlmax_old)) then
+
+!    Set again Nlmax to its original value.
+
+     Nlmax = Nlmax_old
+
+!    Set time derivatives in the base grid back to 0.
+
+     grid(0,0)%dtalpha = 0.d0
+     grid(0,0)%dtphi = 0.d0
+     grid(0,0)%complex_piR = 0.d0
+
+!    Iterate over boxes and levels higher than 0.
+
+     do box=0,Nb
+        do level=1,Nl(box)
+
+!          Point to current grid.
+
+           call currentgrid(box,level,grid(box,level))
+
+           dtalpha = 0.d0
+           dtphi = 0.d0
+           complex_piR = 0.d0
+
+!          Loop over ALL points in the current grid (and I do mean
+!          all of them, not just the ones in the current processor).
+
+           do m=0,Nrbox(box)+ghost-1
+              do n=0,Nzbox(box)+ghost-1
+
+!                Figure out (r,z) position for interpolation.
+
+                 r0 = rminl(box,level) + dble(m)*drl(level)
+                 z0 = zminl(box,level) + dble(n)*dzl(level)
+
+!                Figure out to which grid point this (r0,z0) values
+!                would correspond in the local processor at the
+!                fine grid level.
+
+                 i = nint((r0-r(1-ghost,0))/drl(level)) + 1 - ghost
+                 j = nint((z0-z(0,1-ghost))/dzl(level)) + 1 - ghost
+
+!                Notice now that the (i,j) values above might be outside
+!                the range of the current processor.  This means that
+!                we should not try to access this location as it belongs
+!                to another processor.
+
+                 if ((i>=1-ghost).and.(i<=Nrl(box,rank)).and.(j>=1-ghost).and.(j<=Nzl(box,rank))) then
+                    flag1 = .true.
+                 else
+                    flag1 = .false.
+                 end if
+
+!                Interpolate variables from coarse grid level. But we only update
+!                the values if the location belongs to us.
+
+                 interpvar => grid(0,0)%alpha
+                 aux1 = interp(0,0,r0,z0,flag2)
+                 call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+                 if (flag1) then
+                    alpha(i,j) = aux2
+                 end if
+
+                 interpvar => grid(0,0)%phi
+                 aux1 = interp(0,0,r0,z0,flag2)
+                 call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+                 if (flag1) then
+                    phi(i,j) = aux2
+                 end if
+
+                 interpvar => grid(0,0)%complex_phiR
+                 aux1 = interp(0,0,r0,z0,flag2)
+                 call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+                 if (flag1) then
+                    complex_phiR(i,j) = aux2
+                 end if
+
+              end do
+           end do
+
+        end do
+     end do
+
+!    Set time and time step counters back to zero,
+!    and restart iterations.
+
+     s = 0
+     t = 0.d0
+
+     t1 = 0.d0
+     t2 = 0.d0
+
+     goto 100
+
+  end if
 
 
 ! ************************************************************
@@ -532,6 +665,10 @@
  do box=0,Nb
      do level=min(1,box),Nl(box)
 
+!       Point to current grid.
+
+        call currentgrid(box,level,grid(box,level))
+
 !       Find spatial derivatives of complex_phiR.
 
         diffvar => complex_phiR
@@ -570,7 +707,7 @@
 
 
 
-  recursive subroutine bosonstep(level,method)
+  recursive subroutine bosonstep(level,waveeta,method)
 
 ! *********************************
 ! ***   ADVANCE ONE TIME STEP   ***
@@ -598,9 +735,11 @@
   integer iter         ! Counter for internal iterations.
   integer niter        ! Number of internal iterations.
   integer bmax         ! Number of boxes at this level.
+  integer bbox
 
   real(8) dtw          ! Internal time step.
   real(8) weight       ! Weight for rk4.
+  real(8) waveeta      ! Damping parameter.
   real(8) smallpi      ! Numbers.
   real(8) aux
 
@@ -680,6 +819,112 @@
 
      complex_phiR_p = complex_phiR
      complex_piR_p  = complex_piR
+
+!    Save old values of internal boundaries.
+
+     if (level>0) then
+
+        do i=0,ghost-1
+
+!          alpha.
+
+           alpha_bound_rL(i,:,2) = alpha_bound_rL(i,:,1)
+           alpha_bound_rL(i,:,1) = alpha_bound_rL(i,:,0)
+           alpha_bound_rL(i,:,0) = alpha(1-ghost+i,:)
+           alpha_bound_rR(i,:,2) = alpha_bound_rR(i,:,1)
+           alpha_bound_rR(i,:,1) = alpha_bound_rR(i,:,0)
+           alpha_bound_rR(i,:,0) = alpha(Nr-i,:)
+
+           alpha_bound_zL(:,i,2) = alpha_bound_zL(:,i,1)
+           alpha_bound_zL(:,i,1) = alpha_bound_zL(:,i,0)
+           alpha_bound_zL(:,i,0) = alpha(:,1-ghost+i)
+           alpha_bound_zR(:,i,2) = alpha_bound_zR(:,i,1)
+           alpha_bound_zR(:,i,1) = alpha_bound_zR(:,i,0)
+           alpha_bound_zR(:,i,0) = alpha(:,Nz-i)
+
+!          dtalpha.
+
+           dtalpha_bound_rL(i,:,2) = dtalpha_bound_rL(i,:,1)
+           dtalpha_bound_rL(i,:,1) = dtalpha_bound_rL(i,:,0)
+           dtalpha_bound_rL(i,:,0) = dtalpha(1-ghost+i,:)
+           dtalpha_bound_rR(i,:,2) = dtalpha_bound_rR(i,:,1)
+           dtalpha_bound_rR(i,:,1) = dtalpha_bound_rR(i,:,0)
+           dtalpha_bound_rR(i,:,0) = dtalpha(Nr-i,:)
+
+           dtalpha_bound_zL(:,i,2) = dtalpha_bound_zL(:,i,1)
+           dtalpha_bound_zL(:,i,1) = dtalpha_bound_zL(:,i,0)
+           dtalpha_bound_zL(:,i,0) = dtalpha(:,1-ghost+i)
+           dtalpha_bound_zR(:,i,2) = dtalpha_bound_zR(:,i,1)
+           dtalpha_bound_zR(:,i,1) = dtalpha_bound_zR(:,i,0)
+           dtalpha_bound_zR(:,i,0) = dtalpha(:,Nz-i)
+
+!          phi.
+
+           phi_bound_rL(i,:,2) = phi_bound_rL(i,:,1)
+           phi_bound_rL(i,:,1) = phi_bound_rL(i,:,0)
+           phi_bound_rL(i,:,0) = phi(1-ghost+i,:)
+           phi_bound_rR(i,:,2) = phi_bound_rR(i,:,1)
+           phi_bound_rR(i,:,1) = phi_bound_rR(i,:,0)
+           phi_bound_rR(i,:,0) = phi(Nr-i,:)
+
+           phi_bound_zL(:,i,2) = phi_bound_zL(:,i,1)
+           phi_bound_zL(:,i,1) = phi_bound_zL(:,i,0)
+           phi_bound_zL(:,i,0) = phi(:,1-ghost+i)
+           phi_bound_zR(:,i,2) = phi_bound_zR(:,i,1)
+           phi_bound_zR(:,i,1) = phi_bound_zR(:,i,0)
+           phi_bound_zR(:,i,0) = phi(:,Nz-i)
+
+!          dtphi.
+
+           dtphi_bound_rL(i,:,2) = dtphi_bound_rL(i,:,1)
+           dtphi_bound_rL(i,:,1) = dtphi_bound_rL(i,:,0)
+           dtphi_bound_rL(i,:,0) = dtphi(1-ghost+i,:)
+           dtphi_bound_rR(i,:,2) = dtphi_bound_rR(i,:,1)
+           dtphi_bound_rR(i,:,1) = dtphi_bound_rR(i,:,0)
+           dtphi_bound_rR(i,:,0) = dtphi(Nr-i,:)
+
+           dtphi_bound_zL(:,i,2) = dtphi_bound_zL(:,i,1)
+           dtphi_bound_zL(:,i,1) = dtphi_bound_zL(:,i,0)
+           dtphi_bound_zL(:,i,0) = dtphi(:,1-ghost+i)
+           dtphi_bound_zR(:,i,2) = dtphi_bound_zR(:,i,1)
+           dtphi_bound_zR(:,i,1) = dtphi_bound_zR(:,i,0)
+           dtphi_bound_zR(:,i,0) = dtphi(:,Nz-i)
+
+!          complex_phiR.
+
+           complex_phiR_bound_rL(i,:,2) = complex_phiR_bound_rL(i,:,1)
+           complex_phiR_bound_rL(i,:,1) = complex_phiR_bound_rL(i,:,0)
+           complex_phiR_bound_rL(i,:,0) = complex_phiR(1-ghost+i,:)
+           complex_phiR_bound_rR(i,:,2) = complex_phiR_bound_rR(i,:,1)
+           complex_phiR_bound_rR(i,:,1) = complex_phiR_bound_rR(i,:,0)
+           complex_phiR_bound_rR(i,:,0) = complex_phiR(Nr-i,:)
+
+           complex_phiR_bound_zL(:,i,2) = complex_phiR_bound_zL(:,i,1)
+           complex_phiR_bound_zL(:,i,1) = complex_phiR_bound_zL(:,i,0)
+           complex_phiR_bound_zL(:,i,0) = complex_phiR(:,1-ghost+i)
+           complex_phiR_bound_zR(:,i,2) = complex_phiR_bound_zR(:,i,1)
+           complex_phiR_bound_zR(:,i,1) = complex_phiR_bound_zR(:,i,0)
+           complex_phiR_bound_zR(:,i,0) = complex_phiR(:,Nz-i)
+
+!          complex_piR.
+
+           complex_piR_bound_rL(i,:,2) = complex_piR_bound_rL(i,:,1)
+           complex_piR_bound_rL(i,:,1) = complex_piR_bound_rL(i,:,0)
+           complex_piR_bound_rL(i,:,0) = complex_piR(1-ghost+i,:)
+           complex_piR_bound_rR(i,:,2) = complex_piR_bound_rR(i,:,1)
+           complex_piR_bound_rR(i,:,1) = complex_piR_bound_rR(i,:,0)
+           complex_piR_bound_rR(i,:,0) = complex_piR(Nr-i,:)
+
+           complex_piR_bound_zL(:,i,2) = complex_piR_bound_zL(:,i,1)
+           complex_piR_bound_zL(:,i,1) = complex_piR_bound_zL(:,i,0)
+           complex_piR_bound_zL(:,i,0) = complex_piR(:,1-ghost+i)
+           complex_piR_bound_zR(:,i,2) = complex_piR_bound_zR(:,i,1)
+           complex_piR_bound_zR(:,i,1) = complex_piR_bound_zR(:,i,0)
+           complex_piR_bound_zR(:,i,0) = complex_piR(:,Nz-i)
+
+        end do
+
+     end if
 
 
 !    **********************************************
@@ -801,17 +1046,18 @@
 
         call potential
 
-        !complex_V   = 0.5d0*complex_mass**2*complex_phiR**2
-        !complex_VPR = complex_mass**2*complex_phiR
-
 !       Find frequency omega.
 
-        aux = alpha(1,1)**2/complex_phiR(1,1)*(complex_VPR(1,1) - 1.d0/phi(1,1)**4 &
-            *(Drr_complex_phiR(1,1) + Dzz_complex_phiR(1,1) + Dr_complex_phiR(1,1)/r(1,1) &
-            + Dr_complex_phiR(1,1)*(Dr_alpha(1,1)/alpha(1,1) + 2.d0*Dr_phi(1,1)/phi(1,1)) &
-            + Dz_complex_phiR(1,1)*(Dz_alpha(1,1)/alpha(1,1) + 2.d0*Dz_phi(1,1)/phi(1,1))))
+        if (level==Nlmax) then
 
-        boson_omega = sqrt(abs(aux))
+           aux = alpha(1,1)**2/complex_phiR(1,1)*(complex_VPR(1,1) - 1.d0/phi(1,1)**4 &
+               *(Drr_complex_phiR(1,1) + Dzz_complex_phiR(1,1) + Dr_complex_phiR(1,1)/r(1,1) &
+               + Dr_complex_phiR(1,1)*(Dr_alpha(1,1)/alpha(1,1) + 2.d0*Dr_phi(1,1)/phi(1,1)) &
+               + Dz_complex_phiR(1,1)*(Dz_alpha(1,1)/alpha(1,1) + 2.d0*Dz_phi(1,1)/phi(1,1))))
+
+           boson_omega = sqrt(abs(aux))
+
+        end if
 
 !       The sources for (alpha,phi,complex_phiR) are just (dtalpha,dtphi,complex_piR).
 
@@ -847,7 +1093,7 @@
 !       Damping term  (only for Klein-Gordon).  This
 !       is needed in order to avoid large oscillations.
 
-        scomplex_piR = scomplex_piR - 0.01d0*complex_piR/dt
+        scomplex_piR = scomplex_piR - waveeta*complex_piR/dt
 
 !       And add some dissipation to reduce high frequency noise.
 
@@ -858,7 +1104,9 @@
 !       But set the source at the first grid point close to
 !       the origin to 0 so the value there does not change.
 
-        scomplex_piR(1,1) = 0.d0
+        if (level==Nlmax) then
+           scomplex_piR(1,1) = 0.d0
+        end if
 
 !       Symmetries on axis.
 
@@ -979,10 +1227,138 @@
 !       ***   FOR FINE GRIDS INTERPOLATE BOUNDARIES   ***
 !       *************************************************
 
+!       For fine grids we need to interpolate from the new
+!       time level of the coarse grid to get boundary data.
+!
+!       Remember that the coarse grid has already advanced
+!       to the next time level.
+
+        if (level>0) then
+
+!          Boundaries for alpha.
+
+           finevar   => alpha
+           finevar_p => alpha_p
+           finevar_bound_rR => alpha_bound_rR
+           finevar_bound_rL => alpha_bound_rL
+           finevar_bound_zR => alpha_bound_zR
+           finevar_bound_zL => alpha_bound_zL
+
+           if (level==1) then
+              coarsevar => grid(0,level-1)%alpha
+           else
+              coarsevar => grid(box,level-1)%alpha
+           end if
+
+           call finebound(box,level,dtw,.false.)
+
+!          Boundaries for dtalpha.
+
+           finevar   => dtalpha
+           finevar_p => dtalpha_p
+           finevar_bound_rR => dtalpha_bound_rR
+           finevar_bound_rL => dtalpha_bound_rL
+           finevar_bound_zR => dtalpha_bound_zR
+           finevar_bound_zL => dtalpha_bound_zL
+
+           if (level==1) then
+              coarsevar => grid(0,level-1)%dtalpha
+           else
+              coarsevar => grid(box,level-1)%dtalpha
+           end if
+
+           call finebound(box,level,dtw,.false.)
+
+!          Boundaries for phi.
+
+           finevar   => phi
+           finevar_p => phi_p
+           finevar_bound_rR => phi_bound_rR
+           finevar_bound_rL => phi_bound_rL
+           finevar_bound_zR => phi_bound_zR
+           finevar_bound_zL => phi_bound_zL
+
+           if (level==1) then
+              coarsevar => grid(0,level-1)%phi
+           else
+              coarsevar => grid(box,level-1)%phi
+           end if
+
+           call finebound(box,level,dtw,.false.)
+
+!          Boundaries for dtphi.
+
+           finevar   => dtphi
+           finevar_p => dtphi_p
+           finevar_bound_rR => dtphi_bound_rR
+           finevar_bound_rL => dtphi_bound_rL
+           finevar_bound_zR => dtphi_bound_zR
+           finevar_bound_zL => dtphi_bound_zL
+
+           if (level==1) then
+              coarsevar => grid(0,level-1)%dtphi
+           else
+              coarsevar => grid(box,level-1)%dtphi
+           end if
+
+           call finebound(box,level,dtw,.false.)
+
+!          Boundaries for complex_phiR.
+
+           finevar   => complex_phiR
+           finevar_p => complex_phiR_p
+           finevar_bound_rR => complex_phiR_bound_rR
+           finevar_bound_rL => complex_phiR_bound_rL
+           finevar_bound_zR => complex_phiR_bound_zR
+           finevar_bound_zL => complex_phiR_bound_zL
+
+           if (level==1) then
+              coarsevar => grid(0,level-1)%complex_phiR
+           else
+              coarsevar => grid(box,level-1)%complex_phiR
+           end if
+
+           call finebound(box,level,dtw,.false.)
+
+!          Boundaries for complex_piR.
+
+           finevar   => complex_piR
+           finevar_p => complex_piR_p
+           finevar_bound_rR => complex_piR_bound_rR
+           finevar_bound_rL => complex_piR_bound_rL
+           finevar_bound_zR => complex_piR_bound_zR
+           finevar_bound_zL => complex_piR_bound_zL
+
+           if (level==1) then
+              coarsevar => grid(0,level-1)%complex_piR
+           else
+              coarsevar => grid(box,level-1)%complex_piR
+           end if
+
+           call finebound(box,level,dtw,.false.)
+
+        end if
+
 
 !       *****************************************
 !       ***   SYNCHRONIZE ACROSS PROCESSORS   ***
 !       *****************************************
+
+!       If we have more than one processor we must now
+!       synchronize ghost zones.
+
+        if (size>1) then
+
+           call sync(alpha)
+           call sync(dtalpha)
+
+           call sync(phi)
+           call sync(dtphi)
+
+           call sync(complex_phiR)
+           call sync(complex_piR)
+
+        end if
 
 
 !       ***********************************
@@ -1023,8 +1399,8 @@
 ! current subroutine "wavestep" recursively.
 
   if (level<Nlmax) then
-     call bosonstep(level+1,method)
-     call bosonstep(level+1,method)
+     call bosonstep(level+1,waveeta,method)
+     call bosonstep(level+1,waveeta,method)
   end if
 
 
@@ -1036,15 +1412,214 @@
 ! them up when we where on higher refinement levels
 ! and restricted data to the current level.
 
+  if (Nlmax>0) then
+     do box=0,bmax
+
+!       If this level does not exist for this box cycle.
+
+        if (Nl(box)<level) cycle
+
+!       Do we own axis and/or equator?
+
+        ownaxis = (axis(box,rank)/=-1)
+        ownequator = (eqz(box,rank)/=-1)
+
+!       Symmetries on axis.
+
+        if (ownaxis) then
+           do i=1,ghost
+
+              grid(box,level)%alpha(1-i,:)   = grid(box,level)%alpha(i,:)
+              grid(box,level)%dtalpha(1-i,:) = grid(box,level)%dtalpha(i,:)
+
+              grid(box,level)%phi(1-i,:)   = grid(box,level)%phi(i,:)
+              grid(box,level)%dtphi(1-i,:) = grid(box,level)%dtphi(i,:)
+
+              grid(box,level)%complex_phiR(1-i,:) = grid(box,level)%complex_phiR(i,:)
+              grid(box,level)%complex_piR(1-i,:)  = grid(box,level)%complex_piR(i,:)
+
+           end do
+        end if
+
+     end do
+  end if
+
 
 ! *************************************
 ! ***   DO WE NEED TO SYNC BOXES?   ***
 ! *************************************
 
+! Check if refinement boxes at this level intersect,
+! and if they do make sure they agree. We basically
+! just copy data from the interior of one box to
+! the other.  This is similar to synchronization
+! across inter-processor boundaries, but in this
+! case it is across different refinement boxes on
+! the same time level.
+
+  if (level>0) then
+
+!    Loop over all pairs of boxes in this level.
+
+     do box=0,Nb
+
+        if (Nl(box)<level) cycle
+
+        do k=0,Nb
+
+           if ((Nl(k)<level).or.(k==box)) cycle
+
+           box1var => grid(box,level)%alpha
+           box2var => grid(k  ,level)%alpha
+           call syncboxes(box,k,level,.false.)
+
+           box1var => grid(box,level)%dtalpha
+           box2var => grid(k  ,level)%dtalpha
+           call syncboxes(box,k,level,.false.)
+
+           box1var => grid(box,level)%phi
+           box2var => grid(k  ,level)%phi
+           call syncboxes(box,k,level,.false.)
+
+           box1var => grid(box,level)%dtphi
+           box2var => grid(k  ,level)%dtphi
+           call syncboxes(box,k,level,.false.)
+
+           box1var => grid(box,level)%complex_phiR
+           box2var => grid(k  ,level)%complex_phiR
+           call syncboxes(box,k,level,.false.)
+
+           box1var => grid(box,level)%complex_piR
+           box2var => grid(k  ,level)%complex_piR
+           call syncboxes(box,k,level,.false.)
+
+        end do
+
+     end do
+
+  end if
+
 
 ! ****************************************************
 ! ***   RESTRICT FINE GRID DATA INTO COARSE GRID   ***
 ! ****************************************************
+
+! Restrict the data from the fine to the coarse grid
+! across all boxes when both levels coincide in time.
+! This restriction does not change data in the current
+! grid level, but rather in the coarser level.
+
+  if (level>0) then
+     do box=0,bmax
+
+!       If this level does not exist for this box cycle.
+
+        if (Nl(box)<level) cycle
+
+!       We only restrict when the fine grid catches
+!       up with the coarse grid.
+
+        if (mod(s(box,level),2)==0) then
+
+!          Figure out on which box is level-1.
+
+           if (level==1) then
+              bbox = 0
+           else
+              bbox = box
+           end if
+
+!          Restriction for alpha.
+
+           finevar => grid(box,level)%alpha
+           coarsevar => grid(bbox,level-1)%alpha
+           call restrict(box,level,.false.)
+
+!          Restriction for dtalpha.
+
+           finevar => grid(box,level)%dtalpha
+           coarsevar => grid(bbox,level-1)%dtalpha
+           call restrict(box,level,.false.)
+
+!          Restriction for phi.
+
+           finevar => grid(box,level)%phi
+           coarsevar => grid(bbox,level-1)%phi
+           call restrict(box,level,.false.)
+
+!          Restriction for dtphi.
+
+           finevar => grid(box,level)%dtphi
+           coarsevar => grid(bbox,level-1)%dtphi
+           call restrict(box,level,.false.)
+
+!          Restriction for complex_phiR.
+
+           finevar => grid(box,level)%complex_phiR
+           coarsevar => grid(bbox,level-1)%complex_phiR
+           call restrict(box,level,.false.)
+
+!          Restriction for complex_piR.
+
+           finevar => grid(box,level)%complex_piR
+           coarsevar => grid(bbox,level-1)%complex_piR
+           call restrict(box,level,.false.)
+
+!          Point to grid on level-1.
+
+           call currentgrid(bbox,level-1,grid(bbox,level-1))
+
+!          Symmetries.
+
+           if (ownaxis) then
+              do i=1,ghost
+
+                 alpha(1-i,:)   = alpha(i,:)
+                 dtalpha(1-i,:) = dtalpha(i,:)
+
+                 phi(1-i,:)   = phi(i,:)
+                 dtphi(1-i,:) = dtphi(i,:)
+
+                 complex_phiR(1-i,:) = complex_phiR(i,:)
+                 complex_piR(1-i,:)  = complex_piR(i,:)
+
+              end do
+           end if
+
+           if (eqsym.and.ownequator) then
+              do j=1,ghost
+
+                 alpha(:,1-j)   = alpha(:,j)
+                 dtalpha(:,1-j) = dtalpha(:,j)
+
+                 phi(:,1-j)   = phi(:,j)
+                 dtphi(:,1-j) = dtphi(:,j)
+
+                 complex_phiR(:,1-j) = complex_phiR(:,j)
+                 complex_piR(:,1-j)  = complex_piR(:,j)
+
+              end do
+           end if
+
+!          Sync.
+
+           if (size>1) then
+
+              call sync(alpha)
+              call sync(dtalpha)
+
+              call sync(phi)
+              call sync(dtphi)
+
+              call sync(complex_phiR)
+              call sync(complex_piR)
+
+           end if
+
+        end if
+
+     end do
+  end if
 
 
 ! ***************
