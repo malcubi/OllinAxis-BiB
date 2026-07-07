@@ -470,7 +470,7 @@
   integer :: ELL_Noutput = 10
   integer :: ELL_maxiter = 100000
 
-  real(8) :: ELL_epsilon = 1.d-10
+  real(8) :: ELL_epsilon = 1.d-8
 
   real(8) :: WE_eta   = 0.d0
   real(8) :: WE_diss  = 0.1d0
