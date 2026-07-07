@@ -88,8 +88,8 @@
 ! \/   phi  +  g   [ d ln(alpha)  +  2 d ln(psi) ] d phi  +  psi [ (omega/alpha) phi  -  V' ] = 0
 !  flat               i                 i           j
 !
-! __2              ~ij
-! \/   alpha  +  2 g  d ln(psi) d alpha  -  4 pi (rho + trS)  =  0
+! __2              ~ij                              4
+! \/   alpha  +  2 g  d ln(psi) d alpha  -  4 pi psi (rho + trS)  =  0
 !  flat                i         j
 !
 !
@@ -97,6 +97,13 @@
 ! field at the origin "boson_phi0", and solves the coupled system
 ! of elliptic equations.
 !
+! We solve the system by turning the elliptic equations into
+! hyperbolic wave equations and "evolving" to a steady state.
+!
+! This method is slow (specially at high resolution), but seems quite robust. 
+! It can be improved by using a good initial guess (I'll try this later),
+! and maybe something like multi-grid since it converges much faster
+
 ! IMPORTANT:  To avoid confusion, do notice that in fact we use the
 ! array "phi" for the conformal factor "psi" (this is because in the
 ! code "psi" is declared non-evolving).  On the other hand, the
@@ -121,7 +128,6 @@
   real(8) NNtot
 
   real(8) lres,gres              ! Local and global residuals.
-  real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) one,half,smallpi       ! Numbers.
 
@@ -325,10 +331,6 @@
 ! ***   START ITERATIONS   ***
 ! ****************************
 
-! Initialize damping parameter.
-
-  waveeta = WE_eta
-
 ! Initialize residuals and iteration number.
 
   100 continue
@@ -344,7 +346,6 @@
 
   do while ((step<100).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
 
-
 !    ******************************************
 !    ***   ADVANCE ONE INTERNAL TIME STEP   ***
 !    ******************************************
@@ -355,7 +356,7 @@
 
 !    Advance one time step.
 
-     call bosonstep(0,waveeta,method)
+     call bosonstep(0,method)
 
 
 !    *************************
@@ -396,7 +397,8 @@
 !       Data to screen.
 
         if (rank==0) then
-           write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
+           write(*,"(A,i5,A,ES15.8E2,A,ES15.8E2)") ' WaveElliptic:  Iteration = ',step, &
+              '     omega = ',boson_omega,'     Residual = ',gres
         end if
 
 !       Save data to file.
@@ -451,6 +453,9 @@
            end if
         else
            write (*,'(A,i5,A)') ' BosonStarCF:   Solution converged after ',step,' iterations!'
+           print *
+           write(*,'(A,ES23.16)') ' Final residual = ',gres
+           write(*,'(A,ES23.16)') ' Omega          = ', boson_omega
            print *
         end if
      end if
@@ -563,7 +568,9 @@
 
 
 
-  recursive subroutine bosonstep(level,waveeta,method)
+
+
+  recursive subroutine bosonstep(level,method)
 
 ! *********************************
 ! ***   ADVANCE ONE TIME STEP   ***
@@ -594,7 +601,8 @@
 
   real(8) dtw          ! Internal time step.
   real(8) weight       ! Weight for rk4.
-  real(8) waveeta      ! Damping parameter.
+  real(8) smallpi      ! Numbers.
+  real(8) aux
 
   character(*) method  ! Time integration method.
 
@@ -615,6 +623,13 @@
       rk4 = (method=="rk4")
 
   end if
+
+
+! *******************
+! ***   NUMBERS   ***
+! *******************
+
+  smallpi = acos(-1.d0)
 
 
 ! ******************************************
@@ -651,15 +666,20 @@
 !    ***   SAVE OLD TIME STEP   ***
 !    ******************************
 
-     alpha_p = alpha
-     phi_p = phi
+!    Old values of lapse and time derivative.
+
+     alpha_p   = alpha
+     dtalpha_p = dtalpha
+
+!    Old values of conformal factor and time derivative.
+
+     phi_p   = phi
+     dtphi_p = dtphi
+
+!    Old values of complex_phiR and time derivative.
+
      complex_phiR_p = complex_phiR
-
-!    Save old values of internal boundaries.
-
-     if (level>0) then
-
-     end if
+     complex_piR_p  = complex_piR
 
 
 !    **********************************************
@@ -732,7 +752,7 @@
 !       ***   FIND SOURCES   ***
 !       ************************
 
-!       Derivatives of alpha.
+!       Derivatives of (alpha,dtalpha).
 
         diffvar => alpha
 
@@ -741,9 +761,13 @@
      
         Drr_alpha = diff2r(+1)
         Dzz_alpha = diff2z(+1)
-        Drz_alpha = diff2rz(+1,+1)
 
-!       Derivatives of phi.
+        diffvar => dtalpha
+
+        Dr_dtalpha = diff1r(+1)
+        Dz_dtalpha = diff1z(+1)
+
+!       Derivatives of (phi,dtphi).
 
         diffvar => phi
 
@@ -752,9 +776,13 @@
      
         Drr_phi = diff2r(+1)
         Dzz_phi = diff2z(+1)
-        Drz_phi = diff2rz(+1,+1)
 
-!       Derivatives of complex_phiR.
+        diffvar => dtphi
+
+        Dr_dtphi = diff1r(+1)
+        Dz_dtphi = diff1z(+1)
+
+!       Derivatives of (complex_phiR,complex_piR).
 
         diffvar => complex_phiR
 
@@ -763,11 +791,27 @@
      
         Drr_complex_phiR = diff2r(+1)
         Dzz_complex_phiR = diff2z(+1)
-        Drz_complex_phiR = diff2rz(+1,+1)
+
+        diffvar => complex_piR
+
+        Dr_complex_piR = diff1r(+1)
+        Dz_complex_piR = diff1z(+1)
 
 !       Scalar field potential.
 
+        call potential
+
+        !complex_V   = 0.5d0*complex_mass**2*complex_phiR**2
+        !complex_VPR = complex_mass**2*complex_phiR
+
 !       Find frequency omega.
+
+        aux = alpha(1,1)**2/complex_phiR(1,1)*(complex_VPR(1,1) - 1.d0/phi(1,1)**4 &
+            *(Drr_complex_phiR(1,1) + Dzz_complex_phiR(1,1) + Dr_complex_phiR(1,1)/r(1,1) &
+            + Dr_complex_phiR(1,1)*(Dr_alpha(1,1)/alpha(1,1) + 2.d0*Dr_phi(1,1)/phi(1,1)) &
+            + Dz_complex_phiR(1,1)*(Dz_alpha(1,1)/alpha(1,1) + 2.d0*Dz_phi(1,1)/phi(1,1))))
+
+        boson_omega = sqrt(abs(aux))
 
 !       The sources for (alpha,phi,complex_phiR) are just (dtalpha,dtphi,complex_piR).
 
@@ -778,35 +822,50 @@
 !       The sources of (dtalpha,dtphi,complex_piR) all include the flat Laplacian.
 
         sdtalpha = Drr_alpha + Dzz_alpha + Dr_alpha/r
+
         sdtphi = Drr_phi + Dzz_phi + Dr_phi/r
+
         scomplex_piR = Drr_complex_phiR + Dzz_complex_phiR + Dr_complex_phiR/r
 
 !       Extra sources for dtalpha.
 
+        sdtalpha = sdtalpha + 2.d0*(Dr_alpha*Dr_phi/phi + Dz_alpha*Dz_phi/phi) &
+                 - 8.d0*smallpi*alpha*phi**4*((boson_omega*complex_phiR/alpha)**2 - complex_V)
+
 !       Extra sources for dtphi.
+
+        sdtphi = sdtphi + smallpi*phi**5 &
+               *((Dr_complex_phiR**2 + Dz_complex_phiR**2)/phi**4 &
+               + (boson_omega*complex_phiR/alpha)**2 + 2.d0*complex_V)
 
 !       Extra sources for complex_piR.
 
+        scomplex_piR = scomplex_piR + phi**4*(complex_phiR*(boson_omega/alpha)**2 - complex_VPR) &
+                     + Dr_complex_phiR*(Dr_alpha/alpha + 2.d0*Dr_phi/phi) &
+                     + Dz_complex_phiR*(Dz_alpha/alpha + 2.d0*Dz_phi/phi)
+
+!       Damping term  (only for Klein-Gordon).  This
+!       is needed in order to avoid large oscillations.
+
+        scomplex_piR = scomplex_piR - 0.01d0*complex_piR/dt
+
 !       And add some dissipation to reduce high frequency noise.
-
-        evolvevar => dtalpha
-        sourcevar => sdtalpha
-        call dissipation(+1,+1,WE_diss)
-
-        evolvevar => dtphi
-        sourcevar => sdtphi
-        call dissipation(+1,+1,WE_diss)
 
         evolvevar => complex_piR
         sourcevar => scomplex_piR
         call dissipation(+1,+1,WE_diss)
+
+!       But set the source at the first grid point close to
+!       the origin to 0 so the value there does not change.
+
+        scomplex_piR(1,1) = 0.d0
 
 !       Symmetries on axis.
 
         if (ownaxis) then
            do i=1,ghost
               sdtalpha(1-i,:) = sdtalpha(i,:)
-              sdtphi(1-i,:) = sdtphi(i,:)
+              sdtphi(1-i,:)   = sdtphi(i,:)
               scomplex_piR(1-i,:) = scomplex_piR(i,:)
            end do
         end if
@@ -816,7 +875,7 @@
         if (eqsym.and.ownequator) then
            do j=1,ghost
               sdtalpha(:,1-j) = sdtalpha(:,j)
-              sdtphi(:,1-j) = sdtphi(:,j)
+              sdtphi(:,1-j)   = sdtphi(:,j)
               scomplex_piR(:,1-j) = scomplex_piR(:,j)
            end do
         end if
@@ -826,9 +885,36 @@
 !       ***   BOUNDARY CONDITIONS   ***
 !       *******************************
 
-!       At the moment I use radiative boundaries that reduce
-!       to a Robin boundary condition for static solutions.
-!       Newmann and Diritchlet boundaries can be added later.
+!       Simple radiative boundaries for all three equations.
+
+        if (level==0) then
+
+!          Radiative conditions at r boundary.
+
+           if (mod(rank+1,nprocr)==0) then
+              i = Nr
+              sdtalpha(i,:)     = - (r(i,:)*Dr_dtalpha(i,:)     + z(i,:)*Dz_dtalpha(i,:)     + dtalpha(i,:))/rr(i,:)
+              sdtphi(i,:)       = - (r(i,:)*Dr_dtphi(i,:)       + z(i,:)*Dz_dtphi(i,:)       + dtphi(i,:))/rr(i,:)
+              scomplex_piR(i,:) = - (r(i,:)*Dr_complex_piR(i,:) + z(i,:)*Dz_complex_piR(i,:) + complex_piR(i,:))/rr(i,:)
+           end if
+
+!          Radiative conditions at z boundaries.
+
+           if (rank>=size-nprocr) then
+              j = Nz
+              sdtalpha(:,j)     = - (r(:,j)*Dr_dtalpha(:,j)     + z(:,j)*Dz_dtalpha(:,j)     + dtalpha(:,j))/rr(:,j)
+              sdtphi(:,j)       = - (r(:,j)*Dr_dtphi(:,j)       + z(:,j)*Dz_dtphi(:,j)       + dtphi(:,j  ))/rr(:,j)
+              scomplex_piR(:,j) = - (r(:,j)*Dr_complex_piR(:,j) + z(:,j)*Dz_complex_piR(:,j) + complex_piR(:,j))/rr(:,j)
+           end if
+
+           if ((.not.eqsym).and.(rank<nprocr)) then
+              j = 1-ghost
+              sdtalpha(:,j)     = - (r(:,j)*Dr_dtalpha(:,j) + z(:,j)*Dz_dtalpha(:,j) + dtalpha(:,j))/rr(:,j)
+              sdtphi(:,j)       = - (r(:,j)*Dr_dtphi(:,j) + z(:,j)*Dz_dtphi(:,j) + dtphi(:,j))/rr(:,j)
+              scomplex_piR(:,j) = - (r(:,j)*Dr_complex_piR(:,j) + z(:,j)*Dz_complex_piR(:,j) + complex_piR(:,j))/rr(:,j)
+           end if
+
+        end if
 
 
 !       *****************************************************
@@ -836,6 +922,7 @@
 !       *****************************************************
 
         if (rk4) then
+
            if (iter==1) then
 
               alpha_a   = weight*salpha
@@ -870,6 +957,7 @@
               scomplex_piR  = complex_piR_a + weight*scomplex_piR
 
            end if
+
         end if
 
 
@@ -877,14 +965,14 @@
 !       ***   UPDATE VARIABLES   ***
 !       ****************************
 
-        alpha   = alpha_p + dtw*salpha
+        alpha   = alpha_p   + dtw*salpha
         dtalpha = dtalpha_p + dtw*sdtalpha
 
-        phi   = phi_p + dtw*sphi
+        phi   = phi_p   + dtw*sphi
         dtphi = dtphi_p + dtw*sdtphi
 
         complex_phiR = complex_phiR_p + dtw*scomplex_phiR
-        complex_piR  = complex_piR_p + dtw*scomplex_piR
+        complex_piR  = complex_piR_p  + dtw*scomplex_piR
 
 
 !       *************************************************
@@ -935,8 +1023,8 @@
 ! current subroutine "wavestep" recursively.
 
   if (level<Nlmax) then
-     call bosonstep(level+1,waveeta,method)
-     call bosonstep(level+1,waveeta,method)
+     call bosonstep(level+1,method)
+     call bosonstep(level+1,method)
   end if
 
 
