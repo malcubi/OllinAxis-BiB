@@ -42,10 +42,10 @@
   logical flag1,flag2            ! Interpolation flags.
 
   integer box,level              ! Box number and level counters.
-  integer i,j,n,m                ! Counters.
+  integer i,j,m,n                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
-  integer NNtot
+  integer miniter,NNtot
 
   real(8) lres,gres              ! Local and global residuals.
   real(8) r0,z0,interp           ! For interpolation.
@@ -299,11 +299,13 @@
 
   step = 0
 
-! Start iterations.  Notice that we do at least 100 iterations.
+! Start iterations.  Notice that we do at least "miniter" iterations.
 ! This is because since we start with ell_v=0, for the first few
 ! time steps the change in ell_u might be very small.
 
-  do while ((step<100).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
+  miniter = 100
+
+  do while ((step<miniter).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
 
 
 !    ******************************************
@@ -427,14 +429,6 @@
 ! coarse solution into fine grids and solve again.
 
   if ((step/=ELL_maxiter).and.(Nlmax/=Nlmax_old)) then
-
-!    Set damping parameter to zero. This parameter is required
-!    to avoid large oscilations when we start far from the
-!    true solution.  But once we get here we have a good solution
-!    on the coarse level, so we don't need it anymore and it
-!    only slows the code.
-
-     waveeta = 0.d0
 
 !    Set again Nlmax to its original value.
 
@@ -663,9 +657,11 @@
            ell_u_bound_rR(i,:,2) = ell_u_bound_rR(i,:,1)
            ell_u_bound_rR(i,:,1) = ell_u_bound_rR(i,:,0)
            ell_u_bound_rR(i,:,0) = ell_u(Nr-i,:)
+
            ell_u_bound_zL(:,i,2) = ell_u_bound_zL(:,i,1)
            ell_u_bound_zL(:,i,1) = ell_u_bound_zL(:,i,0)
            ell_u_bound_zL(:,i,0) = ell_u(:,1-ghost+i)
+
            ell_u_bound_zR(:,i,2) = ell_u_bound_zR(:,i,1)
            ell_u_bound_zR(:,i,1) = ell_u_bound_zR(:,i,0)
            ell_u_bound_zR(:,i,0) = ell_u(:,Nz-i)
@@ -1140,17 +1136,21 @@
 
            if (ownaxis) then
               do i=1,ghost
-                 sell_u(1-i,:) = sell_u(i,:)
-                 sell_v(1-i,:) = sell_v(i,:)
+                 ell_u(1-i,:) = ell_u(i,:)
+                 ell_v(1-i,:) = ell_v(i,:)
               end do
            end if
 
+!          Symmetries.
+
            if (eqsym.and.ownequator) then
               do j=1,ghost
-                 sell_u(:,1-j) = sell_u(:,j)
-                 sell_v(:,1-j) = sell_v(:,j)
+                 ell_u(:,1-j) = ell_u(:,j)
+                 ell_v(:,1-j) = ell_v(:,j)
               end do
            end if
+
+!          Sync.
 
            if (size>1) then
               call sync(ell_u)
