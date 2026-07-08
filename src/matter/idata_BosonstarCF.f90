@@ -8,7 +8,7 @@
 ! Boson stars are solutions such that the spacetime is static
 ! and the complex scalar field has a harmonic dependence on time.
 ! This subroutine calculates initial data for a boson star
-! in the conformally flat gauge using a shooting method.
+! in the conformally flat gauge.
 !
 ! To obtain the initial data we assume that spacetime is
 ! static (K_ij=0), and also that the complex scalar field
@@ -183,7 +183,7 @@
 ! *****************************
 
   if (rank==0) then
-     print *, 'Solving initial data for a boson star in conformally flat gauge using shooting method ...'
+     print *, 'Solving initial data for a boson star in conformally flat gauge ...'
      print *
   end if
 
@@ -387,8 +387,8 @@
      lres = 0.d0
      gres = 0.d0
 
-     do j=1,Nzl(0,rank)-ghost
-        do i=1,Nrl(0,rank)-ghost
+     do j=1,Nzl(0,rank)
+        do i=1,Nrl(0,rank)
            lres = lres + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
         end do
      end do
@@ -416,8 +416,8 @@
 !       Data to screen.
 
         if (rank==0) then
-           write(*,"(A,i5,A,ES15.8E2,A,ES15.8E2)") ' WaveElliptic:  Iteration = ',step, &
-              '     omega = ',boson_omega,'     Residual = ',gres
+           write(*,"(A,i5,A,ES15.8E2,A,ES15.8E2)") ' Iteration = ',step, &
+                   '     omega = ',boson_omega,'     Residual = ',gres
         end if
 
 !       Save data to file.
@@ -718,6 +718,7 @@
 
 ! Include modules.
 
+  use mpi
   use param
   use arrays
   use derivatives
@@ -1050,14 +1051,20 @@
 
         if (level==Nlmax) then
 
-           aux = alpha(1,1)**2/complex_phiR(1,1)*(complex_VPR(1,1) - 1.d0/phi(1,1)**4 &
-               *(Drr_complex_phiR(1,1) + Dzz_complex_phiR(1,1) + Dr_complex_phiR(1,1)/r(1,1) &
-               + Dr_complex_phiR(1,1)*(Dr_alpha(1,1)/alpha(1,1) + 2.d0*Dr_phi(1,1)/phi(1,1)) &
-               + Dz_complex_phiR(1,1)*(Dz_alpha(1,1)/alpha(1,1) + 2.d0*Dz_phi(1,1)/phi(1,1))))
+           if (ownaxis.and.ownequator) then
 
-           boson_omega = sqrt(abs(aux))
+              aux = alpha(1,1)**2/complex_phiR(1,1)*(complex_VPR(1,1) - 1.d0/phi(1,1)**4 &
+                  *(Drr_complex_phiR(1,1) + Dzz_complex_phiR(1,1) + Dr_complex_phiR(1,1)/r(1,1) &
+                  + Dr_complex_phiR(1,1)*(Dr_alpha(1,1)/alpha(1,1) + 2.d0*Dr_phi(1,1)/phi(1,1)) &
+                  + Dz_complex_phiR(1,1)*(Dz_alpha(1,1)/alpha(1,1) + 2.d0*Dz_phi(1,1)/phi(1,1))))
+
+              boson_omega = sqrt(abs(aux))
+
+           end if
 
         end if
+
+        call MPI_BCAST(boson_omega,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
 !       The sources for (alpha,phi,complex_phiR) are just (dtalpha,dtphi,complex_piR).
 
