@@ -50,7 +50,6 @@
   real(8) lres,gres              ! Local and global residuals.
   real(8) r0,z0,interp           ! For interpolation.
   real(8) vrmax,vzmax            ! Local maximum speeds.
-  real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) zero,one               ! Numbers.
   real(8) aux1,aux2
@@ -286,10 +285,6 @@
      Nlmax = 0
   end if
 
-! Initialize damping parameter.
-
-  waveeta = WE_eta
-
 ! Initialize residuals and iteration number.
 
   100 continue
@@ -318,7 +313,7 @@
 
 !    Advance one time step.
 
-     call wavestep(0,type,waveeta,method)
+     call wavestep(0,type,method)
 
 
 !    *************************
@@ -544,7 +539,7 @@
 
 
 
-  recursive subroutine wavestep(level,type,waveeta,method)
+  recursive subroutine wavestep(level,type,method)
 
 ! ***************************************************
 ! ***   EVOLUTION OF WAVE EQUATION WITH SOURCES   ***
@@ -582,7 +577,6 @@
 
   real(8) dtw          ! Internal time step.
   real(8) weight       ! Weight for rk4.
-  real(8) waveeta      ! Damping parameter.
 
   character(*) type    ! Type of Laplacian (flat,conformal,physical)
   character(*) method  ! Time integration method.
@@ -836,7 +830,7 @@
 
 !       Source for v: damping term.
 
-        sell_v = sell_v - waveeta*ell_v/dtl(level)
+        sell_v = sell_v - WE_eta*ell_v/dtl(level)
 
 !       And add some dissipation to reduce high frequency noise.
 
@@ -1002,8 +996,8 @@
 ! current subroutine "wavestep" recursively.
 
   if (level<Nlmax) then
-     call wavestep(level+1,type,waveeta,method)
-     call wavestep(level+1,type,waveeta,method)
+     call wavestep(level+1,type,method)
+     call wavestep(level+1,type,method)
   end if
 
 
