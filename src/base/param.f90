@@ -451,19 +451,12 @@
 !                     none  =  no elliptic solver active
 !                     wave  =  WaveElliptic
 !                     sor   =  Succesive Overrelaxation (SOR)
-!
 ! ELL_verbose    Do we output iterations?
 ! ELL_Noutput    How often do we do output for iterations?
 ! ELL_maxiter    Maximum number of iterations for elliptic solver.
 ! ELL_epsilon    Tolerance for elliptic solver.
-!
-! WE_method      Integration method for WaveElliptic.
-! WE_eta         Damping coefficient for WaveElliptic.
-! WE_diss        Dissipation coefficient for WaveElliptic.
-! WE_dtfac       Courant factor for WaveElliptic.
 
   character(30) :: ELL_solver = "wave"  ! range = (none,wave,sor)
-  character(30) :: WE_method = "icn"    ! range = (icn,rk4)
 
   logical :: ELL_verbose = .false.
 
@@ -472,9 +465,26 @@
 
   real(8) :: ELL_epsilon = 1.d-8
 
-  real(8) :: WE_eta   = 0.d0
-  real(8) :: WE_diss  = 0.1d0
+! WE_verbose     Do we output iterations?
+! WE_Noutput     How often do we do output for iterations?
+! WE_method      Integration method for WaveElliptic.
+! WE_eta         Damping coefficient for WaveElliptic.
+! WE_diss        Dissipation coefficient for WaveElliptic.
+! WE_dtfac       Courant factor for WaveElliptic.
+! WE_epsilon     Tolerance for WaveElliptic solver.
+! WE_maxiter     Maximum number of iterations for WaveElliptic.
+
+  character(30) :: WE_method = "icn"    ! range = (icn,rk4)
+
+  logical :: WE_verbose = .false.
+
+  integer :: WE_Noutput = 10
+  integer :: WE_maxiter = 100000
+
+  real(8) :: WE_eta = 0.01d0
+  real(8) :: WE_diss = 0.1d0
   real(8) :: WE_dtfac = 0.6d0
+  real(8) :: WE_epsilon = 1.d-8
 
 
 ! ***********************
