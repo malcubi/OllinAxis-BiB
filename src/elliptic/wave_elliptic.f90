@@ -830,7 +830,7 @@
 
 !       Source for v: damping term.
 
-        sell_v = sell_v - WE_eta*ell_v/dtl(level)
+        sell_v = sell_v - WE_eta*ell_v
 
 !       And add some dissipation to reduce high frequency noise.
 
