@@ -127,11 +127,12 @@
   integer i,j,m,n                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
-  integer miniter,NNtot
+  integer NNtot                  ! Total number of grid points.
+  integer miniter                ! Minimum number of iterations.
+  integer :: maxiter = 100000    ! Maximum number of iterations.
 
   real(8) lres,gres              ! Local and global residuals.
   real(8) r0,z0,interp           ! For interpolation.
-  real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) one,half,smallpi       ! Numbers.
   real(8) aux1,aux2
@@ -284,7 +285,7 @@
 
 ! Save initial data to file if required.
 
-  if (ELL_verbose) then
+  if (WE_verbose) then
 
      do box=0,Nb
         do level=min(1,box),Nl(box)
@@ -292,16 +293,16 @@
            call currentgrid(box,level,grid(box,level))
 
            grabvar => alpha
-           call save1Dvariable('alpha_boson',directory,box,level,outparallel,'replace')
-           call save2Dvariable('alpha_boson',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
+           call save2Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
 
            grabvar => phi
-           call save1Dvariable('psi_boson',directory,box,level,outparallel,'replace')
-           call save2Dvariable('psi_boson',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_psi',directory,box,level,outparallel,'replace')
+           call save2Dvariable('boson_psi',directory,box,level,outparallel,'replace')
 
            grabvar => complex_phiR
-           call save1Dvariable('phiR_boson',directory,box,level,outparallel,'replace')
-           call save2Dvariable('phiR_boson',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
+           call save2Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
 
         end do
      end do
@@ -346,11 +347,7 @@
      Nlmax = 0
   end if
 
-! Initialize damping parameter.
-
-  waveeta = 0.1d0
-
-! Initialize residuals and iteration number.
+! Initialize residual and iteration number.
 
   100 continue
 
@@ -363,7 +360,7 @@
 
   miniter = 100
 
-  do while ((step<miniter).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
+  do while ((step<miniter).or.((gres>WE_epsilon).and.(step<WE_maxiter)))
 
 !    ******************************************
 !    ***   ADVANCE ONE INTERNAL TIME STEP   ***
@@ -375,7 +372,7 @@
 
 !    Advance one time step.
 
-     call bosonstep(0,waveeta,method)
+     call bosonstep(0,method)
 
 
 !    *************************
@@ -389,7 +386,9 @@
 
      do j=1,Nzl(0,rank)
         do i=1,Nrl(0,rank)
-           lres = lres + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
+           lres = lres + (grid(0,0)%alpha(i,j)-grid(0,0)%alpha_p(i,j))**2 &
+                       + (grid(0,0)%phi(i,j)-grid(0,0)%phi_p(i,j))**2 &
+                       + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
         end do
      end do
 
@@ -411,7 +410,7 @@
 
 !    Output if required.
 
-     if ((ELL_verbose).and.(mod(step,ELL_Noutput)==0)) then
+     if (WE_verbose.and.(mod(step,WE_Noutput)==0)) then
 
 !       Data to screen.
 
@@ -428,16 +427,16 @@
               call currentgrid(box,level,grid(box,level))
 
               grabvar => alpha
-              call save1Dvariable('alpha_boson',directory,box,level,outparallel,'old')
-              call save2Dvariable('alpha_boson',directory,box,level,outparallel,'old')
+              call save1Dvariable('boson_alpha',directory,box,level,outparallel,'old')
+              call save2Dvariable('boson_alpha',directory,box,level,outparallel,'old')
 
               grabvar => phi
-              call save1Dvariable('psi_boson',directory,box,level,outparallel,'old')
-              call save2Dvariable('psi_boson',directory,box,level,outparallel,'old')
+              call save1Dvariable('boson_psi',directory,box,level,outparallel,'old')
+              call save2Dvariable('boson_psi',directory,box,level,outparallel,'old')
 
               grabvar => complex_phiR
-              call save1Dvariable('phiR_boson',directory,box,level,outparallel,'old')
-              call save2Dvariable('phiR_boson',directory,box,level,outparallel,'old')
+              call save1Dvariable('boson_phiR',directory,box,level,outparallel,'old')
+              call save2Dvariable('boson_phiR',directory,box,level,outparallel,'old')
 
            end do
         end do
@@ -458,9 +457,9 @@
 
   if (rank==0) then
 
-     if (step==ELL_maxiter) then
+     if (step==WE_maxiter) then
 
-        write (*,'(A,i6,A)') ' BosonStarCF:   Iterations did not converge after ',ELL_maxiter,' iterations.'
+        write (*,'(A,i6,A)') ' BosonStarCF:   Iterations did not converge after ',WE_maxiter,' iterations.'
         print *
 
      else
@@ -500,7 +499,7 @@
 ! If we converged and we have refinement levels, inject the
 ! coarse solution into fine grids and solve again.
 
-  if ((step/=ELL_maxiter).and.(Nlmax/=Nlmax_old)) then
+  if ((step/=WE_maxiter).and.(Nlmax/=Nlmax_old)) then
 
 !    Set again Nlmax to its original value.
 
@@ -662,7 +661,7 @@
 ! ***   IMAGINARY PART OF (phi,xi) AND REAL PART OF pi   ***
 ! **********************************************************
 
- do box=0,Nb
+  do box=0,Nb
      do level=min(1,box),Nl(box)
 
 !       Point to current grid.
@@ -707,7 +706,7 @@
 
 
 
-  recursive subroutine bosonstep(level,waveeta,method)
+  recursive subroutine bosonstep(level,method)
 
 ! *********************************
 ! ***   ADVANCE ONE TIME STEP   ***
@@ -740,7 +739,6 @@
 
   real(8) dtw          ! Internal time step.
   real(8) weight       ! Weight for rk4.
-  real(8) waveeta      ! Damping parameter.
   real(8) smallpi      ! Numbers.
   real(8) aux
 
@@ -1047,7 +1045,8 @@
 
         call potential
 
-!       Find frequency omega.
+!       Find frequency omega.  We solve for omega from the Klein-Gordon
+!       equation at the first grid point.
 
         if (level==Nlmax) then
 
@@ -1069,7 +1068,9 @@
 !       The sources for (alpha,phi,complex_phiR) are just (dtalpha,dtphi,complex_piR).
 
         salpha = dtalpha
+
         sphi = dtphi
+
         scomplex_phiR = complex_piR
 
 !       The sources of (dtalpha,dtphi,complex_piR) all include the flat Laplacian.
@@ -1100,7 +1101,7 @@
 !       Damping term  (only for Klein-Gordon).  This
 !       is needed in order to avoid large oscillations.
 
-        scomplex_piR = scomplex_piR - waveeta*complex_piR/dt
+        scomplex_piR = scomplex_piR - WE_eta*complex_piR/dt
 
 !       And add some dissipation to reduce high frequency noise.
 
@@ -1111,7 +1112,7 @@
 !       But set the source at the first grid point close to
 !       the origin to 0 so the value there does not change.
 
-        if (level==Nlmax) then
+        if ((rank==0).and.(level==Nlmax)) then
            scomplex_piR(1,1) = 0.d0
         end if
 
@@ -1347,9 +1348,53 @@
         end if
 
 
-!       *****************************************
-!       ***   SYNCHRONIZE ACROSS PROCESSORS   ***
-!       *****************************************
+!       **********************
+!       ***   SYMMETRIES   ***
+!       **********************
+
+!       Do we own axis and/or equator?
+
+        ownaxis = (axis(box,rank)/=-1)
+        ownequator = (eqz(box,rank)/=-1)
+
+!       Symmetries on axis.
+
+        if (ownaxis) then
+           do i=1,ghost
+
+              alpha(1-i,:)   = alpha(i,:)
+              dtalpha(1-i,:) = dtalpha(i,:)
+
+              phi(1-i,:)   = phi(i,:)
+              dtphi(1-i,:) = dtphi(i,:)
+
+              complex_phiR(1-i,:) = complex_phiR(i,:)
+              complex_piR(1-i,:)  = complex_piR(i,:)
+
+           end do
+        end if
+
+!       Symmetries on equator.
+
+        if (eqsym.and.ownequator) then
+           do j=1,ghost
+
+              alpha(:,1-j)   = alpha(:,j)
+              dtalpha(:,1-j) = dtalpha(:,j)
+
+              phi(:,1-j)   = phi(:,j)
+              dtphi(:,1-j) = dtphi(:,j)
+
+              complex_phiR(:,1-j) = complex_phiR(:,j)
+              complex_piR(:,1-j)  = complex_piR(:,j)
+
+           end do
+        end if
+
+
+!       ***********************
+!       ***   SYNCHRONIZE   ***
+!       ***********************
 
 !       If we have more than one processor we must now
 !       synchronize ghost zones.
@@ -1406,49 +1451,8 @@
 ! current subroutine "wavestep" recursively.
 
   if (level<Nlmax) then
-     call bosonstep(level+1,waveeta,method)
-     call bosonstep(level+1,waveeta,method)
-  end if
-
-
-! **********************
-! ***   SYMMETRIES   ***
-! **********************
-
-! Apply symmetries again since we might have messed
-! them up when we where on higher refinement levels
-! and restricted data to the current level.
-
-  if (Nlmax>0) then
-     do box=0,bmax
-
-!       If this level does not exist for this box cycle.
-
-        if (Nl(box)<level) cycle
-
-!       Do we own axis and/or equator?
-
-        ownaxis = (axis(box,rank)/=-1)
-        ownequator = (eqz(box,rank)/=-1)
-
-!       Symmetries on axis.
-
-        if (ownaxis) then
-           do i=1,ghost
-
-              grid(box,level)%alpha(1-i,:)   = grid(box,level)%alpha(i,:)
-              grid(box,level)%dtalpha(1-i,:) = grid(box,level)%dtalpha(i,:)
-
-              grid(box,level)%phi(1-i,:)   = grid(box,level)%phi(i,:)
-              grid(box,level)%dtphi(1-i,:) = grid(box,level)%dtphi(i,:)
-
-              grid(box,level)%complex_phiR(1-i,:) = grid(box,level)%complex_phiR(i,:)
-              grid(box,level)%complex_piR(1-i,:)  = grid(box,level)%complex_piR(i,:)
-
-           end do
-        end if
-
-     end do
+     call bosonstep(level+1,method)
+     call bosonstep(level+1,method)
   end if
 
 
