@@ -267,7 +267,7 @@
 !       The scalar field is initialized to a gaussian centered
 !       on the origin with the correct amplitude.
 
-        complex_phiR = boson_phi0*exp(-rr**4/(r**2*complexR_sr0**2 + z**2*complexR_sz0**2))
+        complex_phiR = boson_phi0*exp(-rr**2)
 
 !       Set time derivatives to 0.
 
@@ -459,7 +459,7 @@
 
      if (step==WE_maxiter) then
 
-        write (*,'(A,i6,A)') ' BosonStarCF:   Iterations did not converge after ',WE_maxiter,' iterations.'
+        write (*,'(A,i6,A)') ' BosonStarCF: Iterations did not converge after ',WE_maxiter,' iterations.'
         print *
 
      else
@@ -467,10 +467,10 @@
         if (Nlmax_old>0) then
 
            if (Nlmax_old/=Nlmax) then
-              write (*,'(A,i5,A)') ' BosonStarCF:   Coarse grid solution converged after ',step,' iterations!'
+              write (*,'(A,i5,A)') ' BosonStarCF: Coarse grid solution converged after ',step,' iterations!'
               print *
            else
-              write (*,'(A,i5,A)') ' BosonStarCF:   Finer grids solution converged after ',step,' iterations!'
+              write (*,'(A,i5,A)') ' BosonStarCF: Finer grids solution converged after ',step,' iterations!'
               print *
               write(*,'(A,ES23.16)') ' Final residual = ',gres
               write(*,'(A,ES23.16)') ' Omega          = ', boson_omega
