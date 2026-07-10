@@ -384,16 +384,13 @@
      lres = 0.d0
      gres = 0.d0
 
-     do j=1,Nzl(0,rank)
-        do i=1,Nrl(0,rank)
+     do j=1,Nzl(0,rank)-ghost
+        do i=1,Nrl(0,rank)-ghost
            lres = lres + (grid(0,0)%alpha(i,j)-grid(0,0)%alpha_p(i,j))**2 &
                        + (grid(0,0)%phi(i,j)-grid(0,0)%phi_p(i,j))**2 &
                        + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
         end do
      end do
-
-     NNtot = Nrl(0,rank)*Nzl(0,rank)
-     lres = sqrt(lres/dble(NNtot))
 
 !    Find global residual.
 
@@ -402,6 +399,9 @@
      else
         gres = lres
      end if
+
+     NNtot = Nrtotal*Nztotal
+     gres = sqrt(gres/dble(NNtot))
 
 
 !    ******************
