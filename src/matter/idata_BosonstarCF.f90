@@ -1131,7 +1131,7 @@
 !
 !       and its time derivative:
 !
-!       df(1,1)/dt  = df(2,2)/dt/9
+!       df(1,1)/dt = (df(2,2)/dt)/9
 
         if ((rank==0).and.(level==Nlmax)) then
            !scomplex_piR(1,1) = 0.d0
