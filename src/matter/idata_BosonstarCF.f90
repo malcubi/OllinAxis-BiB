@@ -155,6 +155,8 @@
 
   smallpi = acos(-1.d0)
 
+  NNtot = Nrtotal*Nztotal
+
 
 ! ************************************************
 ! ***   SAVE EXTERNAL STEP AND TIME COUNTERS   ***
@@ -400,7 +402,6 @@
         gres = lres
      end if
 
-     NNtot = Nrtotal*Nztotal
      gres = sqrt(gres/dble(NNtot))
 
 
@@ -415,8 +416,14 @@
 !       Data to screen.
 
         if (rank==0) then
+
            write(*,"(A,i5,A,ES15.8E2,A,ES15.8E2)") ' Iteration = ',step, &
                    '     omega = ',boson_omega,'     Residual = ',gres
+
+           !interpvar => grid(0,0)%complex_phiR
+           !aux1 = interp(0,0,0.d0,0.d0,flag1)
+           !print *, 'Value of phiR at origin = ',aux1
+
         end if
 
 !       Save data to file.
@@ -1109,11 +1116,26 @@
         sourcevar => scomplex_piR
         call dissipation(+1,+1,WE_diss)
 
-!       But set the source at the first grid point close to
-!       the origin to 0 so the value there does not change.
+!       But set the source at point (1,1) such that the
+!       cubic interpolated value to r=0 does not change.
+!
+!       In order to do this we notice that a cubic
+!       interpolation to r=0 (assuming that phiR is
+!       symmetric) implies that:
+!
+!       f0 = (9*f(1,1) - f(2,2))/8
+!
+!       from which we find:
+!
+!       f(1,1) = (8*f0 + f(2,2))/9
+!
+!       and its time derivative:
+!
+!       df(1,1)/dt  = df(2,2)/dt/9
 
         if ((rank==0).and.(level==Nlmax)) then
-           scomplex_piR(1,1) = 0.d0
+           !scomplex_piR(1,1) = 0.d0
+           scomplex_piR(1,1) = scomplex_piR(2,2)/9.d0
         end if
 
 !       Symmetries on axis.
