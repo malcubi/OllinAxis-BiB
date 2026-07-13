@@ -270,12 +270,39 @@
                  + lambda*psi4*auxarray
      end if
 
+!    Boson density and current.  These are calculated here and not
+!    in the analysis routine since for charged fields we need the
+!    current for the source of the electric field.
+!
+!    For a complex scalar field there is a conserved Noether
+!    current given by:
+!
+!                         *                       *
+!    j    =  (i/2)  (  phi  d  phi  -  phi d   phi )
+!     mu                     mu             mu
+!
+!         =  ( phiI  d  phiR  -  phiR  d  phiI )
+!                     mu                mu
+!
+!    From this we can define a boson density as:
+!
+!                   mu
+!    rho      =  - n   j   =  phiR*piI  -  phiI*piR
+!       boson           mu
+
+     complex_Bdens = (complex_phiR*complex_gpiI - complex_phiI*complex_gpiR)
+
+     complex_Bflux_r = complex_phiI*complex_xiR_r - complex_phiR*complex_xiI_r   ! Index down.
+     complex_Bflux_r = complex_phiI*complex_xiR_z - complex_phiR*complex_xiI_z   ! Index down.
+
   end if
 
 
 ! **************************************
 ! ***   NO MORE MATTER FIELDS HERE   ***
 ! **************************************
+
+! STOP:  DON'T ADD NEW MATTER FIELDS AFTER THIS POINT!
 
 
 ! **********************************
