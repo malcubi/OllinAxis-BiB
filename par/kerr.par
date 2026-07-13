@@ -49,4 +49,4 @@ Noutput2D = 10             # How often do we want 2D output?
 
 outvars0D = alpha,beta_r,beta_z,beta_p,trK,phi,psi,A,B,H,C,C1,C2,KTA,KTB,KTH,KTC,KTC1,KTC2,Delta_r,Delta_z,Delta_p,ham,mom_r,mom_z,mom_p,CDelta_r,CDelta_z,CDelta_p,mass_sch
 outvars1D = alpha,beta_r,beta_z,beta_p,trK,phi,psi,A,B,H,C,C1,C2,KTA,KTB,KTH,KTC,KTC1,KTC2,Delta_r,Delta_z,Delta_p,ham,mom_r,mom_z,mom_p,CDelta_r,CDelta_z,CDelta_p,mass_sch
-outvars2D = alpha,beta_r,beta_z,beta_p,trK,psi,A,B,H,C,C1,C2
+outvars2D = alpha,beta_r,beta_z,beta_p,trK,psi,A,B,H,C,C1,C2,ham,mom_r,mom_z,mass_sch
