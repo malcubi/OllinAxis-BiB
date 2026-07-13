@@ -142,7 +142,7 @@
 ! ***************************
 
   if (associated(grid(box,level)%mass_INT)) then
-     print *, 'Integrated mass calculation still not implemeted!"
+     print *, 'Integrated mass calculation still not implemeted!'
   end if
 
 
@@ -151,7 +151,7 @@
 ! ********************
 
   if (associated(grid(box,level)%mass_ADM)) then
-     print *, 'ADM mass calculation still not implemeted!"
+     print *, 'ADM mass calculation still not implemeted!'
   end if
 
 
