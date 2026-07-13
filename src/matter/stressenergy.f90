@@ -290,7 +290,7 @@
 !    rho      =  - n   j   =  phiR*piI  -  phiI*piR
 !       boson           mu
 
-     complex_Bdens = (complex_phiR*complex_gpiI - complex_phiI*complex_gpiR)
+     complex_Bdens = (complex_phiR*complex_piI - complex_phiI*complex_piR)
 
      complex_Bflux_r = complex_phiI*complex_xiR_r - complex_phiR*complex_xiI_r   ! Index down.
      complex_Bflux_r = complex_phiI*complex_xiR_z - complex_phiR*complex_xiI_z   ! Index down.
