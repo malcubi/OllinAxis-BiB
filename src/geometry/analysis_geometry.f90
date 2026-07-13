@@ -137,15 +137,6 @@
   end if
 
 
-! ***************************
-! ***   INTEGRATED MASS   ***
-! ***************************
-
-  if (associated(grid(box,level)%mass_INT)) then
-     print *, 'Integrated mass calculation still not implemeted!'
-  end if
-
-
 ! ********************
 ! ***   ADM MASS   ***
 ! ********************
