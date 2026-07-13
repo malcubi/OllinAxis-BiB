@@ -284,16 +284,22 @@
 !         =  ( phiI  d  phiR  -  phiR  d  phiI )
 !                     mu                mu
 !
-!    From this we can define a boson density as:
+!    From this we can define the boson "density" as:
 !
-!                   mu
-!    rho      =  - n   j   =  phiR*piI  -  phiI*piR
-!       boson           mu
+!                  mu
+!    Bdens   =  - n   j   =  phiR*piI  -  phiI*piR
+!                      mu
+!
+!    and the boson "flux" as:
+!
+!
+!    Bflux   =  j
+!         i      i
 
-     complex_Bdens = (complex_phiR*complex_piI - complex_phiI*complex_piR)
+     complex_Bdens = complex_phiR*complex_piI - complex_phiI*complex_piR
 
      complex_Bflux_r = complex_phiI*complex_xiR_r - complex_phiR*complex_xiI_r   ! Index down.
-     complex_Bflux_r = complex_phiI*complex_xiR_z - complex_phiR*complex_xiI_z   ! Index down.
+     complex_Bflux_z = complex_phiI*complex_xiR_z - complex_phiR*complex_xiI_z   ! Index down.
 
   end if
 
