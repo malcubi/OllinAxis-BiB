@@ -70,66 +70,62 @@
 ! Note that taking this value of R we are assuming spherical symmetry,
 ! which will only be true sufficiently far away.
 
-  if (associated(grid(box,level)%mass_sch)) then
+! Find areal radius and save it in "auxarray".
 
-!    Find areal radius and save it in "auxarray".
+  auxarray = psi2*sqrt(gtt)
+  !auxarray = psi2*sqrt(abs(rr/r))*(gtt*gpp)**0.25d0 ! This is another possible way of defining R.
 
-     auxarray = psi2*sqrt(gtt)
-     !auxarray = psi2*sqrt(abs(rr/r))*(gtt*gpp)**0.25d0 ! This is another possible way of defining R.
+! Find derivatives of areal radius.
 
-!    Find derivatives of areal radius.
+  diffvar => auxarray
+  Dr_auxarray = diff1r(+1)
+  Dz_auxarray = diff1z(+1)
 
-     diffvar => auxarray
-     Dr_auxarray = diff1r(+1)
-     Dz_auxarray = diff1z(+1)
+! Calculate Schwarzschild mass.
 
-!    Calculate Schwarzschild mass.
+  mass_sch = half*auxarray*(one - ((r*Dr_auxarray + z*Dz_auxarray)/rr)**2/(grr*psi4))
 
-     mass_sch = half*auxarray*(one - ((r*Dr_auxarray + z*Dz_auxarray)/rr)**2/(grr*psi4))
+! Output Schwarzschild mass at boundaries.
 
-!    Output Schwarzschild mass at boundaries.
+  if ((box==0).and.(level==0)) then
 
-     if ((box==0).and.(level==0)) then
+     if (t(0,0)==0.d0) then
 
-        if (t(0,0)==0.d0) then
+        if (size==1) then
 
-           if (size==1) then
+           massr = mass_sch(Nr,0)
+           massz = mass_sch(0,Nz)
 
+        else
+
+           rmax = r(Nr,0)
+           zmax = z(0,Nz)
+
+           if (ownequator.and.(rmax>dble(Nrtotal-1)*dr)) then
               massr = mass_sch(Nr,0)
-              massz = mass_sch(0,Nz)
-
            else
-
-              rmax = r(Nr,0)
-              zmax = z(0,Nz)
-
-              if (ownequator.and.(rmax>dble(Nrtotal-1)*dr)) then
-                 massr = mass_sch(Nr,0)
-              else
-                 massr = 0.d0
-              end if
-
-              if (ownaxis.and.(zmax>dble(Nztotal-1)*dz)) then
-                 massz = mass_sch(0,Nz)
-              else
-                 massz = 0.d0
-              end if
-
+              massr = 0.d0
            end if
 
-           aux = massr
-           call MPI_ALLREDUCE(aux,massr,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
-
-           aux = massz
-           call MPI_ALLREDUCE(aux,massz,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
-
-           if (rank==0) then
-              write (*,'(A,ES12.5)') ' Schwarzschild mass along r direction = ',massr
-              write (*,'(A,ES12.5)') ' Schwarzschild mass along z direction = ',massz
-              write (*,'(A,ES12.5,A,ES12.5)')  ' Average Schwarzschild mass = ',0.5d0*(massr+massz),' +-', abs(massr-massz)
-              print *
+           if (ownaxis.and.(zmax>dble(Nztotal-1)*dz)) then
+              massz = mass_sch(0,Nz)
+           else
+              massz = 0.d0
            end if
 
+        end if
+
+        aux = massr
+        call MPI_ALLREDUCE(aux,massr,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+        aux = massz
+        call MPI_ALLREDUCE(aux,massz,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+        if (rank==0) then
+           write (*,'(A,ES12.5)') ' Schwarzschild mass along r direction = ',massr
+           write (*,'(A,ES12.5)') ' Schwarzschild mass along z direction = ',massz
+           write (*,'(A,ES12.5,A,ES12.5)')  ' Average Schwarzschild mass = ',0.5d0*(massr+massz),' +-', abs(massr-massz)
+           print *
         end if
 
      end if
