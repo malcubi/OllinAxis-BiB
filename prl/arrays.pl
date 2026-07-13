@@ -73,8 +73,8 @@ print FILE_ALLOCATEARRAYS "  subroutine allocatearrays(status)\n\n";
 print FILE_ALLOCATEARRAYS "  use param\n";
 print FILE_ALLOCATEARRAYS "  use arrays\n";
 print FILE_ALLOCATEARRAYS "  use procinfo\n\n";
-print FILE_ALLOCATEARRAYS "  implicit none\n";
-print FILE_ALLOCATEARRAYS "  logical contains\n";
+print FILE_ALLOCATEARRAYS "  implicit none\n\n";
+print FILE_ALLOCATEARRAYS "  logical contains\n\n";
 print FILE_ALLOCATEARRAYS "  integer box,level\n";
 print FILE_ALLOCATEARRAYS "  character(len=*) status\n\n";
 print FILE_ALLOCATEARRAYS "  if (trim(status)=='on') then\n";
@@ -152,6 +152,7 @@ print FILE_SAVEOLD "  subroutine saveold\n\n";
 print FILE_SAVEOLD "  use param\n";
 print FILE_SAVEOLD "  use arrays\n\n";
 print FILE_SAVEOLD "  implicit none\n\n";
+print FILE_SAVEOLD "  logical contains\n\n";
 print FILE_SAVEOLD "  integer i\n\n";
 
 # Write beginning of file simpleboundary.f90
@@ -162,6 +163,7 @@ print FILE_SIMPLEBOUNDARY "  subroutine simpleboundary\n\n";
 print FILE_SIMPLEBOUNDARY "  use param\n";
 print FILE_SIMPLEBOUNDARY "  use arrays\n\n";
 print FILE_SIMPLEBOUNDARY "  implicit none\n\n";
+print FILE_SIMPLEBOUNDARY "  logical contains\n\n";
 
 # Write beginning of file symmetries_r.f90
 
@@ -171,6 +173,7 @@ print FILE_SYMMETRIES_R "  subroutine symmetries_r\n\n";
 print FILE_SYMMETRIES_R "  use param\n";
 print FILE_SYMMETRIES_R "  use arrays\n\n";
 print FILE_SYMMETRIES_R "  implicit none\n\n";
+print FILE_SYMMETRIES_R "  logical contains\n\n";
 print FILE_SYMMETRIES_R "  integer i\n\n";
 
 # Write beginning of file symmetries_z.f90
@@ -181,6 +184,7 @@ print FILE_SYMMETRIES_Z "  subroutine symmetries_z\n\n";
 print FILE_SYMMETRIES_Z "  use param\n";
 print FILE_SYMMETRIES_Z "  use arrays\n\n";
 print FILE_SYMMETRIES_Z "  implicit none\n\n";
+print FILE_SYMMETRIES_Z "  logical contains\n\n";
 print FILE_SYMMETRIES_Z "  integer j\n\n";
 
 # Write beginning of file syngeo.f90
@@ -200,6 +204,7 @@ print FILE_SYNCMATT "  subroutine syncmatt\n\n";
 print FILE_SYNCMATT "  use param\n";
 print FILE_SYNCMATT "  use arrays\n\n";
 print FILE_SYNCMATT "  implicit none\n\n";
+print FILE_SYNCMATT "  logical contains\n\n";
 
 # Write beginning of file update.f90
 
@@ -209,6 +214,7 @@ print FILE_UPDATE "  subroutine update(dtw)\n\n";
 print FILE_UPDATE "  use param\n";
 print FILE_UPDATE "  use arrays\n\n";
 print FILE_UPDATE "  implicit none\n\n";
+print FILE_UPDATE "  logical contains\n\n";
 print FILE_UPDATE "  real(8) dtw \n\n";
 
 # Write beginning of file bound_interp.inc
