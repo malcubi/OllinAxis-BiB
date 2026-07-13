@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/restrict.f90,v 1.22 2021/02/19 20:27:39 malcubi Exp $
 
   subroutine restrict(box,level,all)
 
