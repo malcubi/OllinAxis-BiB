@@ -1,5 +1,5 @@
 
-  subroutine bosonintegral(box,level)
+  subroutine bosonintegral(complex_NB)
 
 ! **************************************************
 ! ***   CALCULATION OF INTEGRATED BOSON CHARGE   ***
@@ -27,12 +27,9 @@
 
   implicit none
 
-  integer box,level
-
   real(8) integral
   real(8) smallpi
-
-  real(8) complex_NB(0:Nb,0:Nlmax)
+  real(8) complex_NB
 
 
 ! *******************
@@ -48,22 +45,7 @@
 
   auxarray = 2.d0*smallpi*complex_Bdens*dsqrt(hdet)*psi**6*r
 
-! At the moment we only integrate it at t=0.
-
-  if (t(0,0)==0.d0) then
-
-     complex_NB(box,level) = integral(auxarray)
-
-!    We only output the integrated boson number for the coarse grid.
-
-     if ((box==0).and.(level==0)) then
-        if (rank==0) then
-           write (*,'(A,ES12.5)') ' Total boson number NB = ',complex_NB(0,0)
-           print *
-        end if
-     end if
-
-  end if
+  complex_NB = integral(auxarray)
 
 
 ! ***************
