@@ -41,8 +41,8 @@
 !
 !    with dV the physical volumen element.
 
-     if (associated(grid(box,level)%complex_NB)) then
-        !call bosonintegral
+     if ((box==0).and.(level==0)) then
+        call bosonintegral(box,level)
      end if
 
   end if
