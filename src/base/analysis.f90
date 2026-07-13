@@ -38,7 +38,7 @@
 ! *******************************
 
    if (mattertype/="vacuum") then
-     call analysis_matter
+     call analysis_matter(box,level)
   end if
 
 
