@@ -288,7 +288,7 @@
 
 !    Only processor 0 does output.
 
-10   continue
+     10 continue
 
      if (rank==0) then
 
