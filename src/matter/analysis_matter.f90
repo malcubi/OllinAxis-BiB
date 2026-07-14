@@ -60,8 +60,11 @@
               print *
            end if
 
-!          Output the total binding energy, but only
-!          for certain type of initial data.
+!          Output the total binding energy, but only for certain type of
+!          initial data.
+!
+!          At the moment I use the pseudo-Schwarzschild mass to calculate
+!          the binding energy.  I might be better to use the ADM mass later.
 
            if (size==1) then
 
