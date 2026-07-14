@@ -478,12 +478,12 @@
 
   logical :: WE_verbose = .false.
 
-  integer :: WE_Noutput = 10
+  integer :: WE_Noutput = 100
   integer :: WE_maxiter = 100000
 
   real(8) :: WE_eta = 1.d0
   real(8) :: WE_diss = 0.1d0
-  real(8) :: WE_dtfac = 0.6d0
+  real(8) :: WE_dtfac = 0.5d0
   real(8) :: WE_epsilon = 1.d-8
 
 
