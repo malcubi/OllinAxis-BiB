@@ -713,6 +713,8 @@
 
 
 
+
+
   recursive subroutine bosonstep(level,method)
 
 ! *********************************
@@ -1454,7 +1456,7 @@
 !    Advance time step counter and local time.
 
      s(box,level) = s(box,level) + 1
-     t(box,level) = t(box,level) + dt
+     t(box,level) = t(box,level) + 1.d0/2**level
 
 
 !    ***********************************************
