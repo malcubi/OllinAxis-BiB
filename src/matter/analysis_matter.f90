@@ -22,8 +22,17 @@
 
   real(8) rmax,zmax
   real(8) massr,massz
+  real(8) integral
   real(8) complex_NB
+  real(8) smallpi
   real(8) aux,bind
+
+
+! *******************
+! ***   NUMBERS   ***
+! *******************
+
+  smallpi = acos(-1.d0)
 
 
 ! ********************************
@@ -53,10 +62,11 @@
 
         if ((t(0,0)==0.d0).and.(idata=="bosonstar")) then
 
-           call bosonintegral(complex_NB)
+           auxarray = 2.d0*smallpi*complex_Bdens*dsqrt(hdet)*psi**6*r
+           complex_NB = integral(box,level,auxarray)
 
            if (rank==0) then
-              write (*,'(A,ES12.5)') ' Total boson number NB = ',complex_NB
+              write (*,'(A,ES20.13)') ' Total boson number NB = ',complex_NB
               print *
            end if
 
