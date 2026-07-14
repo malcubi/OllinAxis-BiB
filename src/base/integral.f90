@@ -1,5 +1,5 @@
 
-  real(8) function integral(var)
+  real(8) function integral(box,level,var)
 
 ! ******************************************
 ! ***   CALCULATION OF VOLUME INTEGRAL   ***
@@ -25,11 +25,12 @@
 
   integer i,j
   integer imax,jmax
+  integer box,level
 
   real(8) rmax,zmax
   real(8) aux
 
-  real(8) :: var(1-ghost:Nr,1-ghost:Nz)
+  real(8) :: var(1-ghost:Nrmaxl(box),1-ghost:Nzmaxl(box))
 
 
 ! *********************
