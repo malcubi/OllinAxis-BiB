@@ -106,11 +106,11 @@
      call MPI_ALLREDUCE(aux,integral,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
   end if
 
-!  For equatorial symmetry multiply with 2.
+! For equatorial symmetry multiply with 2.
 
-   if (eqsym) then
-      integral = 2.d0*integral
-   end if
+  if (eqsym) then
+     integral = 2.d0*integral
+  end if
 
 
 ! ***************
