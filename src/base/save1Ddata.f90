@@ -583,8 +583,8 @@
 !    ***   PARALLEL RUN - ONE FILE PER PROC   ***
 !    ********************************************
 
-!    Each processor does its own output. First check it
-!    the current processor owns the axis.
+!    Each processor does its own output. First check
+!    if the current processor owns the axis.
 
      if (ownaxis) then
 
