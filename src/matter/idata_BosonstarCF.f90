@@ -226,20 +226,6 @@
   end if
 
 
-! ************************
-! ***   SANITY CHECK   ***
-! ************************
-
-! Sanity check for potential.
-
-  if ((complexpotential=="phi2").and.(complex_lambda/=0.d0)) then
-     print *, 'You can not have a complexpotential=phi2 and complex_lambda different from zero.'
-     print *, 'Aborting! (subroutine idata_BosonstarCF)'
-     print *
-     call die
-  end if
-
-
 ! *******************************
 ! ***   INITIALIZE SOLUTION   ***
 ! *******************************
@@ -388,9 +374,9 @@
 
      do j=1,Nzl(0,rank)-ghost
         do i=1,Nrl(0,rank)-ghost
-           lres = lres + (grid(0,0)%alpha(i,j)-grid(0,0)%alpha_p(i,j))**2 &
-                       + (grid(0,0)%phi(i,j)-grid(0,0)%phi_p(i,j))**2 &
-                       + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
+           !lres = lres + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
+           lres = lres + grid(0,0)%scomplex_piR(i,j)**2 &
+                + grid(0,0)%sdtalpha(i,j)**2 + grid(0,0)%sdtphi(i,j)**2  
         end do
      end do
 
@@ -1107,8 +1093,9 @@
                      + Dr_complex_phiR*(Dr_alpha/alpha + 2.d0*Dr_phi/phi) &
                      + Dz_complex_phiR*(Dz_alpha/alpha + 2.d0*Dz_phi/phi)
 
-!       Damping term  (only for Klein-Gordon).  This
-!       is needed in order to avoid large oscillations.
+!       Damping term.  This is needed in order to avoid large
+!       oscillations and make the iterations stable.  But it
+!       seems we only need it for the Klen-Gordon equation.
 
         scomplex_piR = scomplex_piR - WE_eta*complex_piR
 
