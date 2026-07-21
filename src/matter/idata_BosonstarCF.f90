@@ -127,7 +127,7 @@
   integer i,j,m,n                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
-  integer NNtot                  ! Total number of grid points.
+  integer NNloc,NNtot            ! Total number of grid points.
   integer miniter                ! Minimum number of iterations.
   integer :: maxiter = 100000    ! Maximum number of iterations.
 
@@ -154,8 +154,6 @@
   half = 0.5d0
 
   smallpi = acos(-1.d0)
-
-  NNtot = Nrtotal*Nztotal
 
 
 ! ************************************************
@@ -292,6 +290,18 @@
            call save1Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
            call save2Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
 
+           grabvar => dtalpha
+           call save1Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
+           call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
+
+           grabvar => dtphi
+           call save1Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
+           call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
+
+           grabvar => complex_piR
+           call save1Dvariable('boson_piR',directory,box,level,outparallel,'replace')
+           call save2Dvariable('boson_piR',directory,box,level,outparallel,'replace')
+
         end do
      end do
 
@@ -372,11 +382,14 @@
      lres = 0.d0
      gres = 0.d0
 
+     NNloc = 0
+     NNtot = 0
+
      do j=1,Nzl(0,rank)-ghost
         do i=1,Nrl(0,rank)-ghost
-           !lres = lres + (grid(0,0)%complex_phiR(i,j)-grid(0,0)%complex_phiR_p(i,j))**2
-           lres = lres + grid(0,0)%scomplex_piR(i,j)**2 &
-                + grid(0,0)%sdtalpha(i,j)**2 + grid(0,0)%sdtphi(i,j)**2  
+           NNloc = NNloc + 1
+           lres = lres + abs(grid(0,0)%scomplex_piR(i,j)) &
+                + abs(grid(0,0)%sdtalpha(i,j)) + abs(grid(0,0)%sdtphi(i,j)) 
         end do
      end do
 
@@ -384,11 +397,13 @@
 
      if (size>1) then
         call MPI_Allreduce(lres,gres,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+        call MPI_Allreduce(NNloc,NNtot,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD,ierr)
      else
         gres = lres
+        NNtot = NNloc
      end if
 
-     gres = sqrt(gres/dble(NNtot))
+     gres = gres/dble(NNtot)
 
 
 !    ******************
@@ -430,6 +445,18 @@
               grabvar => complex_phiR
               call save1Dvariable('boson_phiR',directory,box,level,outparallel,'old')
               call save2Dvariable('boson_phiR',directory,box,level,outparallel,'old')
+
+              grabvar => dtalpha
+              call save1Dvariable('boson_dtalpha',directory,box,level,outparallel,'old')
+              call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'old')
+
+              grabvar => dtphi
+              call save1Dvariable('boson_dtpsi',directory,box,level,outparallel,'old')
+              call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'old')
+
+              grabvar => complex_piR
+              call save1Dvariable('boson_piR',directory,box,level,outparallel,'old')
+              call save2Dvariable('boson_piR',directory,box,level,outparallel,'old')
 
            end do
         end do
@@ -1040,8 +1067,8 @@
 
         call potential
 
-!       Find frequency omega.  We solve for omega from the Klein-Gordon
-!       equation at the first grid point.
+!       Find frequency omega.  We solve for omega from the
+!       Klein-Gordon equation at the first grid point.
 
         if (level==Nlmax) then
 
@@ -1095,7 +1122,7 @@
 
 !       Damping term.  This is needed in order to avoid large
 !       oscillations and make the iterations stable.  But it
-!       seems we only need it for the Klen-Gordon equation.
+!       seems we only need it for the Klein-Gordon equation.
 
         scomplex_piR = scomplex_piR - WE_eta*complex_piR
 
@@ -1103,6 +1130,14 @@
 
         evolvevar => complex_piR
         sourcevar => scomplex_piR
+        call dissipation(+1,+1,WE_diss)
+
+        evolvevar => dtalpha
+        sourcevar => sdtalpha
+        call dissipation(+1,+1,WE_diss)
+
+        evolvevar => dtphi
+        sourcevar => sdtphi
         call dissipation(+1,+1,WE_diss)
 
 !       But set the source at point (1,1) such that the
