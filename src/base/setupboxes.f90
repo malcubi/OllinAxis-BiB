@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/setupboxes.f90,v 1.20 2021/02/26 19:25:51 malcubi Exp $
 
   subroutine setupboxes
 

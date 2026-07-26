@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/analysis.f90,v 1.4 2019/11/15 18:08:48 malcubi Exp $
 
   subroutine analysis(box,level)
 
@@ -37,6 +36,10 @@
 ! *******************************
 ! ***   ANALYSIS FOR MATTER   ***
 ! *******************************
+
+   if (mattertype/="vacuum") then
+     call analysis_matter(box,level)
+  end if
 
 
 ! ***************

@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/save1Ddata.f90,v 1.24 2021/03/28 00:44:46 malcubi Exp $
 
   subroutine save1Ddata
 
@@ -9,8 +8,9 @@
 ! This routine saves 1D data, that is a 1D projection
 ! of the whole spatial arrays at a given time.
 !
-! Here, output is produced for the values in r-direction at the 
-! equator (".rl") and in z-direction at the axis (".zl").
+! Here, output is produced for the values in the r-direction
+! at the equator (".rl"), in the z-direction at the axis (".zl"),
+! and along diagonal directions (".dl").
 
 ! Include modules.
 
@@ -167,7 +167,7 @@
 ! 3) Files with extension .dl correspond to the diagonal
 !    for runs with equatorial symmetry.  When there is
 !    no equatorial symmetry two diagonals are output
-!    with extensions (.d1l.d2l).
+!    with extensions .d1l and .d2l.
 !
 ! Diagonal output is along the computational domain
 ! diagonals, and NOT along the (r=z,r=-z) lines.
@@ -288,7 +288,7 @@
 
 !    Only processor 0 does output.
 
-10   continue
+     10 continue
 
      if (rank==0) then
 
@@ -475,9 +475,9 @@
 
   else if (type=="singlefile") then
 
-!    *************************************
-!    ***   PARALLEL RUN - SINGLE FILE  ***
-!    *************************************
+!    **************************************
+!    ***   PARALLEL RUN - SINGLE FILE   ***
+!    **************************************
 
 !    Check if some processor in the current box owns the axis.
 
@@ -583,8 +583,8 @@
 !    ***   PARALLEL RUN - ONE FILE PER PROC   ***
 !    ********************************************
 
-!    Each processor does its own output. First check it
-!    the current processor owns the axis.
+!    Each processor does its own output. First check
+!    if the current processor owns the axis.
 
      if (ownaxis) then
 

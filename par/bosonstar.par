@@ -1,0 +1,56 @@
+# Test parameter file
+# 
+# Boson star initial data in the conformally-flat gauge, 1+log slicing, no shift.
+
+eqsym = .true.             # Equatorial symmetry
+angmom = .false.           # Do not allocate angular functions
+
+dr0 = 0.05                 # Grid spacing in r
+dz0 = 0.05                 # Grid spacing in z
+
+dtfac = 0.5                # Courant parameter
+
+Nrtotal = 500              # Number of grid points in r
+Nztotal = 500              # Number of grid points in z
+Nt = 0                     # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+slicing = 1+log            # Type of slicing condition
+gauge_f = 2.0              # Coefficient for Bona-Masso slicing
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+boundtype = radiative      # Boundary condition
+
+mattertype = complex       # Complex scalar field
+complexpotential = phi2    # Complex field potential
+complex_mass = 1.0         # Complex field mass
+
+idata = bosonstar          # Complex field initial data
+boson_factor = physical    # Normalization factor for boson star (physical,harmonic)
+boson_phi0  = 0.05         # Central value of scalar field
+
+WE_epsilon = 1.d-8         # Wave elliptic tolerance
+WE_verbose = .true.        # Output information about the elliptic solver iterations
+WE_Noutput = 100           # How often do we output iterations?
+
+complexdiss = 0.01         # Dissipation for scalar field
+geodiss = 0.01             # Dissipation for geometric variables
+
+directory = bosonstar      # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 10             # How often do we want 0D output?
+Noutput1D = 10             # How often do we want 1D output?
+Noutput2D = 50             # How often do we want 2D output?
+
+outparallel = fileperproc
+
+outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_piR,complex_phiI,complex_xiI_r,complex_xiI_z,complex_piI,rho,mass_sch
+outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_piR,complex_phiI,complex_xiI_r,complex_xiI_z,complex_piI,rho,mass_sch
+outvars2D = alpha,trK,psi,A,B,H,C,ham,mom_r,mom_z,complex_phiR,complex_phiI,rho,mass_sch
+
+checkpointinitial = .false.

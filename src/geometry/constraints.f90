@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/constraints.f90,v 1.12 2020/01/31 22:38:24 malcubi Exp $
 
   subroutine constraints(box,level)
 

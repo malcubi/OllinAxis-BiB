@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/matter/potential.f90,v 1.7 2019/11/14 20:30:17 malcubi Exp $
 
   subroutine potential
 

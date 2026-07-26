@@ -1,7 +1,5 @@
 #!/usr/bin/env perl
-
-#$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/prl/arrays.pl,v 1.51 2022/01/11 02:14:45 malcubi Exp $
-
+#
 # This perl script creates the files:
 #
 # arrays.f90
@@ -14,7 +12,8 @@
 # simpleboundary.f90
 # symmetries_r.f90
 # symmetries_z.f90
-# syncall.f90
+# syncgeo.f90
+# syncmatt.f90
 # update.f90
 #
 # Plus the include files:
@@ -37,7 +36,8 @@ open(FILE_SAVEOLD,">src/auto/saveold.f90") or die "Can't open saveold.f90: $!";
 open(FILE_SIMPLEBOUNDARY,">src/auto/simpleboundary.f90") or die "Can't open simpleboundary.f90: $!";
 open(FILE_SYMMETRIES_R,">src/auto/symmetries_r.f90") or die "Can't open symmetries_r.f90: $!";
 open(FILE_SYMMETRIES_Z,">src/auto/symmetries_z.f90") or die "Can't open symmetries_z.f90: $!";
-open(FILE_SYNCALL,">src/auto/syncall.f90") or die "Can't open syncall.f90: $!";
+open(FILE_SYNCGEO,">src/auto/syncgeo.f90") or die "Can't open syncgeo.f90: $!";
+open(FILE_SYNCMATT,">src/auto/syncmatt.f90") or die "Can't open syncmatt.f90: $!";
 open(FILE_UPDATE,">src/auto/update.f90") or die "Can't open update.f90: $!";
 
 open(FILE_BOUNDINTERP,">src/auto/bound_interp.inc") or die "Can't open boundinterp.inc: $!";
@@ -47,6 +47,7 @@ open(FILE_INTERSECTINTERP,">src/auto/intersect_interp.inc") or die "Can't open r
 # Write beginning of file arrays.f90
 
 print FILE_ARRAYS "! Automatically generated file.  Do not edit!\n\n";
+print FILE_ARRAYS "! This routine declares the different arrays.\n\n";
 print FILE_ARRAYS "  module arrays\n\n";
 print FILE_ARRAYS "  use mytypes\n\n";
 print FILE_ARRAYS "  implicit none\n\n";
@@ -64,25 +65,16 @@ print FILE_ARRAYS "  character(50), allocatable, dimension(:) :: outvars1Darray\
 print FILE_ARRAYS "  character(50), allocatable, dimension(:) :: outvars2Darray\n\n";
 print FILE_ARRAYS "  type(gridfuncs), allocatable :: grid(:,:)\n\n";
 
-# Write beginning of file accumulate.f90
-
-print FILE_ACCUMULATE "! Automatically generated file.  Do not edit!\n\n";
-print FILE_ACCUMULATE "  subroutine accumulate(k,niter,w)\n\n";
-print FILE_ACCUMULATE "  use param\n";
-print FILE_ACCUMULATE "  use arrays\n\n";
-print FILE_ACCUMULATE "  implicit none\n\n";
-print FILE_ACCUMULATE "  integer k,niter\n\n";
-print FILE_ACCUMULATE "  real(8) w\n\n";
-
 # Write beginning of file allocatearrays.f90
 
 print FILE_ALLOCATEARRAYS "! Automatically generated file.  Do not edit!\n\n";
+print FILE_ALLOCATEARRAYS "! This routine allocates memory for the different arrays.\n\n";
 print FILE_ALLOCATEARRAYS "  subroutine allocatearrays(status)\n\n";
 print FILE_ALLOCATEARRAYS "  use param\n";
 print FILE_ALLOCATEARRAYS "  use arrays\n";
 print FILE_ALLOCATEARRAYS "  use procinfo\n\n";
-print FILE_ALLOCATEARRAYS "  implicit none\n";
-print FILE_ALLOCATEARRAYS "  logical contains\n";
+print FILE_ALLOCATEARRAYS "  implicit none\n\n";
+print FILE_ALLOCATEARRAYS "  logical contains\n\n";
 print FILE_ALLOCATEARRAYS "  integer box,level\n";
 print FILE_ALLOCATEARRAYS "  character(len=*) status\n\n";
 print FILE_ALLOCATEARRAYS "  if (trim(status)=='on') then\n";
@@ -94,14 +86,17 @@ print FILE_ALLOCATEARRAYS "  end if\n\n";
 # Write beginning of file currentgrid.f90
 
 print FILE_CURRENTGRID "! Automatically generated file.  Do not edit!\n\n";
+print FILE_CURRENTGRID "! This subroutine points grid variables to the current box and level.\n\n";
 print FILE_CURRENTGRID "  subroutine currentgrid(box,level,localgrid)\n\n";
 print FILE_CURRENTGRID "  use param\n";
 print FILE_CURRENTGRID "  use arrays\n";
 print FILE_CURRENTGRID "  use procinfo\n";
 print FILE_CURRENTGRID "  use mytypes\n\n";
 print FILE_CURRENTGRID "  implicit none\n\n";
+print FILE_CURRENTGRID "  logical contains\n\n";
 print FILE_CURRENTGRID "  integer box,level\n\n";
 print FILE_CURRENTGRID "  type(gridfuncs) :: localgrid\n\n";
+print FILE_CURRENTGRID "! Parameters.\n\n";
 print FILE_CURRENTGRID "  ownaxis = (axis(box,rank)/=-1)\n";
 print FILE_CURRENTGRID "  ownequator = (eqz(box,rank)/=-1)\n";
 print FILE_CURRENTGRID "  ownorigin = (origin(box,rank)/=-1)\n\n";
@@ -113,10 +108,12 @@ print FILE_CURRENTGRID "  time = t(box,level)\n\n";
 print FILE_CURRENTGRID "  dt = dtl(level)\n";
 print FILE_CURRENTGRID "  dr = drl(level)\n";
 print FILE_CURRENTGRID "  dz = dzl(level)\n\n";
+print FILE_CURRENTGRID "! Arrays.\n\n";
 
 # Write beginning of file grabarray.f90
 
 print FILE_GRABARRAY "! Automatically generated file.  Do not edit!\n\n";
+print FILE_GRABARRAY "! This routine selects an array for output.\n\n";
 print FILE_GRABARRAY "  subroutine grabarray(varname)\n\n";
 print FILE_GRABARRAY "  use param\n";
 print FILE_GRABARRAY "  use arrays\n";
@@ -132,58 +129,92 @@ print FILE_MYTYPES "! Automatically generated file.  Do not edit!\n\n";
 print FILE_MYTYPES "  module mytypes\n\n";
 print FILE_MYTYPES "  type gridfuncs\n\n";
 
+# Write beginning of file accumulate.f90
+
+print FILE_ACCUMULATE "! Automatically generated file.  Do not edit!\n\n";
+print FILE_ACCUMULATE "! This routine adds to accumulator arrays for the Runge-Kutta time integration.\n\n";
+print FILE_ACCUMULATE "  subroutine accumulate(k,niter,w)\n\n";
+print FILE_ACCUMULATE "  use param\n";
+print FILE_ACCUMULATE "  use arrays\n\n";
+print FILE_ACCUMULATE "  implicit none\n\n";
+print FILE_ACCUMULATE "  logical contains\n";
+print FILE_ACCUMULATE "  logical first,last\n\n";
+print FILE_ACCUMULATE "  integer k,niter\n\n";
+print FILE_ACCUMULATE "  real(8) w\n\n";
+print FILE_ACCUMULATE "  first = (k==1)\n";
+print FILE_ACCUMULATE "  last  = (k==niter)\n\n";
+
 # Write beginning of file saveold.f90
 
 print FILE_SAVEOLD "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SAVEOLD "! This routine saves the values of the arrays on the previous time step.\n\n";
 print FILE_SAVEOLD "  subroutine saveold\n\n";
 print FILE_SAVEOLD "  use param\n";
 print FILE_SAVEOLD "  use arrays\n\n";
 print FILE_SAVEOLD "  implicit none\n\n";
+print FILE_SAVEOLD "  logical contains\n\n";
 print FILE_SAVEOLD "  integer i\n\n";
 
 # Write beginning of file simpleboundary.f90
 
 print FILE_SIMPLEBOUNDARY "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SIMPLEBOUNDARY "! This routine applies simple boundary conditions.\n\n";
 print FILE_SIMPLEBOUNDARY "  subroutine simpleboundary\n\n";
 print FILE_SIMPLEBOUNDARY "  use param\n";
 print FILE_SIMPLEBOUNDARY "  use arrays\n\n";
 print FILE_SIMPLEBOUNDARY "  implicit none\n\n";
+print FILE_SIMPLEBOUNDARY "  logical contains\n\n";
 
 # Write beginning of file symmetries_r.f90
 
 print FILE_SYMMETRIES_R "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SYMMETRIES_R "! This routine applies symmetry conditions at the axis.\n\n";
 print FILE_SYMMETRIES_R "  subroutine symmetries_r\n\n";
 print FILE_SYMMETRIES_R "  use param\n";
 print FILE_SYMMETRIES_R "  use arrays\n\n";
 print FILE_SYMMETRIES_R "  implicit none\n\n";
+print FILE_SYMMETRIES_R "  logical contains\n\n";
 print FILE_SYMMETRIES_R "  integer i\n\n";
-print FILE_SYMMETRIES_R "  do i=1,ghost\n\n";
 
 # Write beginning of file symmetries_z.f90
 
 print FILE_SYMMETRIES_Z "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SYMMETRIES_Z "! This routine applies symmetry conditions at the equator.\n\n";
 print FILE_SYMMETRIES_Z "  subroutine symmetries_z\n\n";
 print FILE_SYMMETRIES_Z "  use param\n";
 print FILE_SYMMETRIES_Z "  use arrays\n\n";
 print FILE_SYMMETRIES_Z "  implicit none\n\n";
+print FILE_SYMMETRIES_Z "  logical contains\n\n";
 print FILE_SYMMETRIES_Z "  integer j\n\n";
-print FILE_SYMMETRIES_Z "  do j=1,ghost\n\n";
 
-# Write beginning of file syncall.f90
+# Write beginning of file syngeo.f90
 
-print FILE_SYNCALL "! Automatically generated file.  Do not edit!\n\n";
-print FILE_SYNCALL "  subroutine syncall\n\n";
-print FILE_SYNCALL "  use param\n";
-print FILE_SYNCALL "  use arrays\n\n";
-print FILE_SYNCALL "  implicit none\n\n";
+print FILE_SYNCGEO "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SYNCGEO "! This routine synchronizes the geometric variables.\n\n";
+print FILE_SYNCGEO "  subroutine syncgeo\n\n";
+print FILE_SYNCGEO "  use param\n";
+print FILE_SYNCGEO "  use arrays\n\n";
+print FILE_SYNCGEO "  implicit none\n\n";
+
+# Write beginning of file syncmatt.f90
+
+print FILE_SYNCMATT "! Automatically generated file.  Do not edit!\n\n";
+print FILE_SYNCMATT "! This routine synchronizes the matter variables.\n\n";
+print FILE_SYNCMATT "  subroutine syncmatt\n\n";
+print FILE_SYNCMATT "  use param\n";
+print FILE_SYNCMATT "  use arrays\n\n";
+print FILE_SYNCMATT "  implicit none\n\n";
+print FILE_SYNCMATT "  logical contains\n\n";
 
 # Write beginning of file update.f90
 
 print FILE_UPDATE "! Automatically generated file.  Do not edit!\n\n";
+print FILE_UPDATE "! This routine updates the evolving variables.\n\n";
 print FILE_UPDATE "  subroutine update(dtw)\n\n";
 print FILE_UPDATE "  use param\n";
 print FILE_UPDATE "  use arrays\n\n";
 print FILE_UPDATE "  implicit none\n\n";
+print FILE_UPDATE "  logical contains\n\n";
 print FILE_UPDATE "  real(8) dtw \n\n";
 
 # Write beginning of file bound_interp.inc
@@ -204,6 +235,34 @@ open(INFILE,"src/base/arrays.config") or die "Can't open arrays.config: $!";
 
 # Parse file arrays.f90 to identify declared arrays
 
+my $line = " ";
+my $nline = 0;
+
+my $angmom = "false";
+my $shift = "false";
+my $shiftangmom = "false";
+
+my $gridold = " ";
+my $gridcond = " ";
+
+my $saveold = " ";
+my $saveecond = " ";
+
+my $updateold = " ";
+my $updatecond = " ";
+
+my $accumold = " ";
+my $accumcond = " ";
+
+my $symrold = " ";
+my $symrcond = " ";
+
+my $symzold = " ";
+my $symzcond = " ";
+
+my $syncold = " ";
+my $synccond = " ";
+
 while ($line=<INFILE>) {
 
    $nline = $nline+1;
@@ -212,21 +271,28 @@ while ($line=<INFILE>) {
 
    if (($line =~ /^\s*REAL/i)||($line =~ /^\s*COMPLEX/i)) {
 
-#     Check that all keywords are present and grab array name (make sure to
-#     ignore possible comment at the end).
+#     Check that all keywords are present and grab array name
+#     (make sure to ignore possible comment at the end).
 
       if ($line =~ /^\s+REAL/i) {
+
           $type = "real(8)";
           $zero = "0.d0";
+
           if ($line =~ /REAL\s*(\S+)\s*!\s*SYMMETRYR\s*=\s*(\S+)\s*,\s*SYMMETRYZ\s*=\s*(\S+)\s*,\s*INTENT\s*=\s*(\S+)\s*,\s*STORAGE\s*=\s*(.+)/i) {
+
              $var = $1;
              $symr = $2;
              $symz = $3;
              $intent = $4;
              $storage = $5;
+
           } else {
+
              die "arrays.pl: Bad syntax for REAL array assignment in line ",$nline," of file arrays.config\n\n";
+
           }
+
       }
 
 #     Check if we have a 0D array.
@@ -235,14 +301,6 @@ while ($line=<INFILE>) {
 	  $zerod = "true";
       } else {
 	  $zerod = "false";
-      }
-
-#     Check if the array has only one grid level.
-
-      if ($line =~ /ONELEVEL/i) {
-	  $onelevel = "true";
-      } else {
-	  $onelevel = "false";
       }
 
 #     Check if the array does not require boundary conditions.
@@ -281,20 +339,25 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if ($intent =~ /^POINTER$/i) {
+
             if ($onelevel eq "true") {
                print FILE_ARRAYS  "  ",$type,", pointer :: ",$var,"\n";
             } else {
                print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"\n";
             }
+
          } else {
+
             if ($onelevel eq "true") {
                print FILE_ARRAYS  "  ",$type,", pointer :: ",$var,"\n";
             } else {
                print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"\n";
             }
+
          }
 
          if (($intent =~ /^EVOLVE$/i) || ($intent =~ /^ELLIPTIC$/i)) {
+
             print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: s",$var,"\n";
             print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"_p\n";
             print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"_a\n";
@@ -302,6 +365,7 @@ while ($line=<INFILE>) {
             print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"_bound_rR(:,:,:)\n";
             print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"_bound_zL(:,:,:)\n";
             print FILE_ARRAYS  "  ",$type,", dimension (:,:), pointer :: ",$var,"_bound_zR(:,:,:)\n";
+
          }
 
       } elsif ($zerod eq "true") {
@@ -309,9 +373,11 @@ while ($line=<INFILE>) {
          print FILE_ARRAYS  "  ",$type," :: ",$var,"\n";
 
          if ($intent =~ /^EVOLVE$/i) {
+
             print FILE_ARRAYS  "  ",$type," :: ",$var,"_p\n";
             print FILE_ARRAYS  "  ",$type," :: ",$var,"_a\n";
             print FILE_ARRAYS  "  ",$type," :: s",$var,"\n";
+
          }
 
       }
@@ -329,6 +395,7 @@ while ($line=<INFILE>) {
          }
 
          if (($intent =~ /^EVOLVE$/i) || ($intent =~ /^ELLIPTIC$/i)) {
+
             print FILE_MYTYPES  "     ",$type,", dimension (:,:), pointer :: s",$var,"\n";
             print FILE_MYTYPES  "     ",$type,", dimension (:,:), pointer :: ",$var,"_p\n";
             print FILE_MYTYPES  "     ",$type,", dimension (:,:), pointer :: ",$var,"_a\n";
@@ -336,6 +403,7 @@ while ($line=<INFILE>) {
             print FILE_MYTYPES  "     ",$type,", dimension (:,:,:), pointer :: ",$var,"_bound_rR\n";
             print FILE_MYTYPES  "     ",$type,", dimension (:,:,:), pointer :: ",$var,"_bound_zL\n";
             print FILE_MYTYPES  "     ",$type,", dimension (:,:,:), pointer :: ",$var,"_bound_zR\n";
+
          }
 
       } elsif ($zerod eq "true") {
@@ -355,19 +423,109 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if ($intent !~ /^POINTER$/i) {
-            if ($onelevel eq "true") {
-            } elsif (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
-               print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+
+            if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
+               $cond = $1;
+
+               if ($cond ne $gridold && $gridcond ne "true") {
+
+                  $gridcond = "true";
+                  $gridold = $cond;
+
+                  print FILE_CURRENTGRID  "! Condition: ",$cond,"\n\n";
+                  print FILE_CURRENTGRID  "  if (",$cond,") then\n\n";
+
+                  if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                     print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n\n";
+                  } else {
+                     print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                     print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+                 }
+
+               } elsif ($cond ne $gridold && $gridcond eq "true") {
+
+                  $gridold = $cond;
+
+                  print FILE_CURRENTGRID  "  end if\n\n";
+                  print FILE_CURRENTGRID  "! End of previous condition.\n\n";
+                  print FILE_CURRENTGRID  "! Condition: ",$cond,"\n\n";
+                  print FILE_CURRENTGRID  "  if (",$cond,") then\n\n";
+
+                  if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                     print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n\n";
+                  } else {
+                     print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                     print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+                  }
+
+               } else {
+
+                  if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                     print FILE_CURRENTGRID  "     ",$var," => localgrid%",$var,"\n\n";
+                  } else {
+                     print FILE_CURRENTGRID  "     ",$var,"   => localgrid%",$var,"\n";
+                     print FILE_CURRENTGRID  "     s",$var,"  => localgrid%s",$var,"\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_p => localgrid%",$var,"_p\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_a => localgrid%",$var,"_a\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                     print FILE_CURRENTGRID  "     ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+                  }
+
+               }
+
+            } elsif ($gridcond eq "true") {
+
+               $gridcond = " ";
+               $gridold  = " ";
+
+               print FILE_CURRENTGRID  "  end if\n\n";
+               print FILE_CURRENTGRID  "! End of previous condition.\n\n";
+
+               if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                  print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+               } else {
+                  print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
+                  print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_a => localgrid%",$var,"_a\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+               }
+
             } else {
-               print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
-               print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
-               print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
-               print FILE_CURRENTGRID  "  ",$var,"_a => localgrid%",$var,"_a\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
-               print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+
+               if (($intent !~ /^EVOLVE$/i) && ($intent !~ /^ELLIPTIC$/i)) {
+                  print FILE_CURRENTGRID  "  ",$var," => localgrid%",$var,"\n\n";
+               } else {
+                  print FILE_CURRENTGRID  "  ",$var,"   => localgrid%",$var,"\n";
+                  print FILE_CURRENTGRID  "  s",$var,"  => localgrid%s",$var,"\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_p => localgrid%",$var,"_p\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_a => localgrid%",$var,"_a\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rL => localgrid%",$var,"_bound_rL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_rR => localgrid%",$var,"_bound_rR\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zL => localgrid%",$var,"_bound_zL\n";
+                  print FILE_CURRENTGRID  "  ",$var,"_bound_zR => localgrid%",$var,"_bound_zR\n\n";
+               }
+
 	    }
+
 	 }
 
       }
@@ -375,26 +533,69 @@ while ($line=<INFILE>) {
 #     Write to FILE_ACCUMULATE code to save old variables.
 
       if ($intent =~ /EVOLVE/i) {
+
          if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
             $cond = $1;
-            print FILE_ACCUMULATE  "  if (",$cond,") then\n";
-            print FILE_ACCUMULATE  "     if (k==1) then\n";
-            print FILE_ACCUMULATE  "        ",$var,"_a = w*s",$var,"\n";
-            print FILE_ACCUMULATE  "     else if (k<niter) then\n";
-            print FILE_ACCUMULATE  "        ",$var,"_a = ",$var,"_a + w*s",$var,"\n";
-            print FILE_ACCUMULATE  "     else\n";
-            print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
-            print FILE_ACCUMULATE  "     end if\n";
+
+            if ($cond ne $accumold && $accumcond ne "true") {
+
+               $accumcond = "true";
+               $accumold = $cond;
+
+               print FILE_ACCUMULATE  "! Condition: ",$cond,"\n\n";
+               print FILE_ACCUMULATE  "  if (",$cond,") then\n\n";
+               print FILE_ACCUMULATE  "     if (.not.last) then\n";
+               print FILE_ACCUMULATE  "        ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+               print FILE_ACCUMULATE  "     else\n";
+               print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+               print FILE_ACCUMULATE  "     end if\n\n";
+
+            } elsif ($cond ne $accumold && $accumcond eq "true") {
+
+               $accumold = $cond;
+
+               print FILE_ACCUMULATE  "  end if\n\n";
+               print FILE_ACCUMULATE  "! Condition: ",$cond,"\n\n";
+               print FILE_ACCUMULATE  "  if (",$cond,") then\n\n";
+               print FILE_ACCUMULATE  "     if (.not.last) then\n";
+               print FILE_ACCUMULATE  "        ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+               print FILE_ACCUMULATE  "     else\n";
+               print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+               print FILE_ACCUMULATE  "     end if\n\n";
+
+            } else {
+
+               print FILE_ACCUMULATE  "     if (.not.last) then\n";
+               print FILE_ACCUMULATE  "        ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+               print FILE_ACCUMULATE  "     else\n";
+               print FILE_ACCUMULATE  "        s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+               print FILE_ACCUMULATE  "     end if\n\n";
+
+            }
+
+         } elsif ($accumcond eq "true") {
+
+            $accumcond = " ";
+            $accumold  = " ";
+
             print FILE_ACCUMULATE  "  end if\n\n";
-         } else {
-            print FILE_ACCUMULATE  "  if (k==1) then\n";
-            print FILE_ACCUMULATE  "     ",$var,"_a = w*s",$var,"\n";
-            print FILE_ACCUMULATE  "  else if (k<niter) then\n";
-            print FILE_ACCUMULATE  "     ",$var,"_a = ",$var,"_a + w*s",$var,"\n";
+            print FILE_ACCUMULATE  "  if (.not.last) then\n";
+            print FILE_ACCUMULATE  "     ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
             print FILE_ACCUMULATE  "  else\n";
             print FILE_ACCUMULATE  "     s",$var,"  = ",$var,"_a + w*s",$var,"\n";
             print FILE_ACCUMULATE  "  end if\n\n";
+
+         } else {
+
+            print FILE_ACCUMULATE  "  if (.not.last) then\n";
+            print FILE_ACCUMULATE  "     ",$var,"_a = merge(w*s",$var,",",$var,"_a + w*s",$var,",first)\n";
+            print FILE_ACCUMULATE  "  else\n";
+            print FILE_ACCUMULATE  "     s",$var,"  = ",$var,"_a + w*s",$var,"\n";
+            print FILE_ACCUMULATE  "  end if\n\n";
+
          }
+
       }
 
 #     Write to FILE_ALLOCATEARRAYS code to allocate memory.
@@ -415,6 +616,7 @@ while ($line=<INFILE>) {
          }
 
          if ($intent =~/^OUTPUT$/i) {
+
             print FILE_ALLOCATEARRAYS  $space,"  if (contains(outvars0D,\"",$var,"\").or. &\n";
             print FILE_ALLOCATEARRAYS  $space,"      contains(outvars1D,\"",$var,"\").or. &\n";
             print FILE_ALLOCATEARRAYS  $space,"      contains(outvars2D,\"",$var,"\")) then\n";
@@ -427,7 +629,9 @@ while ($line=<INFILE>) {
             print FILE_ALLOCATEARRAYS  $space,"     end do\n";
             print FILE_ALLOCATEARRAYS  $space,"     end if\n";
             print FILE_ALLOCATEARRAYS  $space,"  end if\n",$newline;
+
          } elsif ($intent =~ /^EVOLVE$/i) {
+
             print FILE_ALLOCATEARRAYS  $space,"  if (trim(status)=='on') then\n";
             print FILE_ALLOCATEARRAYS  $space,"     checkvars = trim(checkvars) // ',",$var,"'\n";
             print FILE_ALLOCATEARRAYS  $space,"     do box=0,Nb\n";
@@ -451,7 +655,9 @@ while ($line=<INFILE>) {
             print FILE_ALLOCATEARRAYS  $space,"        end do\n";
             print FILE_ALLOCATEARRAYS  $space,"     end do\n";
             print FILE_ALLOCATEARRAYS  $space,"  end if\n",$newline;
+
          } elsif ($intent =~ /^ELLIPTIC$/i) {
+
             print FILE_ALLOCATEARRAYS  $space,"  if (trim(status)=='on') then\n";
             print FILE_ALLOCATEARRAYS  $space,"     do box=0,Nb\n";
             print FILE_ALLOCATEARRAYS  $space,"        do level=min(1,box),Nl(box)\n";
@@ -474,27 +680,34 @@ while ($line=<INFILE>) {
             print FILE_ALLOCATEARRAYS  $space,"        end do\n";
             print FILE_ALLOCATEARRAYS  $space,"     end do\n";
             print FILE_ALLOCATEARRAYS  $space,"  end if\n",$newline;
+
          } elsif ($intent =~ /^AUXILIARY$/i) {
+
             print FILE_ALLOCATEARRAYS  $space,"  if (trim(status)=='on') then\n";
+
             if ($checkpoint eq "true") {
                print FILE_ALLOCATEARRAYS  $space,"     checkvars = trim(checkvars) // ',",$var,"'\n";
             }
-            if ($onelevel eq "true") {
-            } else {
-               print FILE_ALLOCATEARRAYS  $space,"     do box=0,Nb\n";
-               print FILE_ALLOCATEARRAYS  $space,"        do level=min(1,box),Nl(box)\n";
-               print FILE_ALLOCATEARRAYS  $space,"           allocate(grid(box,level)%",$var,"(1-ghost:Nrmaxl(box),1-ghost:Nzmaxl(box)))\n";
-               print FILE_ALLOCATEARRAYS  $space,"           grid(box,level)%",$var," = ",$zero,"\n";
-               print FILE_ALLOCATEARRAYS  $space,"        end do\n";
-               print FILE_ALLOCATEARRAYS  $space,"     end do\n";
-            }
+
+            print FILE_ALLOCATEARRAYS  $space,"     do box=0,Nb\n";
+            print FILE_ALLOCATEARRAYS  $space,"        do level=min(1,box),Nl(box)\n";
+            print FILE_ALLOCATEARRAYS  $space,"           allocate(grid(box,level)%",$var,"(1-ghost:Nrmaxl(box),1-ghost:Nzmaxl(box)))\n";
+            print FILE_ALLOCATEARRAYS  $space,"           grid(box,level)%",$var," = ",$zero,"\n";
+            print FILE_ALLOCATEARRAYS  $space,"        end do\n";
+            print FILE_ALLOCATEARRAYS  $space,"     end do\n";
+
             print FILE_ALLOCATEARRAYS  $space,"  end if\n",$newline;;
+
          } elsif ($intent =~ /^POINTER$/i) {
+
          } else {
+
             die "arrays.pl: Bad INTENT assignment in line ",$nline," of file arrays.config\n\n";
+
          }
 
          if ($storage =~ /^CONDITIONAL\s*\(.*\)/i) {
+
             print FILE_ALLOCATEARRAYS  "  else if (contains(outvars0D,\"",$var,"\").or. &\n";
             print FILE_ALLOCATEARRAYS  "           contains(outvars1D,\"",$var,"\").or. &\n";
             print FILE_ALLOCATEARRAYS  "           contains(outvars2D,\"",$var,"\")) then\n";
@@ -508,6 +721,7 @@ while ($line=<INFILE>) {
             print FILE_ALLOCATEARRAYS  "     end if\n";
             print FILE_ALLOCATEARRAYS  "     call die\n";
             print FILE_ALLOCATEARRAYS  "  end if\n\n";
+
          }
 
       }
@@ -515,48 +729,113 @@ while ($line=<INFILE>) {
 #     Now write to FILE_GRABARRAY code to compare array name.
 
       if ($intent !~ /^POINTER$/i) {
+
          print FILE_GRABARRAY "  if (varname=='",$var,"') then\n";
          print FILE_GRABARRAY "     exists = .true.\n";
          print FILE_GRABARRAY "     grabvar => ",$var,"\n";
+
          if ($intent =~ /^EVOLVE$/i) {
+
             print FILE_GRABARRAY "     grabvar_bound_rL => ",$var,"_bound_rL\n";
             print FILE_GRABARRAY "     grabvar_bound_rR => ",$var,"_bound_rR\n";
             print FILE_GRABARRAY "     grabvar_bound_zL => ",$var,"_bound_zL\n";
             print FILE_GRABARRAY "     grabvar_bound_zR => ",$var,"_bound_zR\n";
+
          }
+
          print FILE_GRABARRAY "  end if\n\n";
+
       }
 
       if ($intent =~ /^EVOLVE$/i) {
+
          print FILE_GRABARRAY "  if (varname=='s",$var,"') then\n";
          print FILE_GRABARRAY "     exists = .true.\n";
          print FILE_GRABARRAY "     grabvar => s",$var,"\n";
          print FILE_GRABARRAY "  end if\n\n";
+
       }
 
 #     Write to FILE_SAVEOLD code to save old variables.
 
       if ($intent =~ /EVOLVE/i) {
+
          if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
             $cond = $1;
-            print FILE_SAVEOLD  "  if (",$cond,") then\n";
-            print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
-            print FILE_SAVEOLD  "     do i=0,ghost-1\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
-            print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
-            print FILE_SAVEOLD  "     end do\n";
+
+            if ($cond ne $saveold && $savecond ne "true") {
+
+               $savecond = "true";
+               $saveold = $cond;
+
+               print FILE_SAVEOLD  "! Condition: ",$cond,"\n\n";
+               print FILE_SAVEOLD  "  if (",$cond,") then\n\n";
+               print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
+               print FILE_SAVEOLD  "     do i=0,ghost-1\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+               print FILE_SAVEOLD  "     end do\n";
+
+            } elsif ($cond ne $saveold && $savecond eq "true") {
+
+               $saveold = $cond;
+
+               print FILE_SAVEOLD  "  end if\n\n";
+               print FILE_SAVEOLD  "! Condition: ",$cond,"\n\n";
+               print FILE_SAVEOLD  "  if (",$cond,") then\n\n";
+               print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
+               print FILE_SAVEOLD  "     do i=0,ghost-1\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+               print FILE_SAVEOLD  "     end do\n\n";
+
+           } else {
+
+               print FILE_SAVEOLD  "     ",$var,"_p = ",$var,"\n";
+               print FILE_SAVEOLD  "     do i=0,ghost-1\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+               print FILE_SAVEOLD  "        ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+               print FILE_SAVEOLD  "     end do\n\n";
+
+            }
+
+         } elsif ($savecond eq "true") {
+
+            $savecond = " ";
+            $saveold  = " ";
+
             print FILE_SAVEOLD  "  end if\n\n";
-         } else {
             print FILE_SAVEOLD  "  ",$var,"_p = ",$var,"\n";
             print FILE_SAVEOLD  "  do i=0,ghost-1\n";
             print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
@@ -572,7 +851,27 @@ while ($line=<INFILE>) {
             print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
             print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
             print FILE_SAVEOLD  "  end do\n\n";
+
+         } else {
+
+            print FILE_SAVEOLD  "  ",$var,"_p = ",$var,"\n";
+            print FILE_SAVEOLD  "  do i=0,ghost-1\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,2) = ",$var,"_bound_rL(i,:,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,1) = ",$var,"_bound_rL(i,:,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rL(i,:,0) = ",$var,"(1-ghost+i,:)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rR(i,:,2) = ",$var,"_bound_rR(i,:,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rR(i,:,1) = ",$var,"_bound_rR(i,:,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_rR(i,:,0) = ",$var,"(Nr-i,:)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zL(:,i,2) = ",$var,"_bound_zL(:,i,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zL(:,i,1) = ",$var,"_bound_zL(:,i,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zL(:,i,0) = ",$var,"(:,1-ghost+i)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,2) = ",$var,"_bound_zR(:,i,1)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,1) = ",$var,"_bound_zR(:,i,0)\n";
+            print FILE_SAVEOLD  "     ",$var,"_bound_zR(:,i,0) = ",$var,"(:,Nz-i)\n";
+            print FILE_SAVEOLD  "  end do\n\n";
+
          }
+
       }
 
 #     Write to FILE_SIMPLEBOUNDARIES code to apply simple boundary conditions.
@@ -580,8 +879,11 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if (($intent =~ /EVOLVE/i) && ($nobound eq "false")) {
+
             if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
                 $cond = $1;
+
                 print FILE_SIMPLEBOUNDARY  "  if (",$cond,") then\n";
 	        print FILE_SIMPLEBOUNDARY  "     if (boundtype=='static') then\n";
 	        print FILE_SIMPLEBOUNDARY  "        s",$var,"(Nr,:) = 0.d0\n";
@@ -597,7 +899,9 @@ while ($line=<INFILE>) {
 	        print FILE_SIMPLEBOUNDARY  "        end if\n";
                 print FILE_SIMPLEBOUNDARY  "     end if\n";
                 print FILE_SIMPLEBOUNDARY  "  end if\n";
+
             } else {
+
 	        print FILE_SIMPLEBOUNDARY  "  if (boundtype=='static') then\n";
 	        print FILE_SIMPLEBOUNDARY  "     s",$var,"(Nr,:) = 0.d0\n";
 	        print FILE_SIMPLEBOUNDARY  "     s",$var,"(:,Nz) = 0.d0\n";
@@ -611,7 +915,9 @@ while ($line=<INFILE>) {
 	        print FILE_SIMPLEBOUNDARY  "        s",$var,"(:,1-ghost) = s",$var,"(:,2-ghost)\n";
 	        print FILE_SIMPLEBOUNDARY  "     end if\n";
                 print FILE_SIMPLEBOUNDARY  "  end if\n";
+
             }
+
          }
 
       }
@@ -621,26 +927,94 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if ($intent =~ /EVOLVE/i) {
+
             if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
                $cond = $1;
-               print FILE_SYMMETRIES_R  "     if (",$cond,") then\n";
-               if ($symr == "+1") {
-                  print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
-               } elsif ($symr == "-1") {
-                  print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = - ",$var,"(i,:)\n";
+
+               if ($cond ne $symrold && $symrcond ne "true") {
+
+                  $symrcond = "true";
+                  $symrold  = $cond;
+
+                  print FILE_SYMMETRIES_R  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYMMETRIES_R  "  if (",$cond,") then\n";
+                  print FILE_SYMMETRIES_R  "     do i=1,ghost\n";
+
+                  if ($symr == "+1") {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
+                  } elsif ($symr == "-1") {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = - ",$var,"(i,:)\n";
+                  } else {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
+                  }
+
+               } elsif ($cond ne $symrold && $symrcond eq "true") {
+
+                  $symrold = $cond;
+
+                  print FILE_SYMMETRIES_R  "     end do\n";
+                  print FILE_SYMMETRIES_R  "  end if\n\n";
+                  print FILE_SYMMETRIES_R  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYMMETRIES_R  "  if (",$cond,") then\n";
+                  print FILE_SYMMETRIES_R  "     do i=1,ghost\n";
+
+                  if ($symr == "+1") {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
+                  } elsif ($symr == "-1") {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = - ",$var,"(i,:)\n";
+                  } else {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
+                  }
+
                } else {
-                  print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
+
+                  if ($symr == "+1") {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
+                  } elsif ($symr == "-1") {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = - ",$var,"(i,:)\n";
+                  } else {
+                     print FILE_SYMMETRIES_R  "        ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
+                  }
+
                }
-               print FILE_SYMMETRIES_R  "     end if\n\n";
-            } else {
+
+            } elsif ($symrcond eq "true") {
+
+               $symrcond = " ";
+               $symrold  = " ";
+
+               print FILE_SYMMETRIES_R  "     end do\n";
+               print FILE_SYMMETRIES_R  "  end if\n\n";
+
+               print FILE_SYMMETRIES_R  "  do i=1,ghost\n";
+
                if ($symr == "+1") {
-	          print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = + ",$var,"(i,:)\n\n";
+                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
                } elsif ($symr == "-1") {
-                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = - ",$var,"(i,:)\n\n";
-               } elsif ($symr != "0") {
-                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n\n";
+                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = - ",$var,"(i,:)\n";
+               } else {
+                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
                }
+
+               print FILE_SYMMETRIES_R  "  end do\n\n";
+
+            } else {
+
+               print FILE_SYMMETRIES_R  "  do i=1,ghost\n";
+
+               if ($symr == "+1") {
+	          print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = + ",$var,"(i,:)\n";
+               } elsif ($symr == "-1") {
+                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = - ",$var,"(i,:)\n";
+               } elsif ($symr != "0") {
+                  print FILE_SYMMETRIES_R  "     ",$var,"(1-i,:) = ",$symr,"*",$var,"(i,:)\n";
+               }
+
+               print FILE_SYMMETRIES_R  "  end do\n\n";
+
             }
+
          }
 
       }
@@ -650,43 +1024,257 @@ while ($line=<INFILE>) {
       if ($zerod eq "false") {
 
          if ($intent =~ /EVOLVE/i) {
+
             if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
                $cond = $1;
-               print FILE_SYMMETRIES_Z  "     if (",$cond,") then\n";
-               if ($symz == "+1") {
-                  print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
-               } elsif ($symz == "-1") {
-                  print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = - ",$var,"(:,j)\n";
-               } else {
-                  print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
+
+               if ($cond ne $symzold && $symzcond ne "true") {
+
+                  $symzcond = "true";
+                  $symzold  = $cond;
+
+                  print FILE_SYMMETRIES_Z  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYMMETRIES_Z  "  if (",$cond,") then\n";
+                  print FILE_SYMMETRIES_Z  "     do j=1,ghost\n";
+
+                  if ($symz == "+1") {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
+                  } elsif ($symz == "-1") {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = - ",$var,"(:,j)\n";
+                  } else {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
+                  }
+
+               } elsif ($cond ne $symzold && $symzcond eq "true") {
+
+                  $symzold = $cond;
+
+                  print FILE_SYMMETRIES_Z  "     end do\n";
+                  print FILE_SYMMETRIES_Z  "  end if\n\n";
+                  print FILE_SYMMETRIES_Z  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYMMETRIES_Z  "  if (",$cond,") then\n";
+                  print FILE_SYMMETRIES_Z  "     do j=1,ghost\n";
+
+                  if ($symz == "+1") {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
+                  } elsif ($symz == "-1") {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = - ",$var,"(:,j)\n";
+                  } else {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
+                  }
+
+              } else {
+
+                  if ($symz == "+1") {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
+                  } elsif ($symz == "-1") {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = - ",$var,"(:,j)\n";
+                  } else {
+                     print FILE_SYMMETRIES_Z  "        ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
+                  }
+
                }
-               print FILE_SYMMETRIES_Z  "     end if\n\n";
-            } else {
+
+            } elsif ($symzcond eq "true") {
+
+               $symzcond = " ";
+               $symzold  = " ";
+
+               print FILE_SYMMETRIES_Z  "     end do\n";
+               print FILE_SYMMETRIES_Z  "  end if\n\n";
+
+               print FILE_SYMMETRIES_Z  "  do j=1,ghost\n";
+
                if ($symz == "+1") {
-	          print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = + ",$var,"(:,j)\n\n";
+	          print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
                } elsif ($symz == "-1") {
-                  print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = - ",$var,"(:,j)\n\n";
+                  print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = - ",$var,"(:,j)\n";
                } elsif ($symr != "0") {
-                  print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n\n";
+                  print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
                }
+
+               print FILE_SYMMETRIES_Z  "  end do\n\n";
+
+            } else {
+
+               print FILE_SYMMETRIES_Z  "  do j=1,ghost\n";
+
+               if ($symz == "+1") {
+	          print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = + ",$var,"(:,j)\n";
+               } elsif ($symz == "-1") {
+                  print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = - ",$var,"(:,j)\n";
+               } elsif ($symr != "0") {
+                  print FILE_SYMMETRIES_Z  "     ",$var,"(:,1-j) = ",$symz,"*",$var,"(:,j)\n";
+               }
+
+               print FILE_SYMMETRIES_Z  "  end do\n\n";
+
             }
+
          }
 
       }
 
-#     Write to FILE_SYNCALL code to synchronize across processors.
+#     Write to FILE_SYNCGEO code to synchronize across processors.
 
       if ($zerod eq "false") {
 
          if ($intent =~ /EVOLVE/i) {
-            if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
-                $cond = $1;
-                print FILE_SYNCALL  "  if (",$cond,") then\n";
-	        print FILE_SYNCALL  "     call sync(",$var,")\n";
-                print FILE_SYNCALL  "  end if\n\n";
-            } else {
-	        print FILE_SYNCALL  "  call sync(",$var,")\n\n";
+
+            if ($storage !~ (/^CONDITIONAL\s*\((.*)\)/i) && ($shift ne "true") && ($angmom ne "true") && ($shiftangmom ne "true")) {
+
+                $shiftangmom = "false";
+                $shift = "false";
+                $angmom = "false";
+
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
+            } elsif (($storage =~ /shift/i) && ($storage =~ /angmom/i)) {
+
+                if (($shift eq "true") || ($angmom eq "true")) {
+
+                   $shiftangmom = "true";
+                   $shift = "false";
+                   $angmon = "false";
+
+                   print FILE_SYNCGEO  "  end if\n\n";
+                   print FILE_SYNCGEO  "  if (angmom.and.(shift/=\"none\")) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } elsif ($shiftangmom ne "true") {
+
+                   $shiftangmom = "true";
+
+                   print FILE_SYNCGEO  "  if (angmom.and.(shift/=\"none\")) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } else {
+
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                }
+
+            } elsif ($storage =~ /shift/i) {
+
+                if (($shiftangmom eq "true") || ($angmom eq "true")) {
+
+                   $shiftangmom = "false";
+                   $angmon = "false";
+                   $shift = "true";
+
+                   print FILE_SYNCGEO  "  end if\n\n";
+                   print FILE_SYNCGEO  "  if (shift/=\"none\") then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } elsif ($shift ne "true") {
+
+                   $shift = "true";
+
+                   print FILE_SYNCGEO  "  if (shift/=\"none\") then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } else {
+
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                }
+
+            } elsif ($storage =~ /angmom/i) {
+
+                if (($shift eq "true") || ($shiftangmom eq "true")) {
+
+                   $shiftangmom = "false";
+                   $angmon = "true";
+                   $shift = "false";
+
+                   print FILE_SYNCGEO  "  end if\n\n";
+                   print FILE_SYNCGEO  "  if (angmom) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } elsif ($angmom ne "true") {
+
+                   $angmom = "true";
+
+                   print FILE_SYNCGEO  "  if (angmom) then\n";
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                } else {
+
+	           print FILE_SYNCGEO  "     call sync(",$var,")\n";
+
+                }
+
+            } elsif ($shiftangmom eq "true") {
+
+                $shiftangmom = "false";
+
+                print FILE_SYNCGEO  "  end if\n\n";
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
+            } elsif ($shift eq "true") {
+
+                $shift = "false";
+
+                print FILE_SYNCGEO  "  end if\n\n";
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
+            } elsif ($angmom eq "true") {
+
+                $angmom = "false";
+
+                print FILE_SYNCGEO  "  end if\n\n";
+	        print FILE_SYNCGEO  "  call sync(",$var,")\n\n";
+
             }
+
+         }
+
+      }
+
+#     Write to FILE_SYNCMATT code to synchronize across processors.
+
+      if ($zerod eq "false") {
+
+         if ($intent =~ /EVOLVE/i) {
+
+            if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i && $storage !~ /shift/i) {
+
+               $cond = $1;
+
+               if ($cond ne $syncold && $synccond ne "true" && $cond ne "angmom") {
+
+                  $synccond = "true";
+                  $syncold = $cond;
+
+                  print FILE_SYNCMATT  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYNCMATT  "  if (",$cond,") then\n";
+	          print FILE_SYNCMATT  "     call sync(",$var,")\n";
+
+               } elsif ($cond ne $syncold && $synccond eq "true" && $cond ne "angmom") {
+
+                  $syncold = $cond;
+
+                  print FILE_SYNCMATT  "  end if\n\n";
+                  print FILE_SYNCMATT  "! Condition: ",$cond,"\n\n";
+                  print FILE_SYNCMATT  "  if (",$cond,") then\n";
+	          print FILE_SYNCMATT  "     call sync(",$var,")\n";
+
+               } elsif ($cond ne "angmom") {
+
+	          print FILE_SYNCMATT  "     call sync(",$var,")\n";
+
+               }
+
+            } elsif ($synccond eq "true") {
+
+                $synccond = " ";
+                $syncold  = " ";
+
+                print FILE_SYNCMATT  "  end if\n\n";
+
+            }
+
          }
 
       }
@@ -694,21 +1282,58 @@ while ($line=<INFILE>) {
 #     Write to FILE_UPDATE code to update variables.
 
       if ($intent =~ /EVOLVE/i) {
+
          if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
             $cond = $1;
-            print FILE_UPDATE  "  if (",$cond,") then\n";
-            print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            if ($cond ne $updateold && $updatecond ne "true") {
+
+               $updatecond = "true";
+               $updateold = $cond;
+
+               print FILE_UPDATE  "! Condition: ",$cond,"\n\n";
+               print FILE_UPDATE  "  if (",$cond,") then\n";
+               print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            } elsif ($cond ne $updateold && $updatecond eq "true") {
+
+               $updateold = $cond;
+
+               print FILE_UPDATE  "  end if\n\n";
+               print FILE_UPDATE  "! Condition: ",$cond,"\n\n";
+               print FILE_UPDATE  "  if (",$cond,") then\n";
+               print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            } else {
+
+               print FILE_UPDATE  "     ",$var," = ",$var,"_p + dtw*s",$var,"\n";
+
+            }
+
+         } elsif ($updatecond eq "true") {
+
+            $updatecond = " ";
+            $updateold  = " ";
+
             print FILE_UPDATE  "  end if\n\n";
-         } else {
             print FILE_UPDATE  "  ",$var," = ",$var,"_p + dtw*s",$var,"\n\n";
+
+         } else {
+
+            print FILE_UPDATE  "  ",$var," = ",$var,"_p + dtw*s",$var,"\n\n";
+
          }
+
       }
 
 #     Write to FILE_BOUNDINTERP code to interpolate variables at boundaries.
 
       if ($intent =~ /EVOLVE/i) {
       #if (($intent =~ /EVOLVE/i) && ($nobound eq "false")) {
+
          if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
             print FILE_BOUNDINTERP  "  if (",$cond,") then\n";
             print FILE_BOUNDINTERP  "     interpvar => grid(bbox,level-1)%",$var,"\n";
             print FILE_BOUNDINTERP  "     aux1 = interp(bbox,level-1,r0,z0,flag2)\n";
@@ -737,7 +1362,9 @@ while ($line=<INFILE>) {
             print FILE_BOUNDINTERP  "        end if\n";
             print FILE_BOUNDINTERP  "     end if\n";
             print FILE_BOUNDINTERP  "  end if\n\n";
+
          } else {
+
             print FILE_BOUNDINTERP  "  interpvar => grid(bbox,level-1)%",$var,"\n";
             print FILE_BOUNDINTERP  "  aux1 = interp(bbox,level-1,r0,z0,flag2)\n";
             print FILE_BOUNDINTERP  "  call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)\n";
@@ -764,14 +1391,19 @@ while ($line=<INFILE>) {
             print FILE_BOUNDINTERP  "        end if\n";
             print FILE_BOUNDINTERP  "     end if\n";
             print FILE_BOUNDINTERP  "  end if\n\n";
+
          }
+
       }
 
 #     Write to FILE_RESTRICTCOPY code to restrict variables to coarse grid.
 
       if ($intent =~ /EVOLVE/i) {
+
          if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
             $cond = $1;
+
             print FILE_RESTRICTINTERP  "  if (",$cond,") then\n";
             print FILE_RESTRICTINTERP  "     interpvar => grid(box,level)%",$var,"\n";
             print FILE_RESTRICTINTERP  "     aux1 = interp(box,level,r0,z0,flag2)\n";
@@ -780,21 +1412,28 @@ while ($line=<INFILE>) {
             print FILE_RESTRICTINTERP  "        grid(bbox,level-1)%",$var,"(i,j) = aux2\n";
             print FILE_RESTRICTINTERP  "     end if\n";
             print FILE_RESTRICTINTERP  "  end if\n\n";
+
          } else {
+
             print FILE_RESTRICTINTERP  "  interpvar => grid(box,level)%",$var,"\n";
             print FILE_RESTRICTINTERP  "  aux1 = interp(box,level,r0,z0,flag2)\n";
             print FILE_RESTRICTINTERP  "  call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)\n";
             print FILE_RESTRICTINTERP  "  if (flag1) then\n";
             print FILE_RESTRICTINTERP  "     grid(bbox,level-1)%",$var,"(i,j) = aux2\n";
             print FILE_RESTRICTINTERP  "  end if\n\n";
+
          }
+
       }
 
 #    Write to FILE_INTERSECTCOPY code to interpolate on box intersections.
 
      if (($intent =~ /EVOLVE/i || $intent =~ /AUXILIARY/) && ($nosync eq "false")) {
+
          if ($storage =~ /^CONDITIONAL\s*\((.*)\)/i) {
+
             $cond = $1;
+
             print FILE_INTERSECTINTERP  "  if (",$cond,") then\n";
             print FILE_INTERSECTINTERP  "     interpvar => grid(b2,level)%",$var,"\n";
             print FILE_INTERSECTINTERP  "     aux1 = interp(b2,level,r0,z0,flag2)\n";
@@ -803,14 +1442,18 @@ while ($line=<INFILE>) {
             print FILE_INTERSECTINTERP  "        grid(b1,level)%",$var,"(i,j) = aux2\n";
             print FILE_INTERSECTINTERP  "     end if\n";
             print FILE_INTERSECTINTERP  "  end if\n\n";
+
          } else {
+
             print FILE_INTERSECTINTERP  "  interpvar => grid(b2,level)%",$var,"\n";
             print FILE_INTERSECTINTERP  "  aux1 = interp(b2,level,r0,z0,flag2)\n";
             print FILE_INTERSECTINTERP  "  call MPI_ALLREDUCE(aux1,aux2,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)\n";
             print FILE_INTERSECTINTERP  "  if (flag1) then\n";
             print FILE_INTERSECTINTERP  "     grid(b1,level)%",$var,"(i,j) = aux2\n";
             print FILE_INTERSECTINTERP  "  end if\n\n";
+
          }
+
       }
 
 #  Close two main conditional statements.
@@ -828,15 +1471,15 @@ close(INFILE);
 
 print FILE_ARRAYS "\n  end module arrays\n\n";
 
-# Write ending of file accumulate.f90.
-
-print FILE_ACCUMULATE "  end subroutine accumulate\n\n";
-
 # Write ending of file allocatearrays.f90
 
 print FILE_ALLOCATEARRAYS "  end subroutine allocatearrays\n\n";
 
 # Write ending of file currentgrid.f90.
+
+if ($gridcond eq "true") {
+   print FILE_CURRENTGRID  "  end if\n\n";
+}
 
 print FILE_CURRENTGRID "  end subroutine currentgrid\n\n";
 
@@ -859,7 +1502,19 @@ print FILE_MYTYPES "\n";
 print FILE_MYTYPES "  end type gridfuncs\n\n";
 print FILE_MYTYPES "  end module mytypes\n\n";
 
+# Write ending of file accumulate.f90.
+
+if ($accumcond eq "true") {
+   print FILE_ACCUMULATE "  end if\n\n";
+}
+
+print FILE_ACCUMULATE "  end subroutine accumulate\n\n";
+
 # Write ending of file saveold.f90.
+
+if ($savecond eq "true") {
+   print FILE_SAVEOLD  "  end if\n\n";
+}
 
 print FILE_SAVEOLD "  end subroutine saveold\n\n";
 
@@ -870,19 +1525,39 @@ print FILE_SIMPLEBOUNDARY "  end subroutine simpleboundary\n\n";
 
 # Write ending of file symmetries_r.f90.
 
-print FILE_SYMMETRIES_R  "  end do\n\n";
+if ($symrcond eq "true") {
+   print FILE_SYMMETRIES_R  "     end do\n";
+   print FILE_SYMMETRIES_R  "  end if\n\n";
+}
+
 print FILE_SYMMETRIES_R  "  end subroutine symmetries_r\n\n";
 
 # Write ending of file symmetries_z.f90.
 
-print FILE_SYMMETRIES_Z  "  end do\n\n";
+if ($symzcond eq "true") {
+   print FILE_SYMMETRIES_Z  "     end do\n";
+   print FILE_SYMMETRIES_Z  "  end if\n\n";
+}
+
 print FILE_SYMMETRIES_Z  "  end subroutine symmetries_z\n\n";
 
-# Write ending of file syncall.f90.
+# Write ending of file syncgeo.f90.
 
-print FILE_SYNCALL  "  end subroutine syncall\n\n";
+print FILE_SYNCGEO  "  end subroutine syncgeo\n\n";
+
+# Write ending of file syncmatt.f90.
+
+if ($synccond eq "true") {
+   print FILE_SYNCMATT  "  end if\n\n";
+}
+
+print FILE_SYNCMATT  "  end subroutine syncmatt\n\n";
 
 # Write ending of file update.f90.
+
+if ($updatecond eq "true") {
+   print FILE_UPDATE  "  end if\n\n";
+}
 
 print FILE_UPDATE "  end subroutine update\n\n";
 
@@ -898,7 +1573,8 @@ close(FILE_SAVEOLD);
 close(FILE_SIMPLEBOUNDARY);
 close(FILE_SYMMETRIES_R);
 close(FILE_SYMMETRIES_Z);
-close(FILE_SYNCALL);
+close(FILE_SYNCGEO);
+close(FILE_SYNCMATT);
 close(FILE_UPDATE);
 
 close(FILE_BOUNDINTERP);

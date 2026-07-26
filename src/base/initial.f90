@@ -66,6 +66,7 @@
 !       Lapse.
 
         alpha = one
+        dtalpha = zero
 
 !       Shift.
 
@@ -87,6 +88,9 @@
         phi = zero
         chi = one
 
+        psi2 = one
+        psi4 = one
+
 !       Metric Functions.
 
         A = one
@@ -94,9 +98,19 @@
         H = one
         C = zero
 
+        g_A = one
+        g_B = one
+        g_H = one
+        g_C = zero
+
         if (angmom) then
+
            C1 = zero
            C2 = zero
+
+           g_C1 = zero
+           g_C2 = zero
+
         end if
 
 !       Extrinsic curvature.
@@ -397,6 +411,42 @@
         end if
         call die
      end if
+  end if
+
+
+! **********************
+! ***   BOSON STAR   ***
+! **********************
+
+! Boson star initial data.
+
+  if (idata=="bosonstar") then
+
+     if (contains(mattertype,"complex")) then
+
+        if (complexpotential=="none") then
+           if (rank==0) then
+              print *, 'For boson star initial data we need a massive scalar field.'
+              print *, 'Aborting! (subroutine initial)'
+              print *
+           end if
+           call die
+        else
+           call idata_BosonstarCF
+        end if
+
+     else
+
+        if (rank==0) then
+           print *, 'Boson star initial data needs "complex" type matter ...'
+           print *, 'Aborting! (subroutine initial)'
+           print *
+        end if
+
+        call die
+
+     end if
+
   end if
 
 

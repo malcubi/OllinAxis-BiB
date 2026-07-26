@@ -129,6 +129,7 @@
 
      if (rank==0) then
         print *, 'Calculating Brill wave initial data with WaveElliptic solver ...'
+        print *
      end if
 
      call wave_elliptic('flat','one')
@@ -147,6 +148,7 @@
 
      if (rank==0) then
         print *, 'Calculating Brill wave initial data with SOR elliptic solver ...'
+        print *
      end if
 
      call sor_elliptic('flat','one')

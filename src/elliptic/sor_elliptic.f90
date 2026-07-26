@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/elliptic/sor_elliptic.f90,v 1.13 2021/02/24 22:35:01 malcubi Exp $
 
   subroutine sor_elliptic(type,init)
 
@@ -73,6 +72,7 @@
   if (order=='four') then
      if (rank==0) then
         print *, 'WARNING: The SOR solver is only second order accurate!'
+        print *
      end if
   end if
 
@@ -356,8 +356,7 @@
               end do
            end do
 
-!          Now loop over current grid to find coefficients
-!          of elliptic equation.
+!          Now loop over current grid to find coefficients of elliptic equation.
 
            imax = Nr+ghost
            jmax = Nz+ghost
@@ -536,6 +535,8 @@
 
 
 
+
+
   subroutine sor(sor_a,sor_b,sor_c,sor_d,sor_e,sor_f,sor_g,sor_h,sor_i,sor_j,sor_u,imax,jmax,rjac,uinf,bound)
 
 ! **********************************************
@@ -656,7 +657,7 @@
                     + sor_g(i,j)*sor_u(i+1,j+1) + sor_h(i,j)*sor_u(i-1,j-1) &
                     + sor_i(i,j)*sor_u(i+1,j-1) + sor_j(i,j)*sor_u(i-1,j+1) &
                     + sor_e(i,j)*sor_u(i,j) - sor_f(i,j)
-              anorm = anorm + abs(resid)
+              anorm = anorm + resid**2
               sor_u(i,j) = sor_u(i,j) - omega*resid/sor_e(i,j)
            end do
 
@@ -665,6 +666,12 @@
         end do
 
         isw = 3 - isw
+
+!       We take as the true residual the root mean square across all grid points.
+!       The reason is that otherwise if we have more points (larger grid for example),
+!       and similar errors at each point, the total residual would just increase.
+
+        anorm = sqrt(anorm/dble(imax*jmax))
 
 !       Overrelaxation factor.
 
@@ -771,6 +778,7 @@
      if (ganorm<ELL_epsilon) then
         if (rank==0) then
            write (*,'(A,i5,A)') ' SOR:   Solution converged after ',n,' iterations!'
+           print *
         end if
         return
      end if
@@ -782,8 +790,6 @@
   if (rank==0) then
      write (*,'(A,i6,A)') ' SOR:   Iterations did not converge after ',ELL_maxiter,' iterations.'
   end if
-
-  !call die
 
 
 ! ***************

@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/sources_lapse.f90,v 1.12 2021/03/09 00:37:59 malcubi Exp $
 
   subroutine sources_lapse
 
@@ -67,10 +66,6 @@
      if (gauge_eta/=0.d0) then
         salpha = salpha - gauge_eta*log(abs(alpha))
      end if
-
-!    We don't use dtalpha.
-
-     dtalpha = 0.d0
 
 
 ! ***********************************

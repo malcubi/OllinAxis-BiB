@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/matter/stressenergy.f90,v 1.11 2021/08/20 17:39:27 malcubi Exp $
 
   subroutine stressenergy
 
@@ -121,10 +120,15 @@
 !
 !
 ! Note: A scalar field in axisymmetry does not have angular dependency.
+!
 ! From the above stress-energy tensor one finds for rho:
 !
+!                 2        i
+! rho  =  1/2 [ pi  +  X  X  ]  +  V
+!                       i
+! 
 !                 2         rr  2         zz   2           rz
-! rho  =  1/2 ( pi  +  gamma   X  +  gamma    X  +  2 gamma  X  X  )  +  V
+!      =  1/2 [ pi  +  gamma   X  +  gamma    X  +  2 gamma  X  X  ]  +  V
 !                               r              z              r  z
 !
 ! where gamma is the physical spatial metric (so don't forget
@@ -147,7 +151,17 @@
 !                           2          mn
 ! S   =  X X  +  gamma  ( pi   -  gamma   X X   -  2 V) / 2
 !  ij     i j         ij                   m n
-
+!
+! Notice in particular that:
+!
+!               2        i
+! trS  =  ( 3 pi  -  X  X  ) / 2  -  3 V
+!                     i
+!
+! which implies:
+!                     2
+! rjo + trS  =  2 ( pi  -  V )
+ 
   if (contains(mattertype,"scalar")) then
 
 !    Energy density.
@@ -201,8 +215,8 @@
 ! T       =  (d  phi) d  phi  -  g      | d    phi d    phi  +  2 V | / 2
 !  mu nu       mu      nu         mu nu \           beta            /
 !
-! But notice that in ths case the potential must be a function
-! of the squqared norm of the scalar field.
+! But notice that in this case the potential must be a function
+! of the squared norm of the scalar field.
 !
 ! From this one gets the same values for (rho,J,S) as in the case
 ! of a real scalar field but twice (for real and imaginary parts).
@@ -256,12 +270,45 @@
                  + lambda*psi4*auxarray
      end if
 
+!    Boson density and current.  These are calculated here and not
+!    in the analysis routine since for charged fields we need the
+!    current for the source of the electric field.
+!
+!    For a complex scalar field there is a conserved Noether
+!    current given by:
+!
+!                         *                       *
+!    j    =  (i/2)  (  phi  d  phi  -  phi d   phi )
+!     mu                     mu             mu
+!
+!         =  ( phiI  d  phiR  -  phiR  d  phiI )
+!                     mu                mu
+!
+!    From this we can define the boson "density" as:
+!
+!                  mu
+!    Bdens   =  - n   j   =  phiR*piI  -  phiI*piR
+!                      mu
+!
+!    and the boson "flux" as:
+!
+!
+!    Bflux   =  j
+!         i      i
+
+     complex_Bdens = complex_phiR*complex_piI - complex_phiI*complex_piR
+
+     complex_Bflux_r = complex_phiI*complex_xiR_r - complex_phiR*complex_xiI_r   ! Index down.
+     complex_Bflux_z = complex_phiI*complex_xiR_z - complex_phiR*complex_xiI_z   ! Index down.
+
   end if
 
 
 ! **************************************
 ! ***   NO MORE MATTER FIELDS HERE   ***
 ! **************************************
+
+! STOP:  DON'T ADD NEW MATTER FIELDS AFTER THIS POINT!
 
 
 ! **********************************

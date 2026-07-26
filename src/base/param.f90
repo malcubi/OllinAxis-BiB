@@ -366,7 +366,7 @@
 
 ! idata:         Type of initial data.
 
-  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw)
+  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar)
 
 
 ! *********************
@@ -451,22 +451,40 @@
 !                     none  =  no elliptic solver active
 !                     wave  =  WaveElliptic
 !                     sor   =  Succesive Overrelaxation (SOR)
-!
 ! ELL_verbose    Do we output iterations?
 ! ELL_Noutput    How often do we do output for iterations?
 ! ELL_maxiter    Maximum number of iterations for elliptic solver.
 ! ELL_epsilon    Tolerance for elliptic solver.
-!
-! WE_eta         Damping coefficient for WaveElliptic.
 
   character(30) :: ELL_solver = "wave"  ! range = (none,wave,sor)
 
   logical :: ELL_verbose = .false.
-  integer :: ELL_Noutput = 1
-  integer :: ELL_maxiter = 100000
-  real(8) :: ELL_epsilon = 1.d-5
 
-  real(8) :: WE_eta = 1.d-2
+  integer :: ELL_Noutput = 10
+  integer :: ELL_maxiter = 100000
+
+  real(8) :: ELL_epsilon = 1.d-8
+
+! WE_verbose     Do we output iterations?
+! WE_Noutput     How often do we do output for iterations?
+! WE_method      Integration method for WaveElliptic.
+! WE_eta         Damping coefficient for WaveElliptic.
+! WE_diss        Dissipation coefficient for WaveElliptic.
+! WE_dtfac       Courant factor for WaveElliptic.
+! WE_epsilon     Tolerance for WaveElliptic solver.
+! WE_maxiter     Maximum number of iterations for WaveElliptic.
+
+  character(30) :: WE_method = "icn"    ! range = (icn,rk4)
+
+  logical :: WE_verbose = .false.
+
+  integer :: WE_Noutput = 100
+  integer :: WE_maxiter = 100000
+
+  real(8) :: WE_eta = 1.d0
+  real(8) :: WE_diss = 0.1d0
+  real(8) :: WE_dtfac = 0.6d0
+  real(8) :: WE_epsilon = 1.d-8
 
 
 ! ***********************
@@ -656,6 +674,26 @@
   real(8) :: complexI_z0 = 0.0
   real(8) :: complexI_sr0 = 1.0
   real(8) :: complexI_sz0 = 1.0
+
+! Boson star initial data:
+!
+! boson_phi0:        Boson star parameter for value at origin (see boson_factor).
+! boson_factor:      Normalization factor:
+!                         * physical:  phi(r<<1) ~ phi0
+!                         * harmonic:  phi(r<<1) ~ phi0/sqrt(4pi*(2l+1))
+! boson_omega:       Frequency of the boson star.
+
+  real(8) :: boson_phi0  = 0.d0
+
+  real(8) :: boson_omega = 0.d0
+
+  character(1000) :: boson_factor = "physical" ! range=(physical,harmonic)
+
+! Boson star perturbation.
+!
+! bosongauss:        Do we add an initial perturbation to the boson star solution?
+
+  logical :: bosongauss = .false.
 
 
 ! ********************************

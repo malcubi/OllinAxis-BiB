@@ -45,45 +45,45 @@
   if (angmom) then
 
      RIC_A = RIC_A + C*Dr_Delta_z*r + A*Dr_Delta_r + C1*Dr_Delta_p*r**3 &
-           + half*(Delta_z*Dz_A + Delta_r*Dr_A)
+           + half*(DelDef_z*Dz_A + DelDef_r*Dr_A)
 
      RIC_B = RIC_B + C*Dz_Delta_r*r + B*Dz_Delta_z + Dz_Delta_p*r**2*C2 &
-           + half*(Delta_r*Dr_B + Delta_z*Dz_B)
+           + half*(DelDef_r*Dr_B + DelDef_z*Dz_B)
 
-     RIC_H = RIC_H + half*(Delta_r*Dr_H + Delta_z*Dz_H) + Delta_r*H/r
+     RIC_H = RIC_H + half*(DelDef_r*Dr_H + DelDef_z*Dz_H) + DelDef_r*H/r
 
      RIC_C = RIC_C + half*C*(Dz_Delta_z + Dr_Delta_r) &
-           + half*(Delta_r*Dr_C + Delta_z*Dz_C) &
-           + half*(C*Delta_r + A*Dz_Delta_r + B*Dr_Delta_z)/r &
+           + half*(DelDef_r*Dr_C + DelDef_z*Dz_C) &
+           + half*(C*DelDef_r + A*Dz_Delta_r + B*Dr_Delta_z)/r &
            + half*(C1*Dz_Delta_p*r**2 + C2*Dr_Delta_p*r)
 
-     RIC_C1 = RIC_C1 + half*(Delta_r*Dr_C1 + Delta_z*Dz_C1 + C1*Dr_Delta_r) &
-           + half*(3.0*Delta_r*C1 + H*Dr_Delta_p + Dr_Delta_z*C2)/r
+     RIC_C1 = RIC_C1 + half*(DelDef_r*Dr_C1 + DelDef_z*Dz_C1 + C1*Dr_Delta_r) &
+           + half*(3.0*DelDef_r*C1 + H*Dr_Delta_p + Dr_Delta_z*C2)/r
 
-     RIC_C2 = RIC_C2 + half*(Delta_r*Dr_C2 + C2*Dz_Delta_z + C1*Dz_Delta_r*r) &
-           + half*(H*Dz_Delta_p + Delta_z*Dz_C2) + Delta_r*C2/r
+     RIC_C2 = RIC_C2 + half*(DelDef_r*Dr_C2 + C2*Dz_Delta_z + C1*Dz_Delta_r*r) &
+           + half*(H*Dz_Delta_p + DelDef_z*Dz_C2) + DelDef_r*C2/r
 
-     RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lamDef)/r + Dr_Delta_p*C1*r &
-           + half*(Delta_r*Dr_lambda + Delta_z*Dz_lambda)  &
-           +       ft6*(A*DD_Delta_rr + lamDef*Delta_r)/r &
+     RIC_lambda = RIC_lambda + (Dr_Delta_z*C + DelDef_r*lamDef)/r + Dr_Delta_p*C1*r &
+           + half*(DelDef_r*Dr_lambda + DelDef_z*Dz_lambda)  &
+           +       ft6*(A*DD_Delta_rr + lamDef*DelDef_r)/r &
            + (1.0-ft6)*(H*DD_Delta_rr/r + lamDef*Dr_Delta_r)
 
   else
 
      RIC_A = RIC_A + C*Dr_Delta_z*r + A*Dr_Delta_r &
-           + half*(Delta_r*Dr_A + Delta_z*Dz_A)
+           + half*(DelDef_r*Dr_A + DelDef_z*Dz_A)
 
      RIC_B = RIC_B + C*Dz_Delta_r*r + B*Dz_Delta_z &
-           + half*(Delta_r*Dr_B + Delta_z*Dz_B)
+           + half*(DelDef_r*Dr_B + DelDef_z*Dz_B)
 
-     RIC_H = RIC_H + half*(Delta_r*Dr_H + Delta_z*Dz_H) + Delta_r*H/r
+     RIC_H = RIC_H + half*(DelDef_r*Dr_H + DelDef_z*Dz_H) + Delta_r*H/r
 
      RIC_C = RIC_C + half*C*(Dr_Delta_r + Dz_Delta_z) &
-           + half*(Delta_r*Dr_C + Delta_z*Dz_C) &
+           + half*(DelDef_r*Dr_C + DelDef_z*Dz_C) &
            + half*(C*Delta_r + A*Dz_Delta_r + B*Dr_Delta_z)/r
 
      RIC_lambda = RIC_lambda + (Dr_Delta_z*C + Delta_r*lamDef)/r &
-           + half*(Delta_r*Dr_lambda + Delta_z*Dz_lambda)  &
+           + half*(DelDef_r*Dr_lambda + DelDef_z*Dz_lambda)  &
            +       ft6*(A*DD_Delta_rr + lamDef*Delta_r)/r &
            + (1.0-ft6)*(H*DD_Delta_rr/r + lamDef*Dr_Delta_r)
 

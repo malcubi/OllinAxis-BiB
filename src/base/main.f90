@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/main.f90,v 1.32 2021/03/08 01:00:27 malcubi Exp $
 
 ! *****************************
 ! ***   PROGRAM OLLINAXIS   ***
@@ -264,6 +263,8 @@
      call system('mkdir -p '//trim(directory))
      call system('cp '//trim(parfile)//' '//trim(directory))
   end if
+
+  call MPI_Barrier(MPI_COMM_WORLD,ierr)
 
 
 ! ***********************

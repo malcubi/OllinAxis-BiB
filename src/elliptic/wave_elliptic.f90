@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/elliptic/wave_elliptic.f90,v 1.35 2021/02/26 18:35:59 malcubi Exp $
 
   subroutine wave_elliptic(type,init)
 
@@ -43,14 +42,14 @@
   logical flag1,flag2            ! Interpolation flags.
 
   integer box,level              ! Box number and level counters.
-  integer i,j,n,m                ! Counters.
+  integer i,j,m,n                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
+  integer miniter,NNtot
 
   real(8) lres,gres              ! Local and global residuals.
   real(8) r0,z0,interp           ! For interpolation.
   real(8) vrmax,vzmax            ! Local maximum speeds.
-  real(8) waveeta                ! Damping parameter.
   real(8) cfac                   ! Courant parameter.
   real(8) zero,one               ! Numbers.
   real(8) aux1,aux2
@@ -60,6 +59,7 @@
   character(3) method            ! Time integration method.
 
   integer s_ext(0:Nb,0:Nlmax)    ! External values of step counter.
+
   real(8) t_ext(0:Nb,0:Nlmax)    ! External values of time counter.
   real(8) t1_ext(0:Nb,0:Nlmax)   ! External values of t1 counter.
   real(8) t2_ext(0:Nb,0:Nlmax)   ! External values of t2 counter.
@@ -104,8 +104,8 @@
 
 ! We always initialize ell_v to 0.
 !
-! By default we initialize ell_u to 1, but we can
-! overrdide this depending on the value of 'init'.
+! The initial value of ell_u is set to either
+! 0 or 1 depending on the value of 'init'.
 
   do box=0,Nb
      do level=min(1,box),Nl(box)
@@ -174,35 +174,28 @@
 ! ***   COURANT PARAMETER   ***
 ! *****************************
 
-! Internal time integration method.  Since we evolve to
-! stationary solution, it doesn't really matter if the
-! time evolution is second (icn) or fourth (rk4) order.
-! By default I set rk4.
+! Internal time integration method.
 
-  method = "rk4"
+  method = WE_method
 
-! Courant parameter:  For rk4 we set the Courant
-! parameter to 0.7, and for icn to 0.5 (it goes
-! unstable otherwise).
+! Courant parameter.
 
-  if (method=="icn") then
-     cfac = 0.5d0
-  else if (method=="rk4") then
-     cfac = 0.7d0
-  end if
+  cfac = WE_dtfac
 
 ! Choose time step.
 
   if (type=='flat') then
 
+!    Flat Laplacian.
+
      dt0 = cfac*min(dr0,dz0)
 
   else
 
-! For a curved Laplacian we need to adapt the Courant
-! parameter to the physical metric.
+!    For a curved Laplacian we need to adapt the Courant
+!    parameter to the physical metric.
 !
-! First we find the maximum speeds in each box and level.
+!    First we find the maximum speeds in each box and level.
 
      do box=0,Nb
         do level=min(1,box),Nl(box)
@@ -292,10 +285,6 @@
      Nlmax = 0
   end if
 
-! Initialize damping parameter.
-
-  waveeta = WE_eta
-
 ! Initialize residuals and iteration number.
 
   100 continue
@@ -305,11 +294,13 @@
 
   step = 0
 
-! Start iterations.  Notice that we do at least 100 iterations.
-! This is because since we start with ell_v=0, the first few
+! Start iterations.  Notice that we do at least "miniter" iterations.
+! This is because since we start with ell_v=0, for the first few
 ! time steps the change in ell_u might be very small.
 
-  do while ((step<100).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
+  miniter = 100
+
+  do while ((step<miniter).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
 
 
 !    ******************************************
@@ -322,7 +313,7 @@
 
 !    Advance one time step.
 
-     call wavestep(0,type,waveeta,method)
+     call wavestep(0,type,method)
 
 
 !    *************************
@@ -336,13 +327,24 @@
 
      do j=1,Nzl(0,rank)-ghost
         do i=1,Nrl(0,rank)-ghost
-           lres = lres + abs(grid(0,0)%ell_u(i,j)-grid(0,0)%ell_u_p(i,j))
+           lres = lres + (grid(0,0)%ell_u(i,j)-grid(0,0)%ell_u_p(i,j))**2
         end do
      end do
 
+!    We take as the true residual the root mean square across all grid points.
+!    The reason is that otherwise if we have more points (larger grid for example),
+!    and similar errors at each point, the total residual would just increase.
+
+     NNtot = Nrl(0,rank)*Nzl(0,rank)
+     lres = sqrt(lres/dble(NNtot))
+
 !    Find global residual.
 
-     call MPI_Allreduce(lres,gres,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+     if (size>1) then
+        call MPI_Allreduce(lres,gres,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+     else
+        gres = lres
+     end if
 
 
 !    ******************
@@ -355,9 +357,9 @@
 
 !       Data to screen.
 
-        if (rank==0) then
-           write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
-        end if
+        !if (rank==0) then
+        !   write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
+        !end if
 
 !       Save data to file.
 
@@ -379,6 +381,11 @@
 
      end if
 
+
+! *************************************
+! ***   END OF ITERATIONS DO LOOP   ***
+! *************************************
+
   end do
 
 
@@ -386,19 +393,23 @@
 ! ***   DID WE CONVERGE?   ***
 ! ****************************
 
-  if ((rank==0).and.(ELL_verbose)) then
+  if (rank==0) then
 
      if (step==ELL_maxiter) then
         write (*,'(A,i6,A)') ' WaveElliptic:   Iterations did not converge after ',ELL_maxiter,' iterations.'
+        print *
      else
         if (Nlmax_old>0) then
            if (Nlmax_old/=Nlmax) then
               write (*,'(A,i5,A)') ' WaveElliptic:   Coarse grid solution converged after ',step,' iterations!'
+              print *
            else
               write (*,'(A,i5,A)') ' WaveElliptic:   Finer grids solution converged after ',step,' iterations!'
+              print *
            end if
         else
            write (*,'(A,i5,A)') ' WaveElliptic:   Solution converged after ',step,' iterations!'
+           print *
         end if
      end if
 
@@ -413,14 +424,6 @@
 ! coarse solution into fine grids and solve again.
 
   if ((step/=ELL_maxiter).and.(Nlmax/=Nlmax_old)) then
-
-!    Set damping parameter to zero. This parameter is required
-!    to avoid large oscilations when we start far from the
-!    true solution.  But once we get here we have a good solution
-!    on the coarse level, so we don't need it anymore and it
-!    only slows the code.
-
-     waveeta = 0.d0
 
 !    Set again Nlmax to its original value.
 
@@ -536,7 +539,7 @@
 
 
 
-  recursive subroutine wavestep(level,type,waveeta,method)
+  recursive subroutine wavestep(level,type,method)
 
 ! ***************************************************
 ! ***   EVOLUTION OF WAVE EQUATION WITH SOURCES   ***
@@ -562,6 +565,9 @@
 
   implicit none
 
+  logical firstcall
+  logical icn,rk4
+
   integer box,level    ! Box number and level counters.
   integer i,j,k        ! Counters.
   integer iter         ! Counter for internal iterations.
@@ -571,10 +577,27 @@
 
   real(8) dtw          ! Internal time step.
   real(8) weight       ! Weight for rk4.
-  real(8) waveeta      ! Damping parameter.
 
   character(*) type    ! Type of Laplacian (flat,conformal,physical)
   character(*) method  ! Time integration method.
+
+  data firstcall / .true. /
+
+  save firstcall,icn,rk4
+
+
+! *************************
+! ***   LOGICAL FLAGS   ***
+! *************************
+
+  if (firstcall) then
+
+      firstcall = .false.
+
+      icn = (method=="icn")
+      rk4 = (method=="rk4")
+
+  end if
 
 
 ! ******************************************
@@ -616,26 +639,27 @@
      ell_u_p = ell_u
      ell_v_p = ell_v
 
-!    Save old values of boundaries.
+!    Save old values of internal boundaries.
 
      if (level>0) then
 
         do i=0,ghost-1
+
            ell_u_bound_rL(i,:,2) = ell_u_bound_rL(i,:,1)
            ell_u_bound_rL(i,:,1) = ell_u_bound_rL(i,:,0)
            ell_u_bound_rL(i,:,0) = ell_u(1-ghost+i,:)
            ell_u_bound_rR(i,:,2) = ell_u_bound_rR(i,:,1)
            ell_u_bound_rR(i,:,1) = ell_u_bound_rR(i,:,0)
            ell_u_bound_rR(i,:,0) = ell_u(Nr-i,:)
+
            ell_u_bound_zL(:,i,2) = ell_u_bound_zL(:,i,1)
            ell_u_bound_zL(:,i,1) = ell_u_bound_zL(:,i,0)
            ell_u_bound_zL(:,i,0) = ell_u(:,1-ghost+i)
+
            ell_u_bound_zR(:,i,2) = ell_u_bound_zR(:,i,1)
            ell_u_bound_zR(:,i,1) = ell_u_bound_zR(:,i,0)
            ell_u_bound_zR(:,i,0) = ell_u(:,Nz-i)
-        end do
 
-        do i=0,ghost-1
            ell_v_bound_rL(i,:,2) = ell_v_bound_rL(i,:,1)
            ell_v_bound_rL(i,:,1) = ell_v_bound_rL(i,:,0)
            ell_v_bound_rL(i,:,0) = ell_v(1-ghost+i,:)
@@ -648,6 +672,7 @@
            ell_v_bound_zR(:,i,2) = ell_v_bound_zR(:,i,1)
            ell_v_bound_zR(:,i,1) = ell_v_bound_zR(:,i,0)
            ell_v_bound_zR(:,i,0) = ell_v(:,Nz-i)
+
         end do
 
      end if
@@ -657,10 +682,10 @@
 !    ***   FIND NUMBER OF INTERNAL ITERATIONS   ***
 !    **********************************************
 
-     if (method=="icn") then
-        niter = 3
-     else if (method=="rk4") then
+     if (rk4) then
         niter = 4
+     else if (icn) then
+        niter = icniter
      end if
 
 
@@ -678,9 +703,34 @@
 !       Find out weights for each iteration for the
 !       different time integration schemes.
 
+!       Fourth order Runge-Kutta.
+
+        if (rk4) then
+
+!          In fourth order Runge-Kutta the first two iterations
+!          jump half a time step and the last two a full time step.
+!          Here we also set the weights with which intermediate
+!          results contribute to final answer: 1/6 for first and
+!          last intermediate results and 1/3 for the two middle ones.
+
+           select case(iter)
+              case(1)
+                 dtw = 0.5d0*dt
+                 weight = 1.d0/6.d0
+              case(2)
+                 dtw = 0.5d0*dt
+                 weight = 1.d0/3.d0
+              case(3) 
+                 dtw = dt
+                 weight = 1.d0/3.d0
+              case(4)
+                 dtw = dt
+                 weight = 1.d0/6.d0
+           end select
+
 !       Iterative Crank-Nicholson (ICN).
 
-        if (method=="icn") then
+        else if (icn) then
 
 !          In ICN all iterations except the last one
 !          jump only half a time step.
@@ -689,30 +739,6 @@
               dtw = 0.5d0*dt
            else
               dtw = dt
-           end if
-
-!       Fourth order Runge-Kutta.
-
-        else if (method=="rk4") then
-
-!          In fourth order Runge-Kutta the first two iterations
-!          jump half a time step and the last two a full time step.
-!          Here we also set the weights with which intermediate
-!          results contribute to final answer: 1/6 for first and
-!          last intermediate results and 1/3 for the two middle ones.
-
-           if (iter==1) then
-              dtw = 0.5d0*dt
-              weight = 1.d0/6.d0
-           else if (iter==2) then
-              dtw = 0.5d0*dt
-              weight = 1.d0/3.d0
-           else if (iter==3) then
-              dtw = dt
-              weight = 1.d0/3.d0
-           else
-              dtw = dt
-              weight = 1.d0/6.d0
            end if
 
         end if
@@ -804,24 +830,18 @@
 
 !       Source for v: damping term.
 
-        sell_v = sell_v - waveeta*ell_v/dtl(level)
+        sell_v = sell_v - WE_eta*ell_v
 
-!       And add some dissipation.  This is mostly because when
-!       we have refinement levels the boundaries of the fine
-!       grids introduce high frequency reflections that we
-!       need to dissipate away.
+!       And add some dissipation to reduce high frequency noise.
 
-        if (Nlmax>0) then
-           evolvevar => ell_v
-           sourcevar => sell_v
-           call dissipation(+1,+1,0.02d0)
-        end if
+        evolvevar => ell_v
+        sourcevar => sell_v
+        call dissipation(+1,+1,WE_diss)
 
 !       Symmetries on axis.
 
         if (ownaxis) then
            do i=1,ghost
-              sell_u(1-i,:) = sell_u(i,:)
               sell_v(1-i,:) = sell_v(i,:)
            end do
         end if
@@ -830,7 +850,6 @@
 
         if (eqsym.and.ownequator) then
            do j=1,ghost
-              sell_u(:,1-j) = sell_u(:,j)
               sell_v(:,1-j) = sell_v(:,j)
            end do
         end if
@@ -855,7 +874,7 @@
 !       ***   FOR RUNGE-KUTTA ADD TO ACCUMULATOR ARRAYS   ***
 !       *****************************************************
 
-        if (method=="rk4") then
+        if (rk4) then
            if (iter==1) then
               ell_u_a = weight*sell_u
               ell_v_a = weight*sell_v
@@ -977,8 +996,8 @@
 ! current subroutine "wavestep" recursively.
 
   if (level<Nlmax) then
-     call wavestep(level+1,type,waveeta,method)
-     call wavestep(level+1,type,waveeta,method)
+     call wavestep(level+1,type,method)
+     call wavestep(level+1,type,method)
   end if
 
 
@@ -1109,20 +1128,23 @@
 
            call currentgrid(bbox,level-1,grid(bbox,level-1))
 
-
            if (ownaxis) then
               do i=1,ghost
-                 sell_u(1-i,:) = sell_u(i,:)
-                 sell_v(1-i,:) = sell_v(i,:)
+                 ell_u(1-i,:) = ell_u(i,:)
+                 ell_v(1-i,:) = ell_v(i,:)
               end do
            end if
+
+!          Symmetries.
 
            if (eqsym.and.ownequator) then
               do j=1,ghost
-                 sell_u(:,1-j) = sell_u(:,j)
-                 sell_v(:,1-j) = sell_v(:,j)
+                 ell_u(:,1-j) = ell_u(:,j)
+                 ell_v(:,1-j) = ell_v(:,j)
               end do
            end if
+
+!          Sync.
 
            if (size>1) then
               call sync(ell_u)

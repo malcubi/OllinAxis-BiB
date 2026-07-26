@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/interp.f90,v 1.17 2021/02/24 22:34:06 malcubi Exp $
 
   real(8) function interp(box,level,r0,z0,flag)
 
