@@ -50,11 +50,11 @@
 !       take a number of ghost zones on the negative side.
 
         if (rbox(box)==0.d0) then
-           do i=1-ghost,Nrmaxl(box)
+           do i=1-ghost,Nr ! debug
               r(i,:) = (dble(Nminl_r(box,rank) + i) - 0.5d0)*dr
            end do
         else
-           do i=1-ghost,Nrmaxl(box)
+           do i=1-ghost,Nr ! debug
               r(i,:) = rbox(box) + (dble(Nminl_r(box,rank) + i) - 0.5d0*dble(Nrbox(box) - ghost + 1))*dr
            end do
         end if
@@ -62,11 +62,11 @@
 !       Find z coordinate.
 
         if (eqsym.and.(zbox(box)==0.d0)) then
-           do j=1-ghost,Nzmaxl(box)
+           do j=1-ghost,Nz ! debug
               z(:,j) = (dble(Nminl_z(box,rank) + j) - 0.5d0)*dz
            end do
         else
-           do j=1-ghost,Nrmaxl(box)
+           do j=1-ghost,Nz ! debug
               z(:,j) = zbox(box) + (dble(Nminl_z(box,rank) + j) - 0.5d0*dble(Nzbox(box) - ghost + 1))*dz
            end do
         end if
@@ -253,6 +253,7 @@
   end if
 
 
+
 ! ****************************************
 ! ***   FIND SOURCES AT INITIAL TIME   ***
 ! ****************************************
@@ -311,6 +312,20 @@
   call save0Ddata
   call save1Ddata
   call save2Ddata
+
+
+!    ****************************
+!    ***** WAVE EXTRACTION  *****
+!    ****************************  
+
+! Save background noise only for Moncrief extraction.
+
+  if (wave_extract) then
+   
+   CALL wavextract
+
+  end if
+
 
   if (convert_to_3D) then
      call save3D('psi',directory)
@@ -427,7 +442,9 @@
 !    Call the wave extraction subroutine only when we need output.
 
      if (wave_extract.and.(mod(step,wavextract_every).eq.0)) then
-        call wavextract
+
+      call wavextract
+      
      end if
 
 

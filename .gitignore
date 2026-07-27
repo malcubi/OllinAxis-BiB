@@ -1,0 +1,62 @@
+# --- Compilación (Fortran/C) ---
+*.o
+*.mod
+*.smod
+*.a
+*.so
+# Ejecutables (ajusta el nombre si OllinAxis genera uno específico)
+*.exe
+fakempi/libfakempi.a
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+venv/
+.env
+
+# --- Julia ---
+*.jl.cov
+*.jl.mem
+manifest.toml
+
+# --- LaTeX (Para tu tesis y docs) ---
+*.aux
+*.fdb_latexmk
+*.fls
+*.gz
+*.log
+*.out
+*.toc
+*.pdf
+*.synctex.gz
+*.blg
+*.bbl
+
+# --- Datos y Gráficas (Salidas de simulación) ---
+*.dat
+*.out
+*.rl
+*.tl
+*.dl
+exe/
+gnuplot/
+objs/
+src/auto
+
+# --- Sistema y Editores ---
+.vscode/
+.DS_Store
+*~
+*.swp
+
+
+# --- Others
+
+.timeend
+.timegraph1
+.timegraph2
+.timeparfiles
+.timestart
+.config
