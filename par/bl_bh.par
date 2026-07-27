@@ -47,6 +47,14 @@ N_ah = 3                   # Look for 3 horizons (horizon 0 is centered on z=0)
 z_ah1 = +1.0               # Center of horizon 1
 z_ah2 = -1.0               # Center of horizon 2
 
+wave_extract = .true.      # Do gravitational extraction
+wavextract_method = both   # Method for gravitational extraction (moncrief,weyl,both)
+wavextract_every = 5       # How often to extract for gravitational wave?
+
+rad1 = 9.0                 # Radi 1 of extraction
+rad2 = 15.0                # Radi 2 of extraction
+rad3 = 18.0                # Radi 3 of extraction
+
 directory = bl_bh          # Name of output directory
 outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
 

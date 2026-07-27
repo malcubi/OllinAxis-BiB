@@ -253,16 +253,6 @@
   end if
 
 
-!    ****************************
-!    ***** WAVE EXTRACTION  *****
-!    ****************************
-  if (wave_extract) then
-
-      call wavextract
-      
-  end if
-
-
 
 ! ****************************************
 ! ***   FIND SOURCES AT INITIAL TIME   ***
@@ -322,6 +312,20 @@
   call save0Ddata
   call save1Ddata
   call save2Ddata
+
+
+!    ****************************
+!    ***** WAVE EXTRACTION  *****
+!    ****************************  
+
+! Save background noise only for Moncrief extraction.
+
+  if (wave_extract) then
+   
+   CALL wavextract
+
+  end if
+
 
   if (convert_to_3D) then
      call save3D('psi',directory)
@@ -438,7 +442,9 @@
 !    Call the wave extraction subroutine only when we need output.
 
      if (wave_extract.and.(mod(step,wavextract_every).eq.0)) then
-        call wavextract
+
+      call wavextract
+      
      end if
 
 

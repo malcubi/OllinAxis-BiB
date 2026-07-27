@@ -41,6 +41,14 @@ ahafter = 0.0              # Start loking for horizons after this time
 ahfind_every = 50          # How often to look for horizons?
 N_ah = 1                   # Look for 1 horizon (centered on origin)
 
+wave_extract = .true.      # Do gravitational extraction
+wavextract_method = both   # Method for gravitational extraction (moncrief,weyl,both)
+wavextract_every = 5       # How often to extract for gravitational wave?
+
+rad1 = 5.0                 # Radi 1 of extraction
+rad2 = 7.0                # Radi 2 of extraction
+rad3 = 9.0                # Radi 3 of extraction
+
 directory = brillwave      # Name of output directory
 outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
 

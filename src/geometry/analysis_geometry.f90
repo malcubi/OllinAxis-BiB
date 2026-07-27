@@ -11,7 +11,7 @@
   use arrays
   use param
   use derivatives
-  use procinfo
+  use procinfo, ONLY: ierr,rank,size
 
 ! Extra variables.
 
@@ -211,12 +211,12 @@
 
 
 ! ***********************
-! ***   WEYL TENSOR   ***
+! ***   WAVE EXTRACT  ***
 ! ***********************
 
 ! Calculate Weyl tensor and curvature invariants.
 
-  if (curvInv) then
+  if (curvInv .or. wave_extract) then
      call weyl
   end if
 
