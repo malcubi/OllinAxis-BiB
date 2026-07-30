@@ -700,21 +700,52 @@
 ! ***   CURVATURE INVARIANTS   ***
 ! ********************************
 
-! curvInv: Calculate cuvature invariants I,J
+! curvInv: Calculate cuvature invariants I,J.
 
   logical :: curvInv = .false.
+
+
+! **********************************
+! ***   MASS, CHARGE, ETCETERA   ***
+! **********************************
+
+! mass_TK:  Tolman-Komar mass (should not be set in parameter file).
+
+! The Tolman-Komar mass only makes sense for static
+! solutions.
+!
+! It is based on the existence on a Killing field,
+! but can be expressed as a volume integral that
+! depends on the lapse function and the stress-energy
+! of matter.
+!
+! The general expression is:
+!
+!            /
+! massTK  =  | alpha (rho + trS) dV
+!            /
+!
+! with alpha the lapse, rho the energy density, trS
+! the trace of the stress tensor, and dV the physical
+! volume element:
+!
+! dV = 2 pi sqrt(hdet) psi**6 r dr dz
+!
+! The factor 2*pi comes from the integral over the angle. 
+
+  real(8) :: mass_TK = 0.d0    ! (should not be set in parameter file).
 
 
 ! ********************************
 ! ***   GRAVITATIONAL WAVES    ***
 ! ********************************
 
-! wave_extract: Gravitational waves extraction
-! wavextract_every : How often do we extract gravitational waves.
+! wave_extract:      Gravitational wave extraction.
+! wavextract_every:  How often do we extract gravitational waves.
 !
-! rad1        : Radius of extraction
-! rad2        : Radius of extraction
-! rad3        : Radius of extraction
+! rad1:  Radius of extraction 1
+! rad2:  Radius of extraction 2
+! rad3:  Radius of extraction 3
 
   logical :: wave_extract = .false.
   integer :: wavextract_every = 5
@@ -738,7 +769,7 @@
 
   real(8) :: dxx = 0.d0
   real(8) :: dyy = 0.d0
-!  real(8) :: dzz = 0.d0
+! real(8) :: dzz = 0.d0
 
   integer :: Nxx = 100
   integer :: Nyy = 100
