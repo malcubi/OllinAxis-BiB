@@ -152,6 +152,7 @@
 ! S   =  X X  +  gamma  ( pi   -  gamma   X X   -  2 V) / 2
 !  ij     i j         ij                   m n
 !
+!
 ! Notice in particular that:
 !
 !               2        i
@@ -160,7 +161,7 @@
 !
 ! which implies:
 !                     2
-! rjo + trS  =  2 ( pi  -  V )
+! rho + trS  =  2 ( pi  -  V )
  
   if (contains(mattertype,"scalar")) then
 
@@ -324,8 +325,8 @@
      trS = g_A*S_A + g_B*S_B + g_H*S_H + two*r**2*g_C*S_C
   end if
 
-! Trace is taken with the physical metric, so we divide
-! by psi4 to take this into account.
+! The trace is taken with the physical metric,
+! so we divide by psi4 to take this into account.
 
   trS = trS/psi4
 
