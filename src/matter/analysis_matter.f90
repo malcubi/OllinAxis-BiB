@@ -78,55 +78,63 @@
 !          Tolman-Komar mass when available, or otherwise using the
 !          pseudo-Schwarzschild mass.
 
-           if (rank==0) then
+!          Use Tolman-Komar mass.
 
-!             Use Tolman-Komar mass.
+           if (mass_TK>0.d0) then
 
-              if (mass_TK>0.d0) then
-
+              if (rank==0) then
                  bind = mass_TK - complex_mass*complex_NB
                  write(*,'(A,ES13.6)') ' Binding energy (M_TK - m*NB) = ',bind
+                 print *
+              end if
 
-!             Use pseudo-Schwarzshild mass.
+!          Use pseudo-Schwarzshild mass.  In this case we need to
+!          find out the values of mass_sch at the last points on
+!          the axis and on the equator.
+
+           else
+
+!             Single processor run.
+
+              if (size==1) then
+
+                 massr = mass_sch(Nr,0)
+                 massz = mass_sch(0,Nz)
+
+!             Parallel run.
 
               else
 
-                 if (size==1) then
+                 rmax = r(Nr,0)
+                 zmax = z(0,Nz)
 
+                 if (ownequator.and.(rmax>dble(Nrtotal-1)*dr)) then
                     massr = mass_sch(Nr,0)
-                    massz = mass_sch(0,Nz)
-
                  else
-
-                    rmax = r(Nr,0)
-                    zmax = z(0,Nz)
-
-                    if (ownequator.and.(rmax>dble(Nrtotal-1)*dr)) then
-                       massr = mass_sch(Nr,0)
-                    else
-                       massr = 0.d0
-                    end if
-
-                    if (ownaxis.and.(zmax>dble(Nztotal-1)*dz)) then
-                       massz = mass_sch(0,Nz)
-                    else
-                       massz = 0.d0
-                    end if
-
-                    aux = massr
-                    call MPI_ALLREDUCE(aux,massr,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
-
-                    aux = massz
-                    call MPI_ALLREDUCE(aux,massz,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
-
+                    massr = 0.d0
                  end if
 
-                 bind = 0.5d0*(massr+massz) - complex_mass*complex_NB
-                 write(*,'(A,ES13.6)') ' Binding energy (M_sch - m*NB) = ',bind
+                 if (ownaxis.and.(zmax>dble(Nztotal-1)*dz)) then
+                    massz = mass_sch(0,Nz)
+                 else
+                    massz = 0.d0
+                 end if
+
+                 aux = massr
+                 call MPI_ALLREDUCE(aux,massr,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+                 aux = massz
+                 call MPI_ALLREDUCE(aux,massz,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
 
               end if
 
-              print *
+!             Output binding energy to screen.
+
+              if (rank==0) then
+                 bind = 0.5d0*(massr+massz) - complex_mass*complex_NB
+                 write(*,'(A,ES13.6)') ' Binding energy (M_sch - m*NB) = ',bind
+                 print *
+              end if
 
            end if
 
