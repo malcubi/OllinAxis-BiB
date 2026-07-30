@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/matter/auxiliary_matter.f90,v 1.9 2021/08/20 17:39:10 malcubi Exp $
 
   subroutine auxiliary_matter
 
