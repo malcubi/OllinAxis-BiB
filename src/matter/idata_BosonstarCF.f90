@@ -135,6 +135,7 @@
   real(8) r0,z0,interp           ! For interpolation.
   real(8) cfac                   ! Courant parameter.
   real(8) one,half,smallpi       ! Numbers.
+  real(8) integral               ! Integrating function.
   real(8) aux1,aux2
 
   character(3) method            ! Time integration method.
@@ -280,27 +281,27 @@
 
            grabvar => alpha
            call save1Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
-           call save2Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
+           !call save2Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
 
            grabvar => phi
            call save1Dvariable('boson_psi',directory,box,level,outparallel,'replace')
-           call save2Dvariable('boson_psi',directory,box,level,outparallel,'replace')
+           !call save2Dvariable('boson_psi',directory,box,level,outparallel,'replace')
 
            grabvar => complex_phiR
            call save1Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
-           call save2Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
+           !call save2Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
 
            grabvar => dtalpha
            call save1Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
-           call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
+           !call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
 
            grabvar => dtphi
            call save1Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
-           call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
+           !call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
 
            grabvar => complex_piR
            call save1Dvariable('boson_piR',directory,box,level,outparallel,'replace')
-           call save2Dvariable('boson_piR',directory,box,level,outparallel,'replace')
+           !call save2Dvariable('boson_piR',directory,box,level,outparallel,'replace')
 
         end do
      end do
@@ -436,27 +437,27 @@
 
               grabvar => alpha
               call save1Dvariable('boson_alpha',directory,box,level,outparallel,'old')
-              call save2Dvariable('boson_alpha',directory,box,level,outparallel,'old')
+              !call save2Dvariable('boson_alpha',directory,box,level,outparallel,'old')
 
               grabvar => phi
               call save1Dvariable('boson_psi',directory,box,level,outparallel,'old')
-              call save2Dvariable('boson_psi',directory,box,level,outparallel,'old')
+              !call save2Dvariable('boson_psi',directory,box,level,outparallel,'old')
 
               grabvar => complex_phiR
               call save1Dvariable('boson_phiR',directory,box,level,outparallel,'old')
-              call save2Dvariable('boson_phiR',directory,box,level,outparallel,'old')
+              !call save2Dvariable('boson_phiR',directory,box,level,outparallel,'old')
 
               grabvar => dtalpha
               call save1Dvariable('boson_dtalpha',directory,box,level,outparallel,'old')
-              call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'old')
+              !call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'old')
 
               grabvar => dtphi
               call save1Dvariable('boson_dtpsi',directory,box,level,outparallel,'old')
-              call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'old')
+              !call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'old')
 
               grabvar => complex_piR
               call save1Dvariable('boson_piR',directory,box,level,outparallel,'old')
-              call save2Dvariable('boson_piR',directory,box,level,outparallel,'old')
+              !call save2Dvariable('boson_piR',directory,box,level,outparallel,'old')
 
            end do
         end do
@@ -617,6 +618,41 @@
 
      goto 100
 
+  end if
+
+
+! *****************************
+! ***   TOLMAN-KOMAR MASS   ***
+! *****************************
+
+! The Tolman-Komar mass only makes sense for static
+! solutions, or for momentarily static initial data.
+!
+! It is based on the existence on a Killing field,
+! but can be expressed as a volume integral that
+! depends on the lapse function and the stress-energy
+! of matter.
+!
+! The general expression is:
+!
+!            /
+! massTK  =  | alpha (rho + trS) dV
+!            /
+!
+! with alpha the lapse, rho the energy density, trS
+! the trace of the stress tensor, and dV the physical
+! volume element:
+!
+! dV = 2 pi sqrt(hdet) psi**6 r dr dz
+!
+! The factor 2*pi comes from the integral over the angle. 
+
+  auxarray = 2.d0*smallpi*alpha*(rho + trS)*dsqrt(hdet)*psi**6*r
+  mass_TK  = integral(box,level,auxarray)
+
+  if (rank==0) then
+     write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK) = ',mass_TK
+     print *
   end if
 
 
