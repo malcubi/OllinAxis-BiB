@@ -640,13 +640,10 @@
 ! ***   TOLMAN-KOMAR MASS   ***
 ! *****************************
 
-! The Tolman-Komar mass only makes sense for static
-! solutions, or for momentarily static initial data.
-!
-! It is based on the existence on a Killing field,
-! but can be expressed as a volume integral that
-! depends on the lapse function and the stress-energy
-! of matter.
+! The Tolman-Komar mass only makes sense for static solutions.
+! It is based on the existence on a Killing field, but can be
+! expressed as a volume integral that depends on the lapse
+! function and the stress-energy of matter.
 !
 ! The general expression is:
 !
@@ -658,7 +655,7 @@
 ! the trace of the stress tensor, and dV the physical
 ! volume element:
 !
-! dV = 2 pi sqrt(hdet) psi**6 r dr dz
+! dV = 2 pi r sqrt(hdet) psi**6 dr dz
 !
 ! The factor 2*pi comes from the integral over the angle.
 !
@@ -667,9 +664,10 @@
 ! rho + trS  =  2 [ PiI**2 - V ]
 !
 ! Remember that since we have conformally flat data hdet=1,
-! and also that we have been using "phi" instead of "psi".
+! and also that we have been using "phi" instead of "psi"
+! (this is fixed at the end of this routine).
 !
-! Also, at the moment I only do the integral in the coarse grid.
+! At the moment I only do the integral in the coarse grid.
 
   call currentgrid(0,0,grid(0,0))
 
