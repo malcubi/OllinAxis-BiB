@@ -494,7 +494,7 @@
               write (*,'(A,i5,A)') ' BosonStarCF: Finer grids solution converged after ',step,' iterations!'
               print *
               write(*,'(A,ES23.16)') ' Final residual = ',gres
-              write(*,'(A,ES23.16)') ' Omega          = ', boson_omega
+              write(*,'(A,ES23.16)') ' Omega          = ',boson_omega
               print *
            end if
 
@@ -503,7 +503,7 @@
            write (*,'(A,i5,A)') ' BosonStarCF:   Solution converged after ',step,' iterations!'
            print *
            write(*,'(A,ES23.16)') ' Final residual = ',gres
-           write(*,'(A,ES23.16)') ' Omega          = ', boson_omega
+           write(*,'(A,ES23.16)') ' Omega          = ',boson_omega
            print *
 
         end if
@@ -621,6 +621,21 @@
   end if
 
 
+! ********************************
+! ***   IMAGINARY PART OF pi   ***
+! ********************************
+
+! From the original ansatz, we take the time derivative of
+! the imaginary part equal to (omega/alpha)*phi.
+
+  do box=0,Nb
+     do level=min(1,box),Nl(box)
+        call currentgrid(box,level,grid(box,level))
+        complex_piI = boson_omega*complex_phiR/alpha
+     end do
+  end do
+
+
 ! *****************************
 ! ***   TOLMAN-KOMAR MASS   ***
 ! *****************************
@@ -645,15 +660,36 @@
 !
 ! dV = 2 pi sqrt(hdet) psi**6 r dr dz
 !
-! The factor 2*pi comes from the integral over the angle. 
+! The factor 2*pi comes from the integral over the angle.
+!
+! Notice that for a boson star we have:
+!
+! rho + trS  =  2 [ PiI**2 - V ]
+!
+! Remember that since we have conformally flat data hdet=1,
+! and also that we have been using "phi" instead of "psi".
+!
+! Also, at the moment I only do the integral in the coarse grid.
 
-  auxarray = 2.d0*smallpi*alpha*(rho + trS)*dsqrt(hdet)*psi**6*r
-  mass_TK  = integral(box,level,auxarray)
+  call currentgrid(0,0,grid(0,0))
+
+  call potential
+
+  auxarray = (4.d0*smallpi*r*phi**6)*alpha*(complex_piI**2 - complex_V)
+  mass_TK  = integral(0,0,auxarray)
 
   if (rank==0) then
      write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK) = ',mass_TK
      print *
   end if
+
+
+
+! ***********************************
+! ***   BOSON STAR PERTURBATION   ***
+! ***********************************
+
+! Perturbation not yet implemented.
 
 
 ! ************************************************************
@@ -696,7 +732,7 @@
 
 !       Now calculate the correct "phi".
 
-        phi  = dlog(psi)
+        phi = dlog(psi)
 
 !       Find "chi".
 
@@ -740,10 +776,6 @@
 
         complex_piR  = 0.d0
 
-!       Set time derivative of imaginary part to (omega/alpha)*phiR.
-
-        complex_piI = boson_omega*complex_phiR/alpha
-
      end do
   end do
 
@@ -753,6 +785,8 @@
 ! ***************
 
   end subroutine idata_BosonstarCF
+
+
 
 
 
