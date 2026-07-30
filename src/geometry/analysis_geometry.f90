@@ -122,9 +122,9 @@
         call MPI_ALLREDUCE(aux,massz,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
 
         if (rank==0) then
-           write (*,'(A,ES12.5)') ' Schwarzschild mass along r direction = ',massr
-           write (*,'(A,ES12.5)') ' Schwarzschild mass along z direction = ',massz
-           write (*,'(A,ES12.5,A,ES12.5)')  ' Average Schwarzschild mass = ',0.5d0*(massr+massz),' +-', abs(massr-massz)
+           write (*,'(A,ES13.6         )') ' Schwarzschild mass along r direction = ',massr
+           write (*,'(A,ES13.6         )') ' Schwarzschild mass along z direction = ',massz
+           write (*,'(A,ES13.6,A,ES13.6)') ' Average Schwarzschild mass           = ',0.5d0*(massr+massz),' +-', abs(massr-massz)
            print *
         end if
 
