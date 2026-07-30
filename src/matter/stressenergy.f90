@@ -124,44 +124,44 @@
 ! From the above stress-energy tensor one finds for rho:
 !
 !                 2        i
-! rho  =  1/2 [ pi  +  X  X  ]  +  V
+! rho  =  1/2 [ Pi  +  X  X  ]  +  V
 !                       i
 ! 
 !                 2         rr  2         zz   2           rz
-!      =  1/2 [ pi  +  gamma   X  +  gamma    X  +  2 gamma  X  X  ]  +  V
+!      =  1/2 [ Pi  +  gamma   X  +  gamma    X  +  2 gamma  X  X  ]  +  V
 !                               r              z              r  z
 !
 ! where gamma is the physical spatial metric (so don't forget
-! the psi^4 factors), pi := n^mu d_mu phi (with n^mu the unit normal
+! the psi^4 factors), Pi := n^mu d_mu phi (with n^mu the unit normal
 ! vector to the spatial hypersurfaces), and X_i := d_i phi.
 !
 ! For the momentum density J_i we find:
 !
-! J  =  - pi X
+! J  =  - Pi X
 !  i          i
 !
 ! (notice that J_phi=0).  This implies:
 !
-!  i         ij                 ij
-! J  =  gamma   J  =  - pi gamma   X
-!                j                  j
+!  i         ij                   ij
+! J  =  gamma   J  =  - Pi ( gamma   X  )
+!                j                    j
 !
 ! Finally, for the stress tensor we find:
 !
 !                           2          mn
-! S   =  X X  +  gamma  ( pi   -  gamma   X X   -  2 V) / 2
+! S   =  X X  +  gamma  ( Pi   -  gamma   X X   -  2 V ) / 2
 !  ij     i j         ij                   m n
 !
 !
 ! Notice in particular that:
 !
 !               2        i
-! trS  =  ( 3 pi  -  X  X  ) / 2  -  3 V
+! trS  =  ( 3 Pi  -  X  X  ) / 2  -  3 V
 !                     i
 !
 ! which implies:
 !                     2
-! rho + trS  =  2 ( pi  -  V )
+! rho + trS  =  2 ( Pi  -  V )
  
   if (contains(mattertype,"scalar")) then
 
