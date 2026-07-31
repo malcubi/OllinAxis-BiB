@@ -742,12 +742,16 @@
 
 ! wave_extract:      Gravitational wave extraction.
 ! wavextract_every:  How often do we extract gravitational waves.
+! wavextract_method: Choose the Extractor of GW.
 !
 ! rad1:  Radius of extraction 1
 ! rad2:  Radius of extraction 2
 ! rad3:  Radius of extraction 3
 
   logical :: wave_extract = .false.
+
+  character(30) :: wavextract_method = "none"   ! range = (none,moncrief,weyl,both)
+
   integer :: wavextract_every = 5
 
   real(8) :: rad1 = 0.0
