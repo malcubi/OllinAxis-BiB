@@ -210,13 +210,13 @@
   end if
 
 
-! ***********************
-! ***   WEYL TENSOR   ***
-! ***********************
+! ****************************************
+! ***   WEYL TENSOR AND WAVE EXTRACT   ***
+! ****************************************
 
 ! Calculate Weyl tensor and curvature invariants.
 
-  if (curvInv) then
+  if (curvInv.or.wave_extract) then
      call weyl
   end if
 
