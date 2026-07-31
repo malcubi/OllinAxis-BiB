@@ -302,6 +302,17 @@
   end do
 
 
+! ***************************
+! ***   WAVE EXTRACTION   ***
+! ***************************
+
+! Call the wave extraction subroutine.
+
+  if (wave_extract) then
+     call wavextract
+  end if
+
+
 ! *********************************
 ! ***   SAVE THE INITIAL DATA   ***
 ! *********************************
@@ -311,6 +322,8 @@
   call save0Ddata
   call save1Ddata
   call save2Ddata
+
+! Convert psi to 3D if needed.
 
   if (convert_to_3D) then
      call save3D('psi',directory)
