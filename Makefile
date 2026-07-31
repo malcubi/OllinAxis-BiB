@@ -195,7 +195,7 @@ endif
 # Object files corresponding to Fortran modules. I separate
 # them from the rest to be sure they are compiled first.
 
-MODS = param.o mytypes.o arrays.o procinfo.o derivatives.o derivadvect.o
+MODS = param.o mytypes.o arrays.o procinfo.o derivatives.o derivadvect.o harmonix.o gw_utils.o
 
 ifneq ($(FX),usingmpi)
 MODS += mpi.o
