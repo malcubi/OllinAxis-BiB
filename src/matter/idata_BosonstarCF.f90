@@ -255,6 +255,7 @@
 !       on the origin with the correct amplitude.
 
         complex_phiR = boson_phi0*exp(-rr**2)
+        complex_phiI = 0.d0
 
 !       Set time derivatives to 0.
 
@@ -280,28 +281,28 @@
            call currentgrid(box,level,grid(box,level))
 
            grabvar => alpha
-           call save1Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
-           !call save2Dvariable('boson_alpha',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_alpha',directory,box,level,outparallel,'new')
+           !call save2Dvariable('boson_alpha',directory,box,level,outparallel,'new')
 
            grabvar => phi
-           call save1Dvariable('boson_psi',directory,box,level,outparallel,'replace')
-           !call save2Dvariable('boson_psi',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_psi',directory,box,level,outparallel,'new')
+           !call save2Dvariable('boson_psi',directory,box,level,outparallel,'new')
 
            grabvar => complex_phiR
-           call save1Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
-           !call save2Dvariable('boson_phiR',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_phiR',directory,box,level,outparallel,'new')
+           !call save2Dvariable('boson_phiR',directory,box,level,outparallel,'new')
 
            grabvar => dtalpha
-           call save1Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
-           !call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_dtalpha',directory,box,level,outparallel,'new')
+           !call save2Dvariable('boson_dtalpha',directory,box,level,outparallel,'new')
 
            grabvar => dtphi
-           call save1Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
-           !call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_dtpsi',directory,box,level,outparallel,'new')
+           !call save2Dvariable('boson_dtpsi',directory,box,level,outparallel,'new')
 
            grabvar => complex_piR
-           call save1Dvariable('boson_piR',directory,box,level,outparallel,'replace')
-           !call save2Dvariable('boson_piR',directory,box,level,outparallel,'replace')
+           call save1Dvariable('boson_piR',directory,box,level,outparallel,'new')
+           !call save2Dvariable('boson_piR',directory,box,level,outparallel,'new')
 
         end do
      end do
@@ -647,9 +648,9 @@
 !
 ! The general expression is:
 !
-!            /
-! massTK  =  | alpha (rho + trS) dV
-!            /
+!             /
+! mass_TK  =  | alpha (rho + trS) dV
+!             /
 !
 ! with alpha the lapse, rho the energy density, trS
 ! the trace of the stress tensor, and dV the physical
@@ -674,13 +675,12 @@
   call potential
 
   auxarray = (4.d0*smallpi*r*phi**6)*alpha*(complex_piI**2 - complex_V)
-  mass_TK  = integral(0,0,auxarray)
+  mass_TK = integral(0,0,auxarray)
 
   if (rank==0) then
-     write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK) = ',mass_TK
-     print *
+     write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK)  = ',mass_TK
+     !print *
   end if
-
 
 
 ! ***********************************
@@ -776,6 +776,38 @@
 
      end do
   end do
+
+
+! ********************
+! ***   ADM MASS   ***
+! ********************
+
+! For a conformally flat metric the ADM mass can be
+! expressed as the following volume integral:
+!
+!              /
+! mass_ADM  =  | psi**5 rho dV_f
+!              /
+!
+! where dV_f is the flat volume element:
+!
+! dV_f  =  2 pi r dr dz
+!
+! The factor 2*pi comes from the integral over the angle.
+
+  call currentgrid(0,0,grid(0,0))
+
+  call potential
+
+  rho = 0.5d0*(complex_piI**2 + (complex_xiR_r**2 + complex_xiR_z**2)/psi4) + complex_V
+
+  auxarray = (2.d0*smallpi*r)*psi**5*rho
+  mass_ADM_V = integral(0,0,auxarray)
+
+  if (rank==0) then
+     write (*,'(A,ES13.6)') ' ADM mass volume (mass_ADM_V) = ',mass_ADM_V
+     print *
+  end if
 
 
 ! ***************
