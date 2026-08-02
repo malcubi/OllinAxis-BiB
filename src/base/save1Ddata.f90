@@ -40,7 +40,7 @@
 ! ***   IS THIS THE FIRST CALL?   ***
 ! ***********************************
 
-! On first call, replace file and figure
+! On first call, create the file and figure
 ! out what needs output.
 
   if (firstcall) then
@@ -49,7 +49,7 @@
 
 !    File status.
 
-     filestatus = 'replace'
+     filestatus = 'new'
 
 !    Find out length of string "outvars1D".
 
@@ -243,9 +243,9 @@
 
      if (ownequator) then
 
-        if (filestatus=='replace') then     
+        if (filestatus=='new') then     
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.rl',form='formatted', &
-           status='replace')
+           status='new')
         else
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.rl',form='formatted', &
            status='old',position='append')
@@ -294,9 +294,9 @@
 
 !       Open file.
 
-        if (filestatus=='replace') then     
+        if (filestatus=='new') then     
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.rl',form='formatted', &
-           status='replace')
+           status='new')
         else
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.rl',form='formatted', &
            status='old',position='append')
@@ -397,9 +397,9 @@
 
         unit = rank+1
 
-        if (filestatus=='replace') then     
+        if (filestatus=='new') then     
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'.rl',form='formatted', &
-           status='replace')
+           status='new')
         else
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'.rl',form='formatted', &
            status='old',position='append')
@@ -444,9 +444,9 @@
 
 !       Open file.
 
-        if (filestatus=='replace') then     
+        if (filestatus=='new') then     
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.zl',form='formatted', &
-           status='replace')
+           status='new')
         else
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.zl',form='formatted', &
            status='old',position='append')
@@ -495,9 +495,9 @@
 
 !       Open file.
 
-        if (filestatus=='replace') then     
+        if (filestatus=='new') then     
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.zl',form='formatted', &
-          status='replace')
+          status='new')
         else
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.zl',form='formatted', &
            status='old',position='append')
@@ -592,9 +592,9 @@
 
         unit = rank+1
 
-        if (filestatus=='replace') then     
+        if (filestatus=='new') then     
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'.zl',form='formatted', &
-           status='replace')
+           status='new')
         else
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'.zl',form='formatted', &
            status='old',position='append')
@@ -651,9 +651,9 @@
 
 !          Open file.
 
-           if (filestatus=='replace') then     
+           if (filestatus=='new') then     
               open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.dl',form='formatted', &
-              status='replace')
+              status='new')
            else
               open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.dl',form='formatted', &
               status='old',position='append')
@@ -696,11 +696,11 @@
 
 !          Open files.
 
-           if (filestatus=='replace') then     
+           if (filestatus=='new') then     
               open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.d1l',form='formatted', &
-              status='replace')
+              status='new')
               open(2,file=trim(outdir)//'/'//varname//trim(filen)//'.d2l',form='formatted', &
-              status='replace')
+              status='new')
            else
               open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.d1l',form='formatted', &
               status='old',position='append')
@@ -770,9 +770,9 @@
 
            if (rank==0) then
 
-              if (filestatus=='replace') then     
+              if (filestatus=='new') then     
                  open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.dl',form='formatted', &
-                 status='replace')
+                 status='new')
               else
                  open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.dl',form='formatted', &
                  status='old',position='append')
@@ -822,11 +822,11 @@
 
            if (rank==0) then
 
-              if (filestatus=='replace') then     
+              if (filestatus=='new') then     
                  open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.d1l',form='formatted', &
-                 status='replace')
+                 status='new')
                  open(2,file=trim(outdir)//'/'//varname//trim(filen)//'.d2l',form='formatted', &
-                 status='replace')
+                 status='new')
               else
                  open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.d1l',form='formatted', &
                  status='old',position='append')

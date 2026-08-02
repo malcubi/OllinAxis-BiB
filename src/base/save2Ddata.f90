@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/save2Ddata.f90,v 1.29 2022/10/24 21:58:46 malcubi Exp $
 
   subroutine save2Ddata
 
@@ -36,7 +35,7 @@
 ! ***   IS THIS THE FIRST CALL?   ***
 ! ***********************************
 
-! On first call, replace file and figure
+! On first call, create the file and figure
 ! out what needs output.
 
   if (firstcall) then
@@ -45,7 +44,7 @@
 
 !    File status.
 
-     filestatus = 'replace'
+     filestatus = 'new'
 
 !    Find out length of string "outvars2D".
 
@@ -222,10 +221,10 @@
 
 ! For checkpoint we need output with many significant figures,
 ! while for plotting we don't.  The easiest way to ensure this
-! is saving 15 significant figures whenever the file is replaced,
+! is saving 15 significant figures whenever the file is new,
 ! and saving fewer when it is only appended to.
 
-  if (filestatus=='replace') then
+  if (filestatus=='new') then
      form = "(3ES23.15)"
   else
      form = "(3ES16.8)"
@@ -246,7 +245,7 @@
 
 !    Open file.
 
-     if (filestatus=='replace') then
+     if (filestatus=='new') then
         open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.2D',form='formatted', &
              status=filestatus)
      else
@@ -300,7 +299,7 @@
 
 !       Open file.
 
-        if (filestatus=='replace') then
+        if (filestatus=='new') then
            open(1,file=trim(outdir)//'/'//varname//trim(filen)//'.2D',form='formatted', &
                 status=filestatus)
         else
@@ -431,7 +430,7 @@
 
      unit = rank+1
 
-     if (filestatus=='replace') then
+     if (filestatus=='new') then
         open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'.2D',form='formatted', &
              status=filestatus)
      else

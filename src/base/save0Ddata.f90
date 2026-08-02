@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/save0Ddata.f90,v 1.27 2021/03/28 00:05:16 malcubi Exp $
 
   subroutine save0Ddata
 
@@ -37,7 +36,7 @@
 ! ***   IS THIS THE FIRST CALL?   ***
 ! ***********************************
 
-! On first call, replace file and figure
+! On first call, create the file and figure
 ! out what needs output.
 
   if (firstcall) then
@@ -46,7 +45,7 @@
 
 !    File status.
 
-     filestatus = 'replace'
+     filestatus = 'new'
 
 !    Find out length of string "outvars0D".
 
@@ -293,8 +292,6 @@
 ! ***   SAVE GLOBAL NORMS   ***
 ! *****************************
 
-  unit = 1
-
 ! Only processor 0 does output.
 
   if (rank==0) then
@@ -305,63 +302,67 @@
 
 !    Save maximum value.
 
-     if (filestatus=='replace') then
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_max.tl',form='formatted', &
-        status='replace')
-        write(unit,*) comment//varname//'_max.tl'
+     if (filestatus=='new') then
+        open(10,file=trim(outdir)//'/'//varname//trim(filen)//'_max.tl',form='formatted', &
+        status='new')
+        write(10,*) comment//varname//'_max.tl'
      else
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_max.tl',form='formatted', &
+        open(10,file=trim(outdir)//'/'//varname//trim(filen)//'_max.tl',form='formatted', &
         status='old',position='append')
      end if
 
-     write(unit,"(2ES20.8E3)") t(box,level),gmax
+     write(10,"(2ES20.8E3)") t(box,level),gmax
+     flush(10)
 
-     close(unit)
+     close(10)
 
 !    Save minimum value.
 
-     if (filestatus=='replace') then
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_min.tl',form='formatted', &
-        status='replace')
-        write(unit,*) comment//varname//'_min.tl'
+     if (filestatus=='new') then
+        open(11,file=trim(outdir)//'/'//varname//trim(filen)//'_min.tl',form='formatted', &
+        status='new')
+        write(11,*) comment//varname//'_min.tl'
      else
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_min.tl',form='formatted', &
+        open(11,file=trim(outdir)//'/'//varname//trim(filen)//'_min.tl',form='formatted', &
         status='old',position='append')
      end if
 
-     write(unit,"(2ES20.8E3)") t(box,level),gmin
+     write(11,"(2ES20.8E3)") t(box,level),gmin
+     flush(11)
 
-     close(unit)
+     close(11)
 
 !    Save norm 1.
 
-     if (filestatus=='replace') then
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_nm1.tl',form='formatted', &
-        status='replace')
-        write(unit,*) comment//varname//'_nm1.tl'
+     if (filestatus=='new') then
+        open(12,file=trim(outdir)//'/'//varname//trim(filen)//'_nm1.tl',form='formatted', &
+        status='new')
+        write(12,*) comment//varname//'_nm1.tl'
      else
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_nm1.tl',form='formatted', &
+        open(12,file=trim(outdir)//'/'//varname//trim(filen)//'_nm1.tl',form='formatted', &
         status='old',position='append')
      end if
 
-     write(unit,"(2ES20.8E3)") t(box,level),gnm1
+     write(12,"(2ES20.8E3)") t(box,level),gnm1
+     flush(12)
 
-     close(unit)
+     close(12)
 
 !    Save norm 2.
 
-     if (filestatus=='replace') then
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_nm2.tl',form='formatted', &
-        status='replace')
-        write(unit,*) comment//varname//'_nm2.tl'
+     if (filestatus=='new') then
+        open(13,file=trim(outdir)//'/'//varname//trim(filen)//'_nm2.tl',form='formatted', &
+        status='new')
+        write(13,*) comment//varname//'_nm2.tl'
      else
-        open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_nm2.tl',form='formatted', &
+        open(13,file=trim(outdir)//'/'//varname//trim(filen)//'_nm2.tl',form='formatted', &
         status='old',position='append')
      end if
 
-     write(unit,"(2ES20.8E3)") t(box,level),gnm2
+     write(13,"(2ES20.8E3)") t(box,level),gnm2
+     flush(13)
 
-     close(unit)
+     close(13)
 
   end if
 
@@ -381,13 +382,13 @@
 
 !    Only processor 0 does output.
 
-     unit = 1
+     unit = 10
 
      if (rank==0) then
 
-        if (filestatus=='replace') then
+        if (filestatus=='new') then
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_origin.tl',form='formatted', &
-           status='replace')
+           status='new')
            write(unit,*) comment//varname//'_max.tl'
         else
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_origin.tl',form='formatted', &
@@ -395,6 +396,7 @@
         end if
 
         write(unit,"(2ES20.8E3)") t(box,level),v0
+        flush(unit)
 
         close(unit)
 
