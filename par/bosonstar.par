@@ -33,8 +33,8 @@ boson_factor = physical    # Normalization factor for boson star (physical,harmo
 boson_phi0  = 0.05         # Central value of scalar field
 
 WE_epsilon = 1.d-8         # Wave elliptic tolerance
-WE_verbose = .true.        # Output information about the elliptic solver iterations
-WE_Noutput = 100           # How often do we output iterations?
+WE_verbose = .false.       # Output information about the elliptic solver iterations
+WE_Noutput = 500           # How often do we output iterations?
 
 complexdiss = 0.01         # Dissipation for scalar field
 geodiss = 0.01             # Dissipation for geometric variables
@@ -44,8 +44,8 @@ outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
 
 Ninfo = 10                 # How often do we want to output information to screen?
 Noutput0D = 10             # How often do we want 0D output?
-Noutput1D = 10             # How often do we want 1D output?
-Noutput2D = 50             # How often do we want 2D output?
+Noutput1D = 100            # How often do we want 1D output?
+Noutput2D = 500            # How often do we want 2D output?
 
 outparallel = fileperproc
 
