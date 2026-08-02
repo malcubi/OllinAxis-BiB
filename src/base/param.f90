@@ -478,12 +478,12 @@
 
   logical :: WE_verbose = .false.
 
-  integer :: WE_Noutput = 100
+  integer :: WE_Noutput = 500
   integer :: WE_maxiter = 100000
 
-  real(8) :: WE_eta = 1.d0
-  real(8) :: WE_diss = 0.1d0
-  real(8) :: WE_dtfac = 0.6d0
+  real(8) :: WE_eta     = 1.d0
+  real(8) :: WE_diss    = 0.1d0
+  real(8) :: WE_dtfac   = 0.6d0
   real(8) :: WE_epsilon = 1.d-8
 
 
@@ -709,8 +709,14 @@
 ! ***   MASS, CHARGE, ETCETERA   ***
 ! **********************************
 
-! mass_TK:  Tolman-Komar mass (should not be set in parameter file).
+! mass_ADM_V:  ADM mass from volume integral.
+! mass ADM_S:  ADM mass from surface integrals.
 
+  real(8) :: mass_ADM_V = 0.d0    ! (should not be set in parameter file).
+  real(8) :: mass_ADM_S = 0.d0    ! (should not be set in parameter file).
+
+! mass_TK:  Tolman-Komar mass.
+!
 ! The Tolman-Komar mass only makes sense for static
 ! solutions.
 !
@@ -733,7 +739,7 @@
 !
 ! The factor 2*pi comes from the integral over the angle. 
 
-  real(8) :: mass_TK = 0.d0    ! (should not be set in parameter file).
+  real(8) :: mass_TK = 0.d0       ! (should not be set in parameter file).
 
 
 ! ********************************
