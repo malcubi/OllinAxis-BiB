@@ -157,12 +157,12 @@
            call currentgrid(box,level,grid(box,level))
 
            grabvar => ell_u
-           call save1Dvariable('ell_u',directory,box,level,outparallel,'replace')
-           call save2Dvariable('ell_u',directory,box,level,outparallel,'replace')
+           call save1Dvariable('ell_u',directory,box,level,outparallel,'new')
+           !call save2Dvariable('ell_u',directory,box,level,outparallel,'new')
 
            grabvar => ell_v
-           call save1Dvariable('ell_v',directory,box,level,outparallel,'replace')
-           call save2Dvariable('ell_v',directory,box,level,outparallel,'replace')
+           call save1Dvariable('ell_v',directory,box,level,outparallel,'new')
+           !call save2Dvariable('ell_v',directory,box,level,outparallel,'new')
 
         end do
      end do
