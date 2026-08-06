@@ -712,6 +712,9 @@
 ! mass_ADM_V:  ADM mass from volume integral.
 ! mass ADM_S:  ADM mass from surface integrals.
 
+  logical :: mass_ADM2 = .false.  ! Do we calculate mass_ADM2?
+  logical :: mass_ADM3 = .false.  ! Do we calculate mass_ADM3?
+
   real(8) :: mass_ADM_V = 0.d0    ! (should not be set in parameter file).
   real(8) :: mass_ADM_S = 0.d0    ! (should not be set in parameter file).
 
