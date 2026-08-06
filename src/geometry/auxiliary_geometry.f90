@@ -986,8 +986,33 @@
 ! ***   BSSN Delta   ***
 ! **********************
 
-! If we don't want to evolve the BSSN variable Delta, then
-! here we calculate it in terms of derivatives of the metric.
+! If we don't want to evolve the BSSN variable Delta, then here
+! we calculate it in terms of derivatives of the metric.
+!
+! Before you get confused here again read this (it took me hours to
+! do figure it out again):
+!
+! The expressions below are correct, I have double checked them.
+! But one must be very careful to calculate them since it is very
+! easy to get the worng.  The Deltas are definded as:
+!
+!      i          mn     i            mn        i                i
+! Delta   =  gamma  Delta    =   gamma   ( Gamma    -  Gamma_flat   )
+!                        mn                     mn               mn
+!
+! where gamma^mn is the conformal inverse metric, Gamma^i_mn are the
+! conformal Christoffel symbols, and the Gamma_flat are the flat
+! Christoffel symbols in cylindrical coordinates.
+!
+! The difference of two Chritoffel symbols Delta^i_mn is a true tensor,
+! and it regular on the axis. But crucially, the trace of the Deltas
+! is taken using the conformal metric for the full Deltas!
+! 
+! We DO NOT take the traces of the Gammas with their respective
+! metrics and later subtract them.  We first subtract the Gammas to
+! obtain the Deltas, and then take the trace of the Deltas using the
+! conformal metric only. To be clear:  we DO NOT trace the flat
+! Christoffels using the flat metric.
 
   DelDef_r = - Dr_g_A - r*Dz_g_C - r*g_lambda - half*(g_A*Dr_hdet + r*g_C*Dz_hdet)*ihdet
   DelDef_z = - Dr_g_C*r - Dz_g_B - two*g_C - half*(r*g_C*Dr_hdet + g_B*Dz_hdet)*ihdet
@@ -1001,10 +1026,13 @@
   end if
 
   if (angmom) then
+
      DelDef_p = - Dr_g_C1*r - Dz_g_C2 - four*g_C1 - half*(r*g_C1*Dr_hdet + g_C2*Dz_hdet)*ihdet
+
      if (noDelta_p.or.(time==zero)) then
         Delta_p = DelDef_p
      end if
+
   end if
 
 ! Save initial values of Delta's (for shift conditions).
