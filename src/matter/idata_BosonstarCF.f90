@@ -678,8 +678,7 @@
   mass_TK = integral(0,0,auxarray)
 
   if (rank==0) then
-     write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK)  = ',mass_TK
-     print *
+     write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK) = ',mass_TK
   end if
 
 
@@ -787,30 +786,35 @@
 ! ***   ADM MASS   ***
 ! ********************
 
-! ADM mass version 1.  For a conformally flat metric the
-! ADM mass can be expressed as the following volume integral:
+! Find energy density. At the moment integrals are only
+! only done on the coarse grid.
+
+  call currentgrid(0,0,grid(0,0))
+
+! Scalar field potential.
+
+  call potential
+
+! Energy density.
+
+  rho = 0.5d0*(complex_piI**2 + (complex_xiR_r**2 + complex_xiR_z**2)/psi4) + complex_V
+
+! ADM mass version 1.  For a conformally flat metric
+! (with K_ij = 0) the ADM mass can be expressed as the
+! following volume integral:
 !
 !                   /
-! mass_ADM  =  2 pi | psi**5 rho r dr dz
+! mass_ADM  =  2 pi | rho psi**5 r dr dz
 !                   /
 !
 ! The factor 2*pi comes from the integral over the angle.
 ! Notice that the integral is done over the flat volume element.
 
-  call currentgrid(0,0,grid(0,0))
-
-  call potential
-
-  rho = 0.5d0*(complex_piI**2 + (complex_xiR_r**2 + complex_xiR_z**2)/psi4) + complex_V
-
-! First version.
-
-  auxarray = (2.d0*smallpi*r)*psi**5*rho
+  auxarray = (2.d0*smallpi*r)*rho*psi**5
   mass_ADM_V = integral(0,0,auxarray)
 
   if (rank==0) then
-     write (*,'(A,ES13.6)') ' Total ADM mass (version 1)   = ',mass_ADM_V
-     print *
+     write (*,'(A,ES13.6)') ' Total integrated ADM mass   = ',mass_ADM_V
   end if
 
 ! ADM mass version 2.  The ADM mass can also be expressed as
@@ -833,16 +837,19 @@
 !
 ! D1_psi  =  psi D1_phi
 !
-! This expression converges very very slowly far away (from below)!
+! This expression converges very very slowly far away (from below).
 ! The slow convergence comes from the second term that contributes
 ! to the integral all the way to infinity.
 
-  auxarray = (2.d0*smallpi*rho + 5.d0*(Dr_phi**2 + Dz_phi**2)/psi**4)*r
-  mass_ADM_V = integral(0,0,auxarray)
+  if (mass_ADM2) then
 
-  if (rank==0) then
-     write (*,'(A,ES13.6)') ' Total ADM mass (version 2)   = ',mass_ADM_V
-     print *
+     auxarray = (2.d0*smallpi*rho + 5.d0*(Dr_phi**2 + Dz_phi**2)/psi4)*r
+     aux1 = integral(0,0,auxarray)
+
+     if (rank==0) then
+        write (*,'(A,ES13.6)') ' Total ADM mass (version 2, converges slowly from below) = ',aux1
+     end if
+
   end if
 
 ! ADM mass version 3. The ADM mass can also be expressed as
@@ -860,7 +867,7 @@
 !                 /
 !
 !             /
-!          =  | [ 2 pi rho psi**6 - (Dr_phi**2 + Dz_phi**2) psi**2 ] r dr dz
+!          =  | [ 2 pi rho psi**4 - (Dr_phi**2 + Dz_phi**2) ] psi**2 r dr dz
 !             /
 !
 ! The factor 2*pi comes from the integral over the angle,
@@ -871,12 +878,15 @@
 ! This expression also converges slowly far away (from above),
 ! but a bit faster that version 2 above.
 
-  auxarray = (2.d0*smallpi*rho*psi**6 - (Dr_phi**2 + Dz_phi**2)*psi**2)*r
-  mass_ADM_V = integral(0,0,auxarray)
+  if (mass_ADM3) then
 
-  if (rank==0) then
-     write (*,'(A,ES13.6)') ' Total ADM mass (version 3)   = ',mass_ADM_V
-     print *
+     auxarray = (2.d0*smallpi*rho*psi4 - (Dr_phi**2 + Dz_phi**2))*psi2*r
+     aux1 = integral(0,0,auxarray)
+
+     if (rank==0) then
+        write (*,'(A,ES13.6)') ' Total ADM mass (version 3, converges slowly from above) = ',aux1
+     end if
+
   end if
 
 
