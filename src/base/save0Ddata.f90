@@ -304,7 +304,7 @@
 
      if (filestatus=='new') then
         open(10,file=trim(outdir)//'/'//varname//trim(filen)//'_max.tl',form='formatted', &
-        status='new')
+        status='replace')
         write(10,*) comment//varname//'_max.tl'
      else
         open(10,file=trim(outdir)//'/'//varname//trim(filen)//'_max.tl',form='formatted', &
@@ -320,7 +320,7 @@
 
      if (filestatus=='new') then
         open(11,file=trim(outdir)//'/'//varname//trim(filen)//'_min.tl',form='formatted', &
-        status='new')
+        status='replace')
         write(11,*) comment//varname//'_min.tl'
      else
         open(11,file=trim(outdir)//'/'//varname//trim(filen)//'_min.tl',form='formatted', &
@@ -336,7 +336,7 @@
 
      if (filestatus=='new') then
         open(12,file=trim(outdir)//'/'//varname//trim(filen)//'_nm1.tl',form='formatted', &
-        status='new')
+        status='replace')
         write(12,*) comment//varname//'_nm1.tl'
      else
         open(12,file=trim(outdir)//'/'//varname//trim(filen)//'_nm1.tl',form='formatted', &
@@ -352,7 +352,7 @@
 
      if (filestatus=='new') then
         open(13,file=trim(outdir)//'/'//varname//trim(filen)//'_nm2.tl',form='formatted', &
-        status='new')
+        status='replace')
         write(13,*) comment//varname//'_nm2.tl'
      else
         open(13,file=trim(outdir)//'/'//varname//trim(filen)//'_nm2.tl',form='formatted', &
@@ -388,7 +388,7 @@
 
         if (filestatus=='new') then
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_origin.tl',form='formatted', &
-           status='new')
+           status='replace')
            write(unit,*) comment//varname//'_max.tl'
         else
            open(unit,file=trim(outdir)//'/'//varname//trim(filen)//'_origin.tl',form='formatted', &
