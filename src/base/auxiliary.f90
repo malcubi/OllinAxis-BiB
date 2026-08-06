@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/base/auxiliary.f90,v 1.7 2020/11/24 20:01:57 malcubi Exp $
 
   subroutine auxiliary
 
