@@ -512,6 +512,70 @@
   end if
 
 
+! *****************************************
+! ***   CONFORMAL CHRISTOFFEL SYMBOLS   ***
+! *****************************************
+
+  chris_rrr = half * ( g_A * Dr_A + r*g_C * (2*C + 2*r*Dr_C - Dz_A) )
+  chris_rrz = half * ( g_A * Dz_A + r*g_C * Dr_B)
+  chris_rzz = half * ( g_A * (2*r*Dz_C - Dr_B) + r*g_C * Dz_B )
+  chris_zrr = half * ( r*g_C * Dr_A + g_B * (2*C + 2*r*Dr_C - Dz_A) )
+  chris_zrz = half * ( r*g_C * Dz_A + g_B * Dr_B)
+  chris_zzz = half * ( r*g_C * (2*r*Dz_C - Dr_B) + g_B * Dz_B )
+
+! At the moment all those with angular momentum are set to zero.
+
+  if (angmom) then
+
+     print *, 'Christoffel symbols with angular momentum not yet implemented.'
+
+!    Correction to previous ones.
+
+     chris_rrr = chris_rrr + zero
+     chris_rrz = chris_rrz + zero
+     chris_rzz = chris_rzz + zero
+     chris_zrr = chris_zrr + zero
+     chris_zrz = chris_zrz + zero
+     chris_zzz = chris_zzz + zero
+
+!    Pure angular momentum.
+
+     chris_rrp = zero
+     chris_rpp = zero
+     chris_rpz = zero
+
+     chris_prr = zero
+     chris_prp = zero
+     chris_prz = zero
+     chris_ppp = zero
+     chris_ppz = zero
+     chris_pzz = zero
+
+     chris_zrp = zero
+     chris_zpp = zero
+     chris_zpz = zero
+
+!    Missing due to symmetries.
+
+     chris_rpr = chris_rrp
+     chris_rzp = chris_rpz
+
+     chris_ppr = chris_prp
+     chris_pzr = chris_prz
+     chris_pzp = chris_ppz
+
+     chris_zpr = chris_zrp
+     chris_zzp = chris_zpz
+
+  end if
+
+! Missing due to symmetries. After those with angular
+! momentum since there are corrections.
+
+  chris_rzr = chris_rrz
+  chris_zzr = chris_zrz
+
+
 ! *****************
 ! ***   SHIFT   ***
 ! *****************
@@ -989,30 +1053,30 @@
 ! If we don't want to evolve the BSSN variable Delta, then here
 ! we calculate it in terms of derivatives of the metric.
 !
-! Before you get confused here again read this (it took me hours to
-! do figure it out again):
+! Before you get confused here again read this (it took me hours
+! to figure it out again):
 !
 ! The expressions below are correct, I have double checked them.
 ! But one must be very careful to calculate them since it is very
-! easy to get the worng.  The Deltas are definded as:
+! easy to get them wrong.  The Deltas are definded as:
 !
 !      i          mn     i            mn        i                i
 ! Delta   =  gamma  Delta    =   gamma   ( Gamma    -  Gamma_flat   )
 !                        mn                     mn               mn
 !
-! where gamma^mn is the conformal inverse metric, Gamma^i_mn are the
-! conformal Christoffel symbols, and the Gamma_flat are the flat
-! Christoffel symbols in cylindrical coordinates.
+! where gamma^mn is the conformal inverse metric, Gamma^i_mn are
+! the conformal Christoffel symbols, and the Gamma_flat are the
+! flat Christoffel symbols in cylindrical coordinates.
 !
-! The difference of two Chritoffel symbols Delta^i_mn is a true tensor,
-! and it regular on the axis. But crucially, the trace of the Deltas
+! The difference of two Christoffel symbols Delta^i_mn is a true tensor,
+! and it is regular on the axis. But crucially, the trace of the Deltas
 ! is taken using the conformal metric for the full Deltas!
 ! 
 ! We DO NOT take the traces of the Gammas with their respective
-! metrics and later subtract them.  We first subtract the Gammas to
-! obtain the Deltas, and then take the trace of the Deltas using the
-! conformal metric only. To be clear:  we DO NOT trace the flat
-! Christoffels using the flat metric.
+! metrics and later subtract them.  We first subtract the Gammas
+! to obtain the Deltas, and only then take the trace of the Deltas
+! using the conformal metric. To be clear:  we DO NOT trace the
+! flat Christoffels using the flat metric.
 
   DelDef_r = - Dr_g_A - r*Dz_g_C - r*g_lambda - half*(g_A*Dr_hdet + r*g_C*Dz_hdet)*ihdet
   DelDef_z = - Dr_g_C*r - Dz_g_B - two*g_C - half*(r*g_C*Dr_hdet + g_B*Dz_hdet)*ihdet
@@ -1105,6 +1169,17 @@
 
   diffvar => auxarray
   DD_Delta_rr = diff1r(+1)
+
+! Vector V needed for Ricci scalar and ADM mass.  It is almost
+! identical to the Deltas, except for the factor of 1/2 in
+! the last terms.
+
+  V_r = - Dr_g_A - r*Dz_g_C - r*g_lambda - (g_A*Dr_hdet + r*g_C*Dz_hdet)*ihdet
+  V_z = - Dr_g_C*r - Dz_g_B - two*g_C - (r*g_C*Dr_hdet + g_B*Dz_hdet)*ihdet
+
+  if (angmom) then
+     V_p = - Dr_g_C1*r - Dz_g_C2 - four*g_C1 - (r*g_C1*Dr_hdet + g_C2*Dz_hdet)*ihdet
+  end if
 
 
 ! ********************
