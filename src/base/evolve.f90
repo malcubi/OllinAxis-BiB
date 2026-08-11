@@ -66,7 +66,7 @@
               z(:,j) = (dble(Nminl_z(box,rank) + j) - 0.5d0)*dz
            end do
         else
-           do j=1-ghost,Nrmaxl(box)
+           do j=1-ghost,Nzmaxl(box)
               z(:,j) = zbox(box) + (dble(Nminl_z(box,rank) + j) - 0.5d0*dble(Nzbox(box) - ghost + 1))*dz
            end do
         end if
