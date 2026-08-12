@@ -516,12 +516,12 @@
 ! ***   CONFORMAL CHRISTOFFEL SYMBOLS   ***
 ! *****************************************
 
-  chris_rrr = half * ( g_A * Dr_A + r*g_C * (2*C + 2*r*Dr_C - Dz_A) )
-  chris_rrz = half * ( g_A * Dz_A + r*g_C * Dr_B)
-  chris_rzz = half * ( g_A * (2*r*Dz_C - Dr_B) + r*g_C * Dz_B )
-  chris_zrr = half * ( r*g_C * Dr_A + g_B * (2*C + 2*r*Dr_C - Dz_A) )
-  chris_zrz = half * ( r*g_C * Dz_A + g_B * Dr_B)
-  chris_zzz = half * ( r*g_C * (2*r*Dz_C - Dr_B) + g_B * Dz_B )
+  chris_rrr = half*(g_A*Dr_A + r*g_C*(2.d0*C + 2.d0*r*Dr_C - Dz_A))
+  chris_rrz = half*(g_A*Dz_A + r*g_C*Dr_B)
+  chris_rzz = half*(g_A*(2.d0*r*Dz_C - Dr_B) + r*g_C*Dz_B)
+  chris_zrr = half*(r*g_C*Dr_A + g_B*(2.d0*C + 2.d0*r*Dr_C - Dz_A))
+  chris_zrz = half*(r*g_C*Dz_A + g_B*Dr_B)
+  chris_zzz = half*(r*g_C*(2.d0*r*Dz_C - Dr_B) + g_B*Dz_B)
 
 ! At the moment all those with angular momentum are set to zero.
 
@@ -569,11 +569,34 @@
 
   end if
 
+! Components for angular momentum.
+
+  if (angmom) then
+
+  end if
+
 ! Missing due to symmetries. After those with angular
 ! momentum since there are corrections.
 
   chris_rzr = chris_rrz
   chris_zzr = chris_zrz
+
+
+! ************************
+! ***   DELTA TENSOR   ***
+! ************************
+
+! For the components that don't involve the angle the
+! Deltas are identical to the conformal Christoffel symbols.
+  Delta_rrr = chris_rrr
+  Delta_rrz = chris_rrz
+  Delta_rzz = chris_rzz
+
+! Missing due to symmetries. After those with angular
+! momentum since there are corrections.
+
+  Delta_rzr = Delta_rrz
+  Delta_zzr = Delta_zrz
 
 
 ! *****************
