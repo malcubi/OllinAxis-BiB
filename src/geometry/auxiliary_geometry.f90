@@ -519,67 +519,71 @@
   chris_rrr = half*(g_A*Dr_A + r*g_C*(2.d0*C + 2.d0*r*Dr_C - Dz_A))
   chris_rrz = half*(g_A*Dz_A + r*g_C*Dr_B)
   chris_rzz = half*(g_A*(2.d0*r*Dz_C - Dr_B) + r*g_C*Dz_B)
+  chris_rpp = - half*(g_A*(r*Dr_H + 2.d0*H) + r**2*g_C*Dz_H)*r
+
   chris_zrr = half*(r*g_C*Dr_A + g_B*(2.d0*C + 2.d0*r*Dr_C - Dz_A))
   chris_zrz = half*(r*g_C*Dz_A + g_B*Dr_B)
   chris_zzz = half*(r*g_C*(2.d0*r*Dz_C - Dr_B) + g_B*Dz_B)
+  chris_zpp = - half*(g_C*(r*Dr_H + 2.d0*H) + g_B*Dz_H)*r**2
 
-! At the moment all those with angular momentum are set to zero.
+  chris_prp = half*g_H*(Dr_H + 2.d0*H/r)
+  chris_pzp = half*g_H*Dz_H
+
+! Angular momentum contributions.
 
   if (angmom) then
 
-     print *, 'Christoffel symbols with angular momentum not yet implemented.'
+     print *, 'Christoffel symbols with angular momentum not yet completely implemented.'
 
-!    Correction to previous ones.
+!    Extra terms to previous ones. Notice that chris_rpp and chris_zpp
+!    do not need any extra terms.
 
-     chris_rrr = chris_rrr + zero
-     chris_rrz = chris_rrz + zero
-     chris_rzz = chris_rzz + zero
-     chris_zrr = chris_zrr + zero
-     chris_zrz = chris_zrz + zero
-     chris_zzz = chris_zzz + zero
+     chris_rrr = chris_rrr + g_C1*(3.d0*C1 + r*Dr_C1)*r**3
+     chris_rrz = chris_rrz + half*g_C1*(r**2*Dz_C1 + r*Dr_C2 + 2.d0*C2)*r**2
+     chris_rzz = chris_rzz + g_C1*Dz_C2*r**3
 
-!    Pure angular momentum.
+     chris_zrr = chris_zrr + g_C2*(3.d0*C1 + r*Dr_C1)*r**2
+     chris_zrz = chris_zrz + half*g_C2*(r**2*Dz_C1 + r*Dr_C2 + 2.d0*C2)*r
+     chris_zzz = chris_zzz + g_C2*Dz_C2*r**2
 
-     chris_rrp = zero
-     chris_rpp = zero
-     chris_rpz = zero
+     chris_prp = chris_prp - half*g_C2*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2)*r
+     chris_pzp = chris_pzp + half*g_C1*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2)*r**2
 
-     chris_prr = zero
-     chris_prp = zero
-     chris_prz = zero
-     chris_ppp = zero
-     chris_ppz = zero
-     chris_pzz = zero
+!    Pure angular momentum.  Nptice that in chris_prz the last term goes
+!    as gH*C2/r, which is singular on the axis.  If this coefficient
+!    ever appears in an equation we need to be very careful!
 
-     chris_zrp = zero
-     chris_zpp = zero
-     chris_zpz = zero
+     chris_rrp = half*(g_C1*(r*Dr_H + 2.d0*H) - g_C*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2))*r**2
+     chris_rzp = half*(g_C1*Dz_H*r**2         + g_A*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2))*r
 
-!    Missing due to symmetries.
+     chris_zrp = half*(g_C2*(r*Dr_H + 2.d0*H) - g_B*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2))*r
+     chris_zzp = half*(g_C2*Dz_H              + g_C*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2))*r**2
+
+     chris_prr = half*g_C1*Dr_A*r + g_C2*(r*Dr_C + C - half*Dz_A) + g_H*(r*Dr_C1 + 3.d0*C1)
+     chris_pzz = half*g_C2*Dz_B + r*g_C1*(r*Dz_C - half*Dr_B) + g_H*Dz_C2
+     chris_prz = half*(g_C2*Dr_B + r*g_C1*Dz_A + g_H*(Dr_C2 + r*Dz_C1 + 2.d0*C2/r))  ! WARNING: The last term is singular
+     chris_ppp = - half*(g_C1*(r*dr_H + 2.d0*H) + g_C2*Dz_H)*r**2
+
+!    Symmetries.
 
      chris_rpr = chris_rrp
-     chris_rzp = chris_rpz
-
-     chris_ppr = chris_prp
-     chris_pzr = chris_prz
-     chris_pzp = chris_ppz
+     chris_rpz = chris_rzp
 
      chris_zpr = chris_zrp
-     chris_zzp = chris_zpz
+     chris_zpz = chris_zzp
+
+     chris_pzr = chris_prz
 
   end if
 
-! Components for angular momentum.
-
-  if (angmom) then
-
-  end if
-
-! Missing due to symmetries. After those with angular
-! momentum since there are corrections.
+! Symmetries. These ones should be done after those with
+! angular momentum since there might be extra terms.
 
   chris_rzr = chris_rrz
   chris_zzr = chris_zrz
+
+  chris_ppr = chris_prp
+  chris_ppz = chris_pzp
 
 
 ! ************************
@@ -588,15 +592,16 @@
 
 ! For the components that don't involve the angle the
 ! Deltas are identical to the conformal Christoffel symbols.
-  Delta_rrr = chris_rrr
-  Delta_rrz = chris_rrz
-  Delta_rzz = chris_rzz
+
+  !Delta_rrr = chris_rrr
+  !Delta_rrz = chris_rrz
+  !Delta_rzz = chris_rzz
 
 ! Missing due to symmetries. After those with angular
 ! momentum since there are corrections.
 
-  Delta_rzr = Delta_rrz
-  Delta_zzr = Delta_zrz
+  !Delta_rzr = Delta_rrz
+  !Delta_zzr = Delta_zrz
 
 
 ! *****************
