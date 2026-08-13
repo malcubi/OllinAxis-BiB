@@ -572,44 +572,7 @@
      chris_prz = half*(g_C2*Dr_B + r*g_C1*Dz_A + g_H*(Dr_C2 + r*Dz_C1 + 2.d0*C2/r)) ! WARNING: The last term is singular.
      chris_ppp = - half*(g_C1*(r*dr_H + 2.d0*H) + g_C2*Dz_H)*r**2
 
-!    Symmetries.
-
-     chris_rpr = chris_rrp
-     chris_rpz = chris_rzp
-
-     chris_zpr = chris_zrp
-     chris_zpz = chris_zzp
-
-     chris_pzr = chris_prz
-
   end if
-
-! Symmetries. These ones should be done after those with
-! angular momentum since there might be extra terms.
-
-  chris_rzr = chris_rrz
-  chris_zzr = chris_zrz
-
-  chris_ppr = chris_prp
-  chris_ppz = chris_pzp
-
-
-! ************************
-! ***   DELTA TENSOR   ***
-! ************************
-
-! For the components that don't involve the angle the
-! Deltas are identical to the conformal Christoffel symbols.
-
-  !Delta_rrr = chris_rrr
-  !Delta_rrz = chris_rrz
-  !Delta_rzz = chris_rzz
-
-! Missing due to symmetries. After those with angular
-! momentum since there are corrections.
-
-  !Delta_rzr = Delta_rrz
-  !Delta_zzr = Delta_zrz
 
 
 ! *****************
