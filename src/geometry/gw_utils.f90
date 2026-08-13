@@ -15,10 +15,10 @@
 
 ! Include modules.
 
+  USE mpi
   USE param
   USE arrays
   USE procinfo
-  USE mpi 
 
   IMPLICIT NONE
 
@@ -59,6 +59,7 @@
     
   REAL(8) :: deltar, deltaz, auxr, auxz, aux
   REAL(8) :: rmin, rmax, zmin, zmax, small
+
   LOGICAL :: forcelinear
 
 
@@ -108,7 +109,7 @@
           zmax = grid(box,level)%z(0,Nzl(box,rank)-ghost+1)
        END IF
 
-!      If point lies outside local domain, exit subroutine.
+!      If point lies outside local domain exit subroutine.
 
        IF ((r0 <= rmin).OR.(r0 > rmax).OR.(z0 <= zmin).OR.(z0 > zmax)) RETURN
 
@@ -184,9 +185,9 @@
         END DO
      END DO
 
-  ELSE
-
 ! Perform bicubic interpolation.
+
+  ELSE
 
      DO i=-1,2
         DO j=-1,2
