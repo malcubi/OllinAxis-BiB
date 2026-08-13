@@ -12,7 +12,7 @@
 !                     perturbation amplitude (Moncrief Q) at fixed radii
 !                     and outputs multipolar modes to disk.
 !
-! Originally written by Carlos Joaquin,
+! Originally written by Carlos Joaquin.
 
   USE mpi
   USE param
@@ -42,8 +42,8 @@
   INTEGER :: box, level, bb, ll
   INTEGER :: i, j, k, l_mode
   INTEGER :: Ntheta
-  REAL(8) :: dth, theta, smallpi, half
-  
+
+  REAL(8) :: dth, theta, smallpi, half  
   REAL(8) :: r0, z0, R_ext
   REAL(8) :: sin_th, cos_th
 
