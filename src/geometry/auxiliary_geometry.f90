@@ -516,6 +516,12 @@
 ! ***   CONFORMAL CHRISTOFFEL SYMBOLS   ***
 ! *****************************************
 
+! Coefficients that appear when there is no angular momentum.
+!
+! Notice that in chris_prp the last term goes as 1/r, which
+! is singular on the axis.  If this coefficient ever appears
+! in an equation we need to be very careful!
+
   chris_rrr = half*(g_A*Dr_A + r*g_C*(2.d0*C + 2.d0*r*Dr_C - Dz_A))
   chris_rrz = half*(g_A*Dz_A + r*g_C*Dr_B)
   chris_rzz = half*(g_A*(2.d0*r*Dz_C - Dr_B) + r*g_C*Dz_B)
@@ -526,7 +532,7 @@
   chris_zzz = half*(r*g_C*(2.d0*r*Dz_C - Dr_B) + g_B*Dz_B)
   chris_zpp = - half*(g_C*(r*Dr_H + 2.d0*H) + g_B*Dz_H)*r**2
 
-  chris_prp = half*g_H*(Dr_H + 2.d0*H/r)
+  chris_prp = half*g_H*(Dr_H + 2.d0*H/r) ! WARNING: The last term is singular.
   chris_pzp = half*g_H*Dz_H
 
 ! Angular momentum contributions.
@@ -549,9 +555,11 @@
      chris_prp = chris_prp - half*g_C2*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2)*r
      chris_pzp = chris_pzp + half*g_C1*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2)*r**2
 
-!    Pure angular momentum.  Nptice that in chris_prz the last term goes
-!    as gH*C2/r, which is singular on the axis.  If this coefficient
-!    ever appears in an equation we need to be very careful!
+!    Pure angular momentum coefficients.
+!
+!    Notice that in chris_prz the last term goes as 1/r, which
+!    is singular on the axis.  If this coefficient ever appears
+!    in an equation we need to be very careful!
 
      chris_rrp = half*(g_C1*(r*Dr_H + 2.d0*H) - g_C*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2))*r**2
      chris_rzp = half*(g_C1*Dz_H*r**2         + g_A*(r**2*Dz_C1 - r*Dr_C2 - 2.d0*C2))*r
@@ -561,7 +569,7 @@
 
      chris_prr = half*g_C1*Dr_A*r + g_C2*(r*Dr_C + C - half*Dz_A) + g_H*(r*Dr_C1 + 3.d0*C1)
      chris_pzz = half*g_C2*Dz_B + r*g_C1*(r*Dz_C - half*Dr_B) + g_H*Dz_C2
-     chris_prz = half*(g_C2*Dr_B + r*g_C1*Dz_A + g_H*(Dr_C2 + r*Dz_C1 + 2.d0*C2/r))  ! WARNING: The last term is singular
+     chris_prz = half*(g_C2*Dr_B + r*g_C1*Dz_A + g_H*(Dr_C2 + r*Dz_C1 + 2.d0*C2/r)) ! WARNING: The last term is singular.
      chris_ppp = - half*(g_C1*(r*dr_H + 2.d0*H) + g_C2*Dz_H)*r**2
 
 !    Symmetries.
