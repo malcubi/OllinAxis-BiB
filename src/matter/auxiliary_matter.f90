@@ -255,19 +255,19 @@
 !    Covariant derivatives (without angular momentum at the moment).
 
      CovDr_maxw_A_r = Dr_maxw_A_r - chris_rrr*maxw_A_r - chris_zrr*maxw_A_z
-     CovDz_maxw_A_r = Dz_maxw_A_r - chris_rzr*maxw_A_r - chris_zzr*maxw_A_z
+     CovDz_maxw_A_r = Dz_maxw_A_r - chris_rrz*maxw_A_r - chris_zrz*maxw_A_z
      CovDr_maxw_A_z = Dr_maxw_A_z - chris_rrz*maxw_A_r - chris_zrz*maxw_A_z
      CovDz_maxw_A_z = Dz_maxw_A_z - chris_rzz*maxw_A_r - chris_zzz*maxw_A_z
 
      CovDr_maxw_E_r = Dr_maxw_E_r + chris_rrr*maxw_E_r + chris_rrz*maxw_E_z
      CovDr_maxw_E_z = Dr_maxw_E_z + chris_zrr*maxw_E_r + chris_zrz*maxw_E_z
-     CovDz_maxw_E_r = Dz_maxw_E_r + chris_rzr*maxw_E_r + chris_rzz*maxw_E_z
-     CovDz_maxw_E_z = Dz_maxw_E_z + chris_zzr*maxw_E_r + chris_zzz*maxw_E_z
+     CovDz_maxw_E_r = Dz_maxw_E_r + chris_rrz*maxw_E_r + chris_rzz*maxw_E_z
+     CovDz_maxw_E_z = Dz_maxw_E_z + chris_zrz*maxw_E_r + chris_zzz*maxw_E_z
 
      CovDr_maxw_B_r = Dr_maxw_B_r + chris_rrr*maxw_B_r + chris_rrz*maxw_B_z
      CovDr_maxw_B_z = Dr_maxw_B_z + chris_zrr*maxw_B_r + chris_zrz*maxw_B_z
-     CovDz_maxw_B_r = Dz_maxw_B_r + chris_rzr*maxw_B_r + chris_rzz*maxw_B_z
-     CovDz_maxw_B_z = Dz_maxw_B_z + chris_zzr*maxw_B_r + chris_zzz*maxw_B_z
+     CovDz_maxw_B_r = Dz_maxw_B_r + chris_rrz*maxw_B_r + chris_rzz*maxw_B_z
+     CovDz_maxw_B_z = Dz_maxw_B_z + chris_zrz*maxw_B_r + chris_zzz*maxw_B_z
 
   end if
 
@@ -353,34 +353,34 @@
 !    Covariant derivatives (without angular momentum at the moment).
 
      CovDr_proc_AR_r = Dr_proc_AR_r - chris_rrr*proc_AR_r - chris_zrr*proc_AR_z
-     CovDz_proc_AR_r = Dz_proc_AR_r - chris_rzr*proc_AR_r - chris_zzr*proc_AR_z
+     CovDz_proc_AR_r = Dz_proc_AR_r - chris_rrz*proc_AR_r - chris_zrz*proc_AR_z
      CovDr_proc_AR_z = Dr_proc_AR_z - chris_rrz*proc_AR_r - chris_zrz*proc_AR_z
      CovDz_proc_AR_z = Dz_proc_AR_z - chris_rzz*proc_AR_r - chris_zzz*proc_AR_z
 
      CovDr_proc_ER_r = Dr_proc_ER_r + chris_rrr*proc_ER_r + chris_rrz*proc_ER_z
      CovDr_proc_ER_z = Dr_proc_ER_z + chris_zrr*proc_ER_r + chris_zrz*proc_ER_z
-     CovDz_proc_ER_r = Dz_proc_ER_r + chris_rzr*proc_ER_r + chris_rzz*proc_ER_z
-     CovDz_proc_ER_z = Dz_proc_ER_z + chris_zzr*proc_ER_r + chris_zzz*proc_ER_z
+     CovDz_proc_ER_r = Dz_proc_ER_r + chris_rrz*proc_ER_r + chris_rzz*proc_ER_z
+     CovDz_proc_ER_z = Dz_proc_ER_z + chris_zrz*proc_ER_r + chris_zzz*proc_ER_z
 
      CovDr_proc_BR_r = Dr_proc_BR_r + chris_rrr*proc_BR_r + chris_rrz*proc_BR_z
      CovDr_proc_BR_z = Dr_proc_BR_z + chris_zrr*proc_BR_r + chris_zrz*proc_BR_z
-     CovDz_proc_BR_r = Dz_proc_BR_r + chris_rzr*proc_BR_r + chris_rzz*proc_BR_z
-     CovDz_proc_BR_z = Dz_proc_BR_z + chris_zzr*proc_BR_r + chris_zzz*proc_BR_z
+     CovDz_proc_BR_r = Dz_proc_BR_r + chris_rrz*proc_BR_r + chris_rzz*proc_BR_z
+     CovDz_proc_BR_z = Dz_proc_BR_z + chris_zrz*proc_BR_r + chris_zzz*proc_BR_z
 
      CovDr_proc_AI_r = Dr_proc_AI_r - chris_rrr*proc_AI_r - chris_zrr*proc_AI_z
-     CovDz_proc_AI_r = Dz_proc_AI_r - chris_rzr*proc_AI_r - chris_zzr*proc_AI_z
+     CovDz_proc_AI_r = Dz_proc_AI_r - chris_rrz*proc_AI_r - chris_zrz*proc_AI_z
      CovDr_proc_AI_z = Dr_proc_AI_z - chris_rrz*proc_AI_r - chris_zrz*proc_AI_z
      CovDz_proc_AI_z = Dz_proc_AI_z - chris_rzz*proc_AI_r - chris_zzz*proc_AI_z
 
      CovDr_proc_EI_r = Dr_proc_EI_r + chris_rrr*proc_EI_r + chris_rrz*proc_EI_z
      CovDr_proc_EI_z = Dr_proc_EI_z + chris_zrr*proc_EI_r + chris_zrz*proc_EI_z
-     CovDz_proc_EI_r = Dz_proc_EI_r + chris_rzr*proc_EI_r + chris_rzz*proc_EI_z
-     CovDz_proc_EI_z = Dz_proc_EI_z + chris_zzr*proc_EI_r + chris_zzz*proc_EI_z
+     CovDz_proc_EI_r = Dz_proc_EI_r + chris_rrz*proc_EI_r + chris_rzz*proc_EI_z
+     CovDz_proc_EI_z = Dz_proc_EI_z + chris_zrz*proc_EI_r + chris_zzz*proc_EI_z
 
      CovDr_proc_BI_r = Dr_proc_BI_r + chris_rrr*proc_BI_r + chris_rrz*proc_BI_z
      CovDr_proc_BI_z = Dr_proc_BI_z + chris_zrr*proc_BI_r + chris_zrz*proc_BI_z
-     CovDz_proc_BI_r = Dz_proc_BI_r + chris_rzr*proc_BI_r + chris_rzz*proc_BI_z
-     CovDz_proc_BI_z = Dz_proc_BI_z + chris_zzr*proc_BI_r + chris_zzz*proc_BI_z
+     CovDz_proc_BI_r = Dz_proc_BI_r + chris_rrz*proc_BI_r + chris_rzz*proc_BI_z
+     CovDz_proc_BI_z = Dz_proc_BI_z + chris_zrz*proc_BI_r + chris_zzz*proc_BI_z
 
   end if
 
