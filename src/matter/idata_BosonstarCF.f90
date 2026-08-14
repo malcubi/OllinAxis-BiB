@@ -786,6 +786,11 @@
 ! ***   ADM MASS   ***
 ! ********************
 
+! The more general version of the ADM mass is calculated
+! in the routine "analysis_geometry".  Here I just added
+! two alternative versions for conformally flat data
+! for testing.
+
 ! Find energy density. At the moment integrals are only
 ! only done on the coarse grid.
 
@@ -798,24 +803,6 @@
 ! Energy density.
 
   rho = 0.5d0*(complex_piI**2 + (complex_xiR_r**2 + complex_xiR_z**2)/psi4) + complex_V
-
-! ADM mass version 1.  For a conformally flat metric
-! (with K_ij = 0) the ADM mass can be expressed as the
-! following volume integral:
-!
-!                   /
-! mass_ADM  =  2 pi | rho psi**5 r dr dz
-!                   /
-!
-! The factor 2*pi comes from the integral over the angle.
-! Notice that the integral is done over the flat volume element.
-
-  auxarray = (2.d0*smallpi*r)*rho*psi**5
-  mass_ADM_V = integral(0,0,auxarray)
-
-  if (rank==0) then
-     write (*,'(A,ES13.6)') ' Total integrated ADM mass   = ',mass_ADM_V
-  end if
 
 ! ADM mass version 2.  The ADM mass can also be expressed as
 ! the sum of two terms, one coming from the integral of the
