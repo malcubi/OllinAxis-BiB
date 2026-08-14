@@ -327,7 +327,7 @@
 
      do j=1,Nzl(0,rank)-ghost
         do i=1,Nrl(0,rank)-ghost
-           lres = lres + (grid(0,0)%ell_u(i,j)-grid(0,0)%ell_u_p(i,j))**2
+           lres = lres + (grid(0,0)%sell_v(i,j))**2
         end do
      end do
 
