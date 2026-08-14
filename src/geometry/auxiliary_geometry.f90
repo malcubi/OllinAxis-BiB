@@ -259,21 +259,21 @@
 ! dividing a factor of r**2. Also, for Lagrangian
 ! evolutions (the default), hdet must remain equal
 ! to its initial value.
-!
-! At t=0 the routine initial.f90 already made sure
-! that the determinant of the conformal metric is
-! equal to the flat one, so we must set hdet=1.
 
-  if (time==zero) then
+! If we are at t=0 and factorhdet=true we must set hdet=1.
+
+  if ((time==zero).and.factorhdet) then
+
      hdet  = one
      ihdet = one
+
      Dr_hdet = zero
      Dz_hdet = zero
-  end if
 
-! Eulerian evolution.
+! If we are at t=0 and factorhdet=false, or for Eulerian evolutions,
+! we must calculate the value of hdet and its derivatives.
 
-  if (bssnflavor=="eulerian") then
+  else if ((time==zero).or.(bssnflavor=="eulerian")) then
 
 !    Determinant.
 
@@ -293,21 +293,28 @@
      Dr_hdet = diff1r(+1)
      Dz_hdet = diff1z(+1)
 
-  end if
+! At t>0 and for Lagrangian evolutions we must make sure that
+! the determinant of the conformal metric remains time indepedent.
 
-! For Lagrangian evolutions make sure that the determinant
-! of the conformal metric remains time indepedent.
+  else if (bssnflavor=="lagrangian") then
 
-  if (bssnflavor=="lagrangian") then
+!    If we are not evolving H we solve for it from the
+!    valur of hdet which is time independent.
+
      if (.not.evolveH) then
+
         if (.not.angmom) then
            H = hdet/(A*B - (r*C)**2)
         else
            H = (hdet + r**2*(A*C2**2 + r**2*C1*(B*C1 - two*C*C2)))/(A*B - (r*C)**2)
         end if
+
      else
+
         call factordet
+
      end if
+
   end if
 
 
