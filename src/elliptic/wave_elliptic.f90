@@ -149,7 +149,7 @@
 
 ! Save initial data to file if required.
 
-  if (ELL_verbose) then
+  if (WE_verbose) then
 
      do box=0,Nb
         do level=min(1,box),Nl(box)
@@ -353,13 +353,13 @@
 
 !    Output if required.
 
-     if ((ELL_verbose).and.(mod(step,ELL_Noutput)==0)) then
+     if ((WE_verbose).and.(mod(step,WE_Noutput)==0)) then
 
 !       Data to screen.
 
-        !if (rank==0) then
-        !   write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
-        !end if
+        if (rank==0) then
+           write(*,"(A,i5,A,ES15.8E2)") ' WaveElliptic:   Iteration = ',step,'         Residual = ',gres
+        end if
 
 !       Save data to file.
 
@@ -370,11 +370,11 @@
 
               grabvar => ell_u
               call save1Dvariable('ell_u',directory,box,level,outparallel,'old')
-              call save2Dvariable('ell_u',directory,box,level,outparallel,'old')
+              !call save2Dvariable('ell_u',directory,box,level,outparallel,'old')
 
               grabvar => ell_v
               call save1Dvariable('ell_v',directory,box,level,outparallel,'old')
-              call save2Dvariable('ell_v',directory,box,level,outparallel,'old')
+              !call save2Dvariable('ell_v',directory,box,level,outparallel,'old')
 
            end do
         end do
