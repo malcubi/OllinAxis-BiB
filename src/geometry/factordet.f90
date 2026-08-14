@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/src/geometry/factordet.f90,v 1.1 2020/04/08 19:17:41 malcubi Exp $
 
   subroutine factordet
 
@@ -36,7 +35,7 @@
 ! ***   FIND DETERMINANT   ***
 ! ****************************
 
-! Find metric determinant (divided by r**2).
+! Find current value of metric determinant (divided by r**2).
 
   if (angmom) then
      auxarray = A*B*H - r**2*(H*C**2 + A*C2**2 + r**2*C1*(B*C1 - two*C*C2))
@@ -44,10 +43,18 @@
      auxarray = (A*B - (r*C)**2)*H
   end if
 
+! Divide the current valof of the determinant by the
+! value of hdet which does not change in time.
+
+  auxarray = auxarray/hdet
+
 
 ! **************************
 ! ***   RESCALE METRIC   ***
 ! **************************
+
+! This rescaling guarantees that the metric determinant
+! is always ewaul to hdet.
 
   auxarray = auxarray**third
 
