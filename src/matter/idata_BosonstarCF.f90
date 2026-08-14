@@ -1304,7 +1304,7 @@
 !       oscillations and make the iterations stable.  But it
 !       seems we only need it for the Klein-Gordon equation.
 
-        scomplex_piR = scomplex_piR - WE_eta*complex_piR
+        scomplex_piR = scomplex_piR - complex_piR
 
 !       And add some dissipation to reduce high frequency noise.
 
