@@ -365,8 +365,12 @@
 ! ************************
 
 ! idata:         Type of initial data.
+!
+! factorhdet     Factor the initial value of the metric determinant to make sure hdet=1.
 
   character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar)
+
+  logical :: factorhdet = .true.
 
 
 ! *********************
