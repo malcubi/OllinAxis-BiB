@@ -465,62 +465,78 @@
 ! ***   FACTOR METRIC DETERMINANT   ***
 ! *************************************
 
-! For BSSN one should have the determinant
-! of the conformal metric equal to its flat
-! value (r**2).  But some initial data don't
-! do this (Brill waves for example), so here
-! we fix it.
+! For BSSN one should have the determinant of the
+! conformal metric equal to its flat value (r**2).
+! But some initial data don't do this (Brill waves
+! for example), so here we fix it.
 !
-! NOTE: In fact, the version of BSSN we use
-! here should work in any case as long as the
-! determinant is time-independent (for lagrangian
-! evolutions), but in practice having a non-trivial
-! determinant that remains fixed in time can lead
-! to late-time instabilities.
+! Notice that this WILL CHANGE the initial metric,
+! so don't be surprised.
+!
+! NOTE: In fact, the version of BSSN we use here
+! should work in any case as long as the determinant
+! is time-independent (for lagrangian evolutions),
+! but in practice having a non-trivial determinant
+! that remains fixed in time can lead to late-time
+! instabilities.
+!
+! Because of this I allow the option of NOT changing
+! the initial determinant depending on the value
+! of the logical parameter "factorhdet" (which is
+! true by default).
 
 ! Loop over boxes and grids levels.
 
-  do box=0,Nb
-     do level=min(1,box),Nl(box)
+  if (factorhdet) then
 
-!       Point to current grid.
+     do box=0,Nb
+        do level=min(1,box),Nl(box)
 
-        call currentgrid(box,level,grid(box,level))
+!          Point to current grid.
 
-!       Find metric determinant (divided by r**2).
+           call currentgrid(box,level,grid(box,level))
 
-        if (angmom) then
-           hdet = A*B*H - r**2*(H*C**2 + A*C2**2 + r**2*C1*(B*C1 - two*C*C2))
-        else
-           hdet = (A*B - (r*C)**2)*H
-        end if
+!          Find metric determinant (divided by r**2).
 
-!       Find new conformal factor.
+           if (angmom) then
+              hdet = A*B*H - r**2*(H*C**2 + A*C2**2 + r**2*C1*(B*C1 - two*C*C2))
+           else
+              hdet = (A*B - (r*C)**2)*H
+           end if
 
-        phi = phi + log(hdet)/12.d0
+!          Find new conformal factor.
 
-!       Find new metric.
+           phi = phi + log(hdet)/12.d0
 
-        auxarray = hdet**third
+!          Find new metric.
 
-        A = A/auxarray
-        B = B/auxarray
-        C = C/auxarray
-        H = H/auxarray
+           auxarray = hdet**third
 
-        if (angmom) then
-           C1 = C1/auxarray
-           C2 = C2/auxarray
-        end if
+           A = A/auxarray
+           B = B/auxarray
+           C = C/auxarray
+           H = H/auxarray
 
-!       psi, psi2, psi4.
+           if (angmom) then
+              C1 = C1/auxarray
+              C2 = C2/auxarray
+           end if
 
-        psi  = exp(phi)
-        psi2 = psi**2
-        psi4 = psi**4
+!          Set determinant to 1.
 
+           hdet  = 1.d0
+           ihdet = 1.d0
+
+!          Find psi,psi2,psi4.
+
+           psi  = exp(phi)
+           psi2 = psi**2
+           psi4 = psi**4
+
+        end do
      end do
-  end do
+
+  end if
 
 
 ! *************************************************
