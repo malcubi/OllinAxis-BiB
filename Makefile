@@ -266,6 +266,7 @@ dir :
 
 # Targets to run perl scripts that create files for parameter
 # assignment, for dealing with arrays and for system calls.
+#
 # Notice that the scripts need to be run only if the prerequisite
 # files have changed since the last time we compiled.  Since the
 # make system can only compare the dates on files, I use this trick:
@@ -332,7 +333,7 @@ ollinaxis : $(OBJS)
 # needed apart from the default ones *.f90 defined by the compilation
 # rule above.
 
-$(MODS) :
+$(MODS) : .perl
 $(OBJS) : $(MODS)
 
 # Up to date message.  Here I make use of the same trick described
