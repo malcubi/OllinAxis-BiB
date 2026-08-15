@@ -713,14 +713,19 @@
 ! ***   MASS, CHARGE, ETCETERA   ***
 ! **********************************
 
-! mass_ADM_V:  ADM mass from volume integral.
-! mass ADM_S:  ADM mass from surface integrals.
+! mass_ADM_Vol:   Do we calculate the ADM mass from volume integral?
+! mass_ADM_Vol2:  Do we calculate the ADM mass from volume integral (version 2)?
+! mass_ADM_Vol3:  Do we calculate the ADM mass from volume integral (version 3)?
+!
+! mass_ADM_V:     ADM mass from volume integral.
+! mass ADM_S:     ADM mass from surface integral.
 
-  logical :: mass_ADM2 = .false.  ! Do we calculate mass_ADM2?
-  logical :: mass_ADM3 = .false.  ! Do we calculate mass_ADM3?
+  logical :: mass_ADM_Vol  = .false.  ! Do we calculate mass_ADM?
+  logical :: mass_ADM_Vol2 = .false.  ! Do we calculate mass_ADM2?
+  logical :: mass_ADM_Vol3 = .false.  ! Do we calculate mass_ADM3?
 
-  real(8) :: mass_ADM_V = 0.d0    ! (should not be set in parameter file).
-  real(8) :: mass_ADM_S = 0.d0    ! (should not be set in parameter file).
+  real(8) :: mass_ADM_V = 0.d0        ! (should not be set in parameter file).
+  real(8) :: mass_ADM_S = 0.d0        ! (should not be set in parameter file).
 
 ! mass_TK:  Tolman-Komar mass.
 !
