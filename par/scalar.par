@@ -2,11 +2,13 @@
 #
 # Real scalar field, 1+log slicing, no shift.
 
+mass_ADM_Vol = .true.      # Calculate ADM mass (volume integral)
+
 eqsym =  .true.            # Equatorial symmetry
 angmom = .false.           # Do not allocate angular functions
 
-dr0 = 0.1                  # Grid spacing in r
-dz0 = 0.1                  # Grid spacing in z
+dr0 = 0.05                 # Grid spacing in r
+dz0 = 0.05                 # Grid spacing in z
 
 dtfac = 0.5                # Courant parameter
 
@@ -14,8 +16,8 @@ Nt = 500                   # Number of time steps
 
 Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
 
-Nrtotal = 100              # Number of grid points in r
-Nztotal = 100              # Number of grid points in z
+Nrtotal = 300              # Number of grid points in r
+Nztotal = 300              # Number of grid points in z
 
 slicing = 1+log            # Type of slicing condition (1+log,maximal)
 gauge_f = 2.0              # Coefficient for Bona-Masso slicing
@@ -41,14 +43,15 @@ scalar_sr0 = 1.0           # Width of perturbation on rho
 scalar_sz0 = 1.0           # Width of perturbation on z
 
 ELL_solver = wave          # Elliptic solver (wave,sor)
+WE_epsilon = 1.d-9         # Wave elliptic tolerance
 
 directory = scalar         # Name of output directory
 outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
 
-Ninfo = 25                 # How often do we want to output information to screen?
+Ninfo = 50                 # How often do we want to output information to screen?
 Noutput0D = 10             # How often do we want 0D output?
-Noutput1D = 25             # How often do we want 1D output?
-Noutput2D = 50             # How often do we want 2D output?
+Noutput1D = 50             # How often do we want 1D output?
+Noutput2D = 100            # How often do we want 2D output?
 
 outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,scalar_phi,scalar_xi_r,scalar_xi_z,rho,mass_sch
 outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,Delta_r,Delta_z,ham,mom_r,mom_z,scalar_phi,scalar_xi_r,scalar_xi_z,rho,mass_sch
