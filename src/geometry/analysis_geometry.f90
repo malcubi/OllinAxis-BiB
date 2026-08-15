@@ -136,7 +136,6 @@
 !       Show results.
 
         if (rank==0) then
-           print *
            write (*,'(A,ES13.6         )') ' Schwarzschild mass along r direction = ',massr
            write (*,'(A,ES13.6         )') ' Schwarzschild mass along z direction = ',massz
            write (*,'(A,ES13.6         )') ' Schwarzschild mass along diagonal    = ',massd
@@ -203,200 +202,298 @@
 ! At the moment the volume integrals for the ADM mass
 ! are only done on the coarse grid.
 
-  if ((box==0).and.(level==0)) then
+  if (mass_ADM_Vol) then
 
-!    Geometric contribution from V and Q1. These do not depend
-!    on the angular momentum since neither d_i(phi), not Z_i
-!    have angular components.
+     if ((box==0).and.(level==0)) then
 
-     do j=1-ghost,Nzmaxl(box)
-        do i=1-ghost,Nrmaxl(box)
-
-!          Find (Vr,Vz).
-
-           Vr = - Dr_g_A(i,j) - r(i,j)*Dz_g_C(i,j) - r(i,j)*g_lambda(i,j) &
-              - 1.d0/hdet(i,j)*(g_A(i,j)*Dr_hdet(i,j) + r(i,j)*g_C(i,j)*Dz_hdet(i,j))
-
-           Vz = - Dz_g_B(i,j) - r(i,j)*Dr_g_C(i,j) - two*g_C(i,j) &
-              - 1.d0/hdet(i,j)*(r(i,j)*g_C(i,j)*Dr_hdet(i,j) + g_B(i,j)*Dz_hdet(i,j))
-
-!          Find (Delr,Delz) and Q2.
-
-           Delr = - Dr_g_A(i,j) - r(i,j)*Dz_g_C(i,j) - r(i,j)*g_lambda(i,j) &
-                - half/hdet(i,j)*(g_A(i,j)*Dr_hdet(i,j) + r(i,j)*g_C(i,j)*Dz_hdet(i,j))
-
-           Delz = - Dz_g_B(i,j) - r(i,j)*Dr_g_C(i,j) - two*g_C(i,j) &
-                - half/hdet(i,j)*(r(i,j)*g_C(i,j)*Dr_hdet(i,j) + g_B(i,j)*Dz_hdet(i,j))
-
-           Q1 =  half/hdet(i,j)*(Delr*Dr_hdet(i,j) + Delz*Dz_hdet(i,j))
-
-!          Add contributions to integrand.
-
-           auxarray(i,j) = 0.125d0*(Vr*Dr_phi(i,j) + Vz*Dz_phi(i,j) + Q1)*psi(i,j)*r(i,j)*sqrt(hdet(i,j))
-
-        end do
-     end do
-
-!    Geometric contributions from Q2.  This term
-!    does depend on the angular momentum.
-
-     if (angmom) then
-
-!       Case with angular momentum.
+!       Geometric contribution from V and Q1. These do not depend
+!       on the angular momentum since neither d_i(phi), not Z_i
+!       have angular components.
 
         do j=1-ghost,Nzmaxl(box)
-          do i=1-ghost,Nrmaxl(box)
+           do i=1-ghost,Nrmaxl(box)
 
-!            Inverse metric.
+!             Find (Vr,Vz).
 
-             gu(1,1) = g_A(i,j)
-             gu(2,2) = g_B(i,j)
-             gu(3,3) = g_H(i,j)/r(i,j)**2
-             gu(1,2) = r(i,j)*g_C(i,j)
-             gu(1,3) = r(i,j)*g_C1(i,j)
-             gu(2,3) = g_C2(i,j)
+              Vr = - Dr_g_A(i,j) - r(i,j)*Dz_g_C(i,j) - r(i,j)*g_lambda(i,j) &
+                - 1.d0/hdet(i,j)*(g_A(i,j)*Dr_hdet(i,j) + r(i,j)*g_C(i,j)*Dz_hdet(i,j))
 
-             gu(2,1) = gu(1,2)
-             gu(3,1) = gu(1,3)
-             gu(3,2) = gu(2,3)
+              Vz = - Dz_g_B(i,j) - r(i,j)*Dr_g_C(i,j) - two*g_C(i,j) &
+                 - 1.d0/hdet(i,j)*(r(i,j)*g_C(i,j)*Dr_hdet(i,j) + g_B(i,j)*Dz_hdet(i,j))
 
-!            Deltas. Most of them are equal to the Christoffels,
-!            except Delta(1,3,3) and Delta(3,1,3).
+!             Find (Delr,Delz) and Q2.
 
-             Delta(1,1,1) = chris_rrr(i,j)
-             Delta(1,1,2) = chris_rrz(i,j)
-             Delta(1,1,3) = chris_rrp(i,j)
-             Delta(1,2,2) = chris_rzz(i,j)
-             Delta(1,2,3) = chris_rzp(i,j)
-             Delta(1,3,3) = chris_rpp(i,j) + r(i,j)
+              Delr = - Dr_g_A(i,j) - r(i,j)*Dz_g_C(i,j) - r(i,j)*g_lambda(i,j) &
+                   - half/hdet(i,j)*(g_A(i,j)*Dr_hdet(i,j) + r(i,j)*g_C(i,j)*Dz_hdet(i,j))
 
-             Delta(2,1,1) = chris_zrr(i,j)
-             Delta(2,1,2) = chris_zrz(i,j)
-             Delta(2,1,3) = chris_zrp(i,j)
-             Delta(2,2,2) = chris_zzz(i,j)
-             Delta(2,2,3) = chris_zzp(i,j)
-             Delta(2,3,3) = chris_zpp(i,j)
+              Delz = - Dz_g_B(i,j) - r(i,j)*Dr_g_C(i,j) - two*g_C(i,j) &
+                   - half/hdet(i,j)*(r(i,j)*g_C(i,j)*Dr_hdet(i,j) + g_B(i,j)*Dz_hdet(i,j))
 
-             Delta(3,1,1) = chris_prr(i,j)
-             Delta(3,1,2) = chris_prz(i,j)
-             Delta(3,1,3) = chris_prp(i,j) - one/r(i,j)
-             Delta(3,2,2) = chris_pzz(i,j)
-             Delta(3,2,3) = chris_pzp(i,j)
-             Delta(3,3,3) = chris_ppp(i,j)
+              Q1 =  half/hdet(i,j)*(Delr*Dr_hdet(i,j) + Delz*Dz_hdet(i,j))
 
-!            Symmetries.
+!             Add contributions to integrand.
 
-             Delta(1,2,1) = Delta(1,1,2)
-             Delta(2,2,1) = Delta(2,1,2)
-             Delta(3,2,1) = Delta(3,1,2)
+              auxarray(i,j) = 0.125d0*(Vr*Dr_phi(i,j) + Vz*Dz_phi(i,j) + Q1)*psi(i,j)*r(i,j)*sqrt(hdet(i,j))
 
-             Delta(1,3,1) = Delta(1,1,3)
-             Delta(2,3,1) = Delta(2,1,3)
-             Delta(3,3,1) = Delta(3,1,3)
-
-             Delta(1,3,2) = Delta(1,2,3)
-             Delta(2,3,2) = Delta(2,2,3)
-             Delta(3,3,2) = Delta(3,2,3)
-
-!            Now do the sum for Q2.
-
-             Q2 = 0.d0
-
-             do k=1,3
-                do l=1,3
-                   do m=1,3
-                      do n=1,3
-                         Q2 = Q2 + gu(m,n)*Delta(k,m,l)*Delta(l,n,k)
-                      end do
-                   end do
-                end do
-             end do
-
-!            Add contributions to integrand.
-
-             auxarray(i,j) = auxarray(i,j) - 0.125d0*Q2*psi(i,j)*r(i,j)*sqrt(hdet(i,j))
-
-          end do
+           end do
         end do
 
-     else
+!       Geometric contributions from Q2.  This term
+!       does depend on the angular momentum.
 
-!       No angular momentum.
+        if (angmom) then
 
-        gu = 0.d0
-        Delta = 0.d0
+!          Case with angular momentum.
 
-        do j=1-ghost,Nzmaxl(box)
-          do i=1-ghost,Nrmaxl(box)
+           do j=1-ghost,Nzmaxl(box)
+              do i=1-ghost,Nrmaxl(box)
 
-!            Inverse metric.
+!                Inverse metric.
 
-             gu(1,1) = g_A(i,j)
-             gu(2,2) = g_B(i,j)
-             gu(3,3) = g_H(i,j)/r(i,j)**2
-             gu(1,2) = r(i,j)*g_C(i,j)
+                 gu(1,1) = g_A(i,j)
+                 gu(2,2) = g_B(i,j)
+                 gu(3,3) = g_H(i,j)/r(i,j)**2
+                 gu(1,2) = r(i,j)*g_C(i,j)
+                 gu(1,3) = r(i,j)*g_C1(i,j)
+                 gu(2,3) = g_C2(i,j)
 
-             gu(2,1) = gu(1,2)
+                 gu(2,1) = gu(1,2)
+                 gu(3,1) = gu(1,3)
+                 gu(3,2) = gu(2,3)
 
-!            Deltas. Most of them are equal to the Christoffels,
-!            except Delta(1,3,3) and Delta(3,1,3).
+!                Deltas. Most of them are equal to the Christoffels,
+!                except Delta(1,3,3) and Delta(3,1,3).
 
-             Delta(1,1,1) = chris_rrr(i,j)
-             Delta(1,1,2) = chris_rrz(i,j)
-             Delta(1,2,2) = chris_rzz(i,j)
-             Delta(1,3,3) = chris_rpp(i,j) + r(i,j)
+                 Delta(1,1,1) = chris_rrr(i,j)
+                 Delta(1,1,2) = chris_rrz(i,j)
+                 Delta(1,1,3) = chris_rrp(i,j)
+                 Delta(1,2,2) = chris_rzz(i,j)
+                 Delta(1,2,3) = chris_rzp(i,j)
+                 Delta(1,3,3) = chris_rpp(i,j) + r(i,j)
 
-             Delta(2,1,1) = chris_zrr(i,j)
-             Delta(2,1,2) = chris_zrz(i,j)
-             Delta(2,2,2) = chris_zzz(i,j)
-             Delta(2,3,3) = chris_zpp(i,j)
+                 Delta(2,1,1) = chris_zrr(i,j)
+                 Delta(2,1,2) = chris_zrz(i,j)
+                 Delta(2,1,3) = chris_zrp(i,j)
+                 Delta(2,2,2) = chris_zzz(i,j)
+                 Delta(2,2,3) = chris_zzp(i,j)
+                 Delta(2,3,3) = chris_zpp(i,j)
 
-             Delta(3,1,3) = chris_prp(i,j) - one/r(i,j)
-             Delta(3,2,3) = chris_pzp(i,j)
+                 Delta(3,1,1) = chris_prr(i,j)
+                 Delta(3,1,2) = chris_prz(i,j)
+                 Delta(3,1,3) = chris_prp(i,j) - one/r(i,j)
+                 Delta(3,2,2) = chris_pzz(i,j)
+                 Delta(3,2,3) = chris_pzp(i,j)
+                 Delta(3,3,3) = chris_ppp(i,j)
 
-!            Symmetries.
+!                Symmetries.
 
-             Delta(1,2,1) = Delta(1,1,2)
-             Delta(2,2,1) = Delta(2,1,2)
-             Delta(3,3,1) = Delta(3,1,3)
-             Delta(3,3,2) = Delta(3,2,3)
+                 Delta(1,2,1) = Delta(1,1,2)
+                 Delta(2,2,1) = Delta(2,1,2)
+                 Delta(3,2,1) = Delta(3,1,2)
 
-!            Now do the sum for Q2.
+                 Delta(1,3,1) = Delta(1,1,3)
+                 Delta(2,3,1) = Delta(2,1,3)
+                 Delta(3,3,1) = Delta(3,1,3)
 
-             Q2 = 0.d0
+                 Delta(1,3,2) = Delta(1,2,3)
+                 Delta(2,3,2) = Delta(2,2,3)
+                 Delta(3,3,2) = Delta(3,2,3)
 
-             do k=1,3
-                do l=1,3
-                   do m=1,3
-                      do n=1,3
-                         Q2 = Q2 + gu(m,n)*Delta(k,m,l)*Delta(l,n,k)
-                      end do
-                   end do
-                end do
-             end do
+!                Now do the sum for Q2.
 
-!            Add contributions to integrand.
+                 Q2 = 0.d0
 
-             auxarray(i,j) = auxarray(i,j) - 0.125d0*Q2*psi(i,j)*r(i,j)*sqrt(hdet(i,j))
+                 do k=1,3
+                    do l=1,3
+                       do m=1,3
+                          do n=1,3
+                             Q2 = Q2 + gu(m,n)*Delta(k,m,l)*Delta(l,n,k)
+                          end do
+                       end do
+                    end do
+                 end do
 
-          end do
-        end do
+!                Add contributions to integrand.
+
+                 auxarray(i,j) = auxarray(i,j) - 0.125d0*Q2*psi(i,j)*r(i,j)*sqrt(hdet(i,j))
+
+              end do
+           end do
+
+        else
+
+!          No angular momentum.
+
+           gu = 0.d0
+           Delta = 0.d0
+
+           do j=1-ghost,Nzmaxl(box)
+              do i=1-ghost,Nrmaxl(box)
+
+!                Inverse metric.
+
+                 gu(1,1) = g_A(i,j)
+                 gu(2,2) = g_B(i,j)
+                 gu(3,3) = g_H(i,j)/r(i,j)**2
+                 gu(1,2) = r(i,j)*g_C(i,j)
+
+                 gu(2,1) = gu(1,2)
+
+!                Deltas. Most of them are equal to the Christoffels,
+!                except Delta(1,3,3) and Delta(3,1,3).
+
+                 Delta(1,1,1) = chris_rrr(i,j)
+                 Delta(1,1,2) = chris_rrz(i,j)
+                 Delta(1,2,2) = chris_rzz(i,j)
+                 Delta(1,3,3) = chris_rpp(i,j) + r(i,j)
+
+                 Delta(2,1,1) = chris_zrr(i,j)
+                 Delta(2,1,2) = chris_zrz(i,j)
+                 Delta(2,2,2) = chris_zzz(i,j)
+                 Delta(2,3,3) = chris_zpp(i,j)
+
+                 Delta(3,1,3) = chris_prp(i,j) - one/r(i,j)
+                 Delta(3,2,3) = chris_pzp(i,j)
+
+!                Symmetries.
+
+                 Delta(1,2,1) = Delta(1,1,2)
+                 Delta(2,2,1) = Delta(2,1,2)
+                 Delta(3,3,1) = Delta(3,1,3)
+                 Delta(3,3,2) = Delta(3,2,3)
+
+!                Now do the sum for Q2.
+
+                 Q2 = 0.d0
+
+                 do k=1,3
+                    do l=1,3
+                       do m=1,3
+                          do n=1,3
+                             Q2 = Q2 + gu(m,n)*Delta(k,m,l)*Delta(l,n,k)
+                          end do
+                       end do
+                    end do
+                 end do
+
+!                Add contributions to integrand.
+
+                 auxarray(i,j) = auxarray(i,j) - 0.125d0*Q2*psi(i,j)*r(i,j)*sqrt(hdet(i,j))
+
+              end do
+           end do
+
+        end if
+
+!       Add matter contribution to integrand
+
+        if (mattertype/="vacuum") then
+           auxarray = auxarray + (2.d0*smallpi*r)*rho*psi**5
+        end if
+
+!       Integrate.
+
+        mass_ADM_V = integral(0,0,auxarray)
+
+        if ((rank==0).and.(time==0)) then
+           write (*,'(A,ES13.6)') ' Total integrated ADM mass   = ',mass_ADM_V
+           print *
+        end if
 
      end if
 
-!    Add matter contribution to integrand
+  end if
 
-     if (mattertype/="vacuum") then
-        auxarray = auxarray + (2.d0*smallpi*r)*rho*psi**5
+
+! ************************************
+! ***   ADM MASS VOLUME INTEGRAL   ***
+! ***    (ALTERNATIVE VERSIONS)    ***
+! ************************************
+
+! Here we add two alternative versions of the ADM volume
+! integral.  At the moment they only make sense for
+! conformally flat initial data.
+
+! ADM mass version 2.  The ADM mass can also be expressed as
+! the sum of two terms, one coming from the integral of the
+! energy density over the flat volume element, and another
+! one coming from the integral coming from a quadratic term
+! in the Christoffel symbols.
+!
+! For a conformally flat metric the final expression is:
+!
+!                 /
+! mass_ADM = 2 pi | [ rho + 5/(2 pi) (Dr_psi**2 + Dz_psi**2) / psi**6 ] r dr dz
+!                 /
+!
+!             /
+!          =  | [ 2 pi rho + 5 (Dr_phi**2 + Dz_phi**2) / psi**4 ] r dr dz
+!             /
+!
+! The factor 2*pi comes from the integral over the angle,
+! and we used the fact that:
+!
+! D1_psi  =  psi D1_phi
+!
+! This expression converges very very slowly far away (from below).
+! The slow convergence comes from the second term that contributes
+! to the integral all the way to infinity.
+
+  if (mass_ADM_Vol2) then
+
+     if ((box==0).and.(level==0)) then
+
+        auxarray = (2.d0*smallpi*rho + 5.d0*(Dr_phi**2 + Dz_phi**2)/psi4)*r
+        aux = integral(0,0,auxarray)
+
+        if ((rank==0).and.(time==0)) then
+           write (*,'(A,ES13.6)') ' Total ADM mass (version 2, converges slowly from below) = ',aux
+           print *
+        end if
+
      end if
 
-!    Integrate.
+  end if
 
-     mass_ADM_V = integral(0,0,auxarray)
+! ADM mass version 3. The ADM mass can also be expressed as
+! a different sum of two terms, but now as integrals over
+! the physical curved volume element. This is an interesting
+! expression as the first terms is just the total integrated
+! density as measured by the Eulerian observers, and
+! the second term (which again comes from a quadratic term
+! in the Christoffels) can be interpreted as the total
+! gravitational potential energy.
 
-     if (rank==0) then
-        write (*,'(A,ES13.6)') ' Total integrated ADM mass   = ',mass_ADM_V
-        print *
+! For a conformally flat metric the final expression is:
+!
+!                 /
+! mass_ADM = 2 pi | [ rho - 1/(2 pi) (Dr_psi**2 + Dz_psi**2) / psi**6 ] psi**6 r dr dz
+!                 /
+!
+!             /
+!          =  | [ 2 pi rho psi**4 - (Dr_phi**2 + Dz_phi**2) ] psi**2 r dr dz
+!             /
+!
+! The factor 2*pi comes from the integral over the angle,
+! and we used the fact that:
+!
+! D1_psi  =  psi D1_phi
+!
+! This expression also converges slowly far away (from above),
+! but a bit faster that version 2 above.
+
+  if (mass_ADM_Vol3) then
+
+     if ((box==0).and.(level==0)) then
+
+        auxarray = (2.d0*smallpi*rho*psi4 - (Dr_phi**2 + Dz_phi**2))*psi2*r
+        aux = integral(0,0,auxarray)
+
+        if ((rank==0).and.(time==0)) then
+           write (*,'(A,ES13.6)') ' Total ADM mass (version 3, converges slowly from above) = ',aux
+           print *
+        end if
+
      end if
 
   end if
