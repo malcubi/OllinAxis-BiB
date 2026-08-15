@@ -300,7 +300,7 @@
 
   miniter = 100
 
-  do while ((step<miniter).or.((gres>ELL_epsilon).and.(step<ELL_maxiter)))
+  do while ((step<miniter).or.((gres>WE_epsilon).and.(step<WE_maxiter)))
 
 
 !    ******************************************
