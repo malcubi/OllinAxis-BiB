@@ -2,11 +2,13 @@
 # 
 # Boson star initial data in the conformally-flat gauge, 1+log slicing, no shift.
 
+mass_ADM_Vol = .true.      # Calculate ADM mass (volume integral)
+
 eqsym = .true.             # Equatorial symmetry
 angmom = .false.           # Do not allocate angular functions
 
-dr0 = 0.05                 # Grid spacing in r
-dz0 = 0.05                 # Grid spacing in z
+dr0 = 0.04                 # Grid spacing in r
+dz0 = 0.04                 # Grid spacing in z
 
 dtfac = 0.5                # Courant parameter
 
