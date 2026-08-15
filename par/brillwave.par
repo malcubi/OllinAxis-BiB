@@ -2,6 +2,8 @@
 #
 # Brill wave spacetime, shockavoid slicing, no shift.
 
+mass_ADM_Vol = .true.      # Calculate ADM mass (volume integral)
+
 eqsym     = .true.         # Equatorial symmetry
 angmom    = .false.        # Do not allocate angular functions
 chimethod = .true.         # Use chi method for conformal factor
@@ -14,8 +16,8 @@ adjuststep = .true.        # Adjust time step during evolution
 
 Nt = 5000                  # Number of time steps
 
-Nrtotal = 250              # Number of grid points in r
-Nztotal = 250              # Number of grid points in z
+Nrtotal = 500              # Number of grid points in r
+Nztotal = 500              # Number of grid points in z
 
 Nl0 = 1                    # Number of refinement levels for box 0 (centered on origin)
 
@@ -33,6 +35,9 @@ idata = BrillWave          # Brill wave initial data
 brill_a0 = 4.0             # Brill wave amplitude
 
 ELL_solver = wave          # Elliptic solver (wave,sor)
+WE_epsilon = 1.d-8         # Wave elliptic tolerance
+We_verbose = .false.       # Output information about the elliptic solver iterations
+WE_Noutput = 1000          # How often do we output iterations?
 
 ahfind = .true.            # Look for apparent horizon
 ahmethod = spectral        # Horizon finder method (shoot,spectral)
