@@ -679,6 +679,7 @@
 
   if (rank==0) then
      write (*,'(A,ES13.6)') ' Tolman-Komar mass (mass_TK) = ',mass_TK
+     print *
   end if
 
 
