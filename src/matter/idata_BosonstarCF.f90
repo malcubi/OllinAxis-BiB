@@ -32,7 +32,7 @@
 !
 ! The Hamiltonian constraint takes the form:
 !
-! __2                    5
+! __2                   5
 ! \/    psi  +  2 pi psi rho  =  0
 !   flat
 !
@@ -88,8 +88,8 @@
 ! \/   phi  +  g   [ d ln(alpha)  +  2 d ln(psi) ] d phi  +  psi [ (omega/alpha) phi  -  V' ] = 0
 !  flat               i                 i           j
 !
-! __2              ~ij                              4
-! \/   alpha  +  2 g  d ln(psi) d alpha  -  4 pi psi (rho + trS)  =  0
+! __2              ~ij                                    4
+! \/   alpha  +  2 g  d ln(psi) d alpha  -  4 pi alpha psi (rho + trS)  =  0
 !  flat                i         j
 !
 !
