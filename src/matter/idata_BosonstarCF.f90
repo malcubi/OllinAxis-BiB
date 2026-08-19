@@ -54,7 +54,7 @@
 ! Finally, the maximal slicing equation takes the form:
 !
 ! __2
-! \/ alpha  -  4 pi (rho + trS)  =  0
+! \/ alpha  -  4 pi alpha (rho + trS)  =  0
 !
 !
 ! where now:
@@ -103,11 +103,11 @@
 ! This method is slow (specially at high resolution), but seems quite robust. 
 ! It can be improved by using a good initial guess (I'll try this later),
 ! and maybe something like multi-grid since it converges much faster
-
+!
 ! IMPORTANT:  To avoid confusion, do notice that in fact we use the
 ! array "phi" for the conformal factor "psi" (this is because in the
 ! code "psi" is declared non-evolving).  On the other hand, the
-! scalar field is called "complex_phi".
+! scalar field is called "complex_phiR".
 
 ! Include modules.
 
@@ -139,6 +139,8 @@
   real(8) aux1,aux2
 
   character(3) method            ! Time integration method.
+
+! Local time stepping arrays.
 
   integer s_ext(0:Nb,0:Nlmax)    ! External values of step counter.
 
@@ -248,20 +250,19 @@
 
         call currentgrid(box,level,grid(box,level))
 
-        alpha = 1.d0
-        phi   = 1.d0
+        alpha = one
+        phi   = one
 
 !       The scalar field is initialized to a gaussian centered
 !       on the origin with the correct amplitude.
 
         complex_phiR = boson_phi0*exp(-rr**2)
-        complex_phiI = 0.d0
 
-!       Set time derivatives to 0.
+!       Set all time derivatives to 0.
 
-        dtalpha = 0.d0       ! Time derivative of alpha
-        dtphi = 0.d0         ! Time derivatve of phi
-        complex_piR = 0.d0   ! Time derivative of complex_phiR
+        dtalpha = 0.d0       ! Time derivative of alpha.
+        dtphi = 0.d0         ! Time derivatve of phi.
+        complex_piR = 0.d0   ! Time derivative of complex_phiR.
 
      end do
   end do
@@ -391,7 +392,7 @@
         do i=1,Nrl(0,rank)-ghost
            NNloc = NNloc + 1
            lres = lres + abs(grid(0,0)%scomplex_piR(i,j)) &
-                + abs(grid(0,0)%sdtalpha(i,j)) + abs(grid(0,0)%sdtphi(i,j)) 
+                + abs(grid(0,0)%sdtalpha(i,j)) + abs(grid(0,0)%sdtphi(i,j))
         end do
      end do
 
@@ -778,6 +779,11 @@
 !       Set time derivative of the real part of phi to zero.
 
         complex_piR  = 0.d0
+
+!       Set again dtalpha and dtphi to 0.
+
+        dtalpha = 0.d0
+        dtphi = 0.d0
 
      end do
   end do
