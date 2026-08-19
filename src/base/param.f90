@@ -368,7 +368,7 @@
 !
 ! factorhdet     Factor the initial value of the metric determinant to make sure hdet=1.
 
-  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar)
+  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar,rotboson)
 
   logical :: factorhdet = .true.
 
@@ -681,14 +681,16 @@
 
 ! Boson star initial data:
 !
+! boson_L            Angular momentum number for rotating boson stars.
 ! boson_phi0:        Boson star parameter for value at origin (see boson_factor).
 ! boson_factor:      Normalization factor:
 !                         * physical:  phi(r<<1) ~ phi0
 !                         * harmonic:  phi(r<<1) ~ phi0/sqrt(4pi*(2l+1))
 ! boson_omega:       Frequency of the boson star.
 
-  real(8) :: boson_phi0  = 0.d0
+  integer :: boson_L = 0
 
+  real(8) :: boson_phi0  = 0.d0
   real(8) :: boson_omega = 0.d0
 
   character(1000) :: boson_factor = "physical" ! range=(physical,harmonic)
