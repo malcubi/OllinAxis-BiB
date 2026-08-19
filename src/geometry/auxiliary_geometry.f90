@@ -546,8 +546,6 @@
 
   if (angmom) then
 
-     print *, 'Christoffel symbols with angular momentum not yet completely implemented.'
-
 !    Extra terms to previous ones. Notice that chris_rpp and chris_zpp
 !    do not need any extra terms.
 
