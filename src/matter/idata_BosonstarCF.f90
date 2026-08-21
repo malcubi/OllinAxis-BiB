@@ -729,7 +729,7 @@
 
         psi = phi
 
-!       Now calculate the correct "phi".
+!       Now calculate the correct "phi" and its derivatives.
 
         phi = dlog(psi)
 
@@ -1207,10 +1207,6 @@
 
 !       And add some dissipation to reduce high frequency noise.
 
-        evolvevar => complex_piR
-        sourcevar => scomplex_piR
-        call dissipation(+1,+1,WE_diss)
-
         evolvevar => dtalpha
         sourcevar => sdtalpha
         call dissipation(+1,+1,WE_diss)
@@ -1219,8 +1215,12 @@
         sourcevar => sdtphi
         call dissipation(+1,+1,WE_diss)
 
+        evolvevar => complex_piR
+        sourcevar => scomplex_piR
+        call dissipation(+1,+1,WE_diss)
+
 !       But set the source at point (1,1) such that the
-!       cubic interpolated value to r=0 does not change.
+!       cubic interpolated value at r=0 does not change.
 !
 !       In order to do this we notice that a cubic
 !       interpolation to r=0 (assuming that phiR is
@@ -1290,8 +1290,8 @@
 
            if ((.not.eqsym).and.(rank<nprocr)) then
               j = 1-ghost
-              sdtalpha(:,j)     = - (r(:,j)*Dr_dtalpha(:,j) + z(:,j)*Dz_dtalpha(:,j) + dtalpha(:,j))/rr(:,j)
-              sdtphi(:,j)       = - (r(:,j)*Dr_dtphi(:,j) + z(:,j)*Dz_dtphi(:,j) + dtphi(:,j))/rr(:,j)
+              sdtalpha(:,j)     = - (r(:,j)*Dr_dtalpha(:,j)     + z(:,j)*Dz_dtalpha(:,j)     + dtalpha(:,j))/rr(:,j)
+              sdtphi(:,j)       = - (r(:,j)*Dr_dtphi(:,j)       + z(:,j)*Dz_dtphi(:,j)       + dtphi(:,j))/rr(:,j)
               scomplex_piR(:,j) = - (r(:,j)*Dr_complex_piR(:,j) + z(:,j)*Dz_complex_piR(:,j) + complex_piR(:,j))/rr(:,j)
            end if
 
