@@ -414,9 +414,9 @@
   end if
 
 
-! **********************
-! ***   BOSON STAR   ***
-! **********************
+! ***********************
+! ***   BOSON STARS   ***
+! ***********************
 
 ! Boson star initial data.
 
@@ -433,6 +433,44 @@
            call die
         else
            call idata_BosonstarCF
+        end if
+
+     else
+
+        if (rank==0) then
+           print *, 'Boson star initial data needs "complex" type matter ...'
+           print *, 'Aborting! (subroutine initial)'
+           print *
+        end if
+
+        call die
+
+     end if
+
+  end if
+
+! Rotating boson star initial data.
+
+  if (idata=="rotboson") then
+
+     if (.not.angmom) then
+        print *, 'Rotating boson star initial data needs angmon=.true. ...'
+        print *, 'Aborting! (subroutine idata_RotBoson)'
+        print *
+        call die
+     end if
+
+     if (contains(mattertype,"complex")) then
+
+        if (complexpotential=="none") then
+           if (rank==0) then
+              print *, 'For boson star initial data we need a massive scalar field.'
+              print *, 'Aborting! (subroutine initial)'
+              print *
+           end if
+           call die
+        else
+           call idata_RotBoson
         end if
 
      else
