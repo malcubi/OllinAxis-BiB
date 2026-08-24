@@ -271,6 +271,42 @@
                  + lambda*psi4*auxarray
      end if
 
+!    Corrections for rotating boson stars.
+
+     if (angmom.and.(boson_L>0)) then
+
+        auxarray = half*(g_H*boson_L**2*(complex_phiR**2 + complex_phiI**2)/r**2 &
+                 + two*g_C1*boson_L*(complex_xiI_r*complex_phiR - complex_xiR_r*complex_phiI)*r &
+                 + two*g_C2*boson_L*(complex_xiI_z*complex_phiR - complex_xiR_z*complex_phiI))
+
+!       Energy density
+
+        rho = rho + auxarray/psi4
+
+!       Momentum density.
+
+        J_r = J_r + r*g_C1*boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
+        J_r = J_r +   g_C2*boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
+
+        J_p = J_p +   g_H *boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4/r**2
+        !J_p = boson_L*complex_phiR**2*(boson_L*beta_p+boson_omega)/r**2/alpha
+
+!       Stress tensor.
+
+        S_A = S_A - A*auxarray
+        S_B = S_B - B*auxarray
+        S_C = S_C - C*auxarray
+        S_H = S_H - H*auxarray + boson_L**2*(complex_phiR**2 + complex_phiI**2)/r**2
+
+        S_C1 = S_C1 - C1*auxarray + boson_L*(complex_xiI_r*complex_phiR - complex_xiR_r*complex_phiI)/r**3
+        S_C2 = S_C2 - C2*auxarray + boson_L*(complex_xiI_z*complex_phiR - complex_xiR_z*complex_phiI)/r**2
+
+!       S_lambda.
+
+        S_lambda = S_lambda - boson_L**2*(complex_phiR**2 + complex_phiI**2)/r**4 - lambda*auxarray
+
+     end if
+
 !    Boson density and current.  These are calculated here and not
 !    in the analysis routine since for charged fields we need the
 !    current for the source of the electric field.
