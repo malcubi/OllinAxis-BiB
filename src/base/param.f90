@@ -370,7 +370,7 @@
 
   character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar,rotboson)
 
-  logical :: factorhdet = .true.
+  logical :: factorhdet = .false.
 
 
 ! *********************
