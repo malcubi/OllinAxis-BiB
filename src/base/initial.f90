@@ -511,17 +511,16 @@
 ! Notice that this WILL CHANGE the initial metric,
 ! so don't be surprised.
 !
+! Also, if your initial data has matter and you
+! calculated it with hdet different from 1, it
+! is not a good idea to factor the determinant
+! since this effectively changes the coordnate
+! system and you would then have to do also
+! modify the matter.
+!
 ! NOTE: In fact, the version of BSSN we use here
 ! should work in any case as long as the determinant
-! is time-independent (for lagrangian evolutions),
-! but in practice having a non-trivial determinant
-! that remains fixed in time can lead to late-time
-! instabilities.
-!
-! Because of this I allow the option of NOT changing
-! the initial determinant depending on the value
-! of the logical parameter "factorhdet" (which is
-! true by default).
+! is time-independent (for lagrangian evolutions).
 
 ! Loop over boxes and grids levels.
 
