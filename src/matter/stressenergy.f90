@@ -248,10 +248,9 @@
 !    Stress tensor.
 
      auxarray = half*(complex_piR**2 + complex_piI**2 &
-              -(g_A*complex_xiR_r**2 + g_B*complex_xiR_z**2 &
-              + two*r*g_C*complex_xiR_r*complex_xiR_z &
-              + g_A*complex_xiI_r**2 + g_B*complex_xiI_z**2 &
-              + two*r*g_C*complex_xiI_r*complex_xiI_z)/psi4) &
+              -(g_A*(complex_xiR_r**2 + complex_xiI_r**2) &
+              + g_B*(complex_xiR_z**2 + complex_xiI_z**2) &
+              + two*r*g_C*(complex_xiR_r*complex_xiR_z + complex_xiI_r*complex_xiI_z))/psi4) &
               - complex_V
 
      S_A = S_A + complex_xiR_r**2 + complex_xiI_r**2 + A*psi4*auxarray
@@ -287,9 +286,7 @@
 
         J_r = J_r + r*g_C1*boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
         J_r = J_r +   g_C2*boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
-
         J_p = J_p +   g_H *boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4/r**2
-        !J_p = boson_L*complex_phiR**2*(boson_L*beta_p+boson_omega)/r**2/alpha
 
 !       Stress tensor.
 
