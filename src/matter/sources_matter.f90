@@ -38,6 +38,24 @@
   end if
 
 
+! *************************
+! ***   MAXWELL FIELD   ***
+! *************************
+
+  if (contains(mattertype,"electric")) then
+     call sources_maxwell
+  end if
+
+
+! *******************************
+! ***   COMPLEX PROCA FIELD   ***
+! *******************************
+
+  if (contains(mattertype,"complexproca")) then
+     call sources_complexproca
+  end if
+
+
 ! ***************
 ! ***   END   ***
 ! ***************
