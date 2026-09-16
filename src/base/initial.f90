@@ -488,6 +488,26 @@
   end if
 
 
+! ***************************************
+! ***   PROCA STAR FROM OLLINSPHERE   ***
+! ***************************************
+
+! This initial data corresponds data imported from OllinSphere
+
+  if (idata=="procastar_ollinsphere") then
+     if (contains(mattertype,"complexproca")) then
+        call idata_procastar_ollinsphere
+     else
+        if (rank==0) then
+           print *, 'Proca star initial data needs complex Proca field type matter.'
+           print *, 'Aborting (subroutine initial.f90)'
+           print *
+        end if
+        call die
+     end if
+  end if
+
+
 ! *************************************************
 ! ***   NO MORE INITIAL DATA AFTER THIS POINT   ***
 ! *************************************************
