@@ -368,7 +368,7 @@
 !
 ! factorhdet     Factor the initial value of the metric determinant to make sure hdet=1.
 
-  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar,rotboson)
+  character(30) :: idata = "minkowski"  ! range = (checkpoint,minkowski,schwarzschild,kerr,BrillLindquist,BrillWave,scalarpulse,complexpulse,testgw,bosonstar,rotboson,procastar_ollinsphere)
 
   logical :: factorhdet = .false.
 
@@ -433,10 +433,11 @@
 
 ! Kreiss-Oliger dissipation coefficients.  It is better if they are independent.
 
-  real(8) :: geodiss     = 0.01    ! Dissipation for geometric variables.
-  real(8) :: scalardiss  = 0.01    ! Dissipation for scalar fields.
-  real(8) :: complexdiss = 0.01    ! Dissipation for complex scalar fields.
-
+  real(8) :: geodiss     = 0.01       ! Dissipation for geometric variables.
+  real(8) :: scalardiss  = 0.01       ! Dissipation for scalar fields.
+  real(8) :: complexdiss = 0.01       ! Dissipation for complex scalar fields.
+  real(8) :: maxwelldiss = 0.01       ! Dissipation for Maxwell field.
+  real(8) :: complexprocadiss = 0.01  ! Dissipation for complex Proca field.
 
 ! **********************
 ! ***   BOUNDARIES   ***
@@ -485,9 +486,9 @@
   integer :: WE_Noutput = 500
   integer :: WE_maxiter = 100000
 
-  real(8) :: WE_eta     = 0.d0
-  real(8) :: WE_diss    = 0.1d0
-  real(8) :: WE_dtfac   = 0.6d0
+  real(8) :: WE_eta     = 0.0
+  real(8) :: WE_diss    = 0.01
+  real(8) :: WE_dtfac   = 0.5
   real(8) :: WE_epsilon = 1.d-8
 
 
@@ -609,7 +610,7 @@
 !    scalar  = Scalar Field.
 !    complex = Complex scalar field.
 
-  character(1000) :: mattertype = "vacuum"  ! multiple, range=(vacuum,scalar,complex)
+  character(1000) :: mattertype = "vacuum"  ! multiple, range=(vacuum,scalar,complex,electric,complexproca)
 
 
 ! *****************************
@@ -651,6 +652,8 @@
 ! complex_mass:       Complex field mass parameter.
 ! complex_lambda:     Coefficient of phi**4 term in potential.
 !
+! complex_l:          Total angular momentum for rotating case (azimuthal quantum number).
+!
 ! complex*_a0:        Amplitude of gaussian perturbation.
 ! complex*_r0:        Center of gaussian perturbation.
 ! complex*_z0:        Center of gaussian perturbation.
@@ -667,6 +670,8 @@
   real(8) :: complex_mass = 0.0
   real(8) :: complex_lambda = 0.0
 
+  integer :: complex_l = 0
+
   real(8) :: complexR_a0 = 0.0
   real(8) :: complexR_r0 = 0.0
   real(8) :: complexR_z0 = 0.0
@@ -681,14 +686,11 @@
 
 ! Boson star initial data:
 !
-! boson_L            Angular momentum number for rotating boson stars.
 ! boson_phi0:        Boson star parameter for value at origin (see boson_factor).
 ! boson_factor:      Normalization factor:
 !                         * physical:  phi(r<<1) ~ phi0
 !                         * harmonic:  phi(r<<1) ~ phi0/sqrt(4pi*(2l+1))
 ! boson_omega:       Frequency of the boson star.
-
-  integer :: boson_L = 0
 
   real(8) :: boson_phi0  = 0.d0
   real(8) :: boson_omega = 0.d0
@@ -700,6 +702,15 @@
 ! bosongauss:        Do we add an initial perturbation to the boson star solution?
 
   logical :: bosongauss = .false.
+
+
+! ********************************
+! ***   COMPLEX PROCA FIELD   ***
+! ********************************
+
+! proca_mass:   Mass of the complex Proca field
+
+  real(8) :: proc_mass = 1.0
 
 
 ! ********************************
