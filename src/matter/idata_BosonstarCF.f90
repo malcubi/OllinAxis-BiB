@@ -93,7 +93,7 @@
 !  flat                i         j
 !
 !
-! This routine takes as input parameter the value of the scalar
+! The routine takes as input parameter the value of the scalar
 ! field at the origin "boson_phi0", and solves the coupled system
 ! of elliptic equations.
 !
@@ -102,7 +102,7 @@
 !
 ! This method is slow (specially at high resolution), but seems quite robust. 
 ! It can be improved by using a good initial guess (I'll try this later),
-! and maybe something like multi-grid since it converges much faster
+! and maybe something like multi-grid since it converges much faster.
 !
 ! IMPORTANT:  To avoid confusion, do notice that in fact we use the
 ! array "phi" for the conformal factor "psi" (this is because in the
@@ -647,7 +647,8 @@
 ! expressed as a volume integral that depends on the lapse
 ! function and the stress-energy of matter.
 !
-! The general expression is:
+! The general expression is (for zero shift vector, otherwise
+! there is an extra term):
 !
 !             /
 ! mass_TK  =  | alpha (rho + trS) dV
@@ -661,19 +662,23 @@
 !
 ! The factor 2*pi comes from the integral over the angle.
 !
-! Notice that for a boson star we have:
+! Notice that for a complex scalar field we have:
 !
-! rho + trS  =  2 [ PiI**2 - V ]
+! rho + trS  =  2 [ Pi**2 - V ]
 !
 ! Remember that since we have conformally flat data hdet=1,
 ! and also that we have been using "phi" instead of "psi"
 ! (this is fixed at the end of this routine).
-!
+
 ! At the moment I only do the integral in the coarse grid.
 
   call currentgrid(0,0,grid(0,0))
 
+! Scalar field potential.
+
   call potential
+
+! Integrate.
 
   auxarray = (4.d0*smallpi*r*phi**6)*alpha*(complex_piI**2 - complex_V)
   mass_TK = integral(0,0,auxarray)
@@ -1184,7 +1189,7 @@
 
 !       Extra sources for dtalpha.
 
-        sdtalpha = sdtalpha + 2.d0*(Dr_alpha*Dr_phi/phi + Dz_alpha*Dz_phi/phi) &
+        sdtalpha = sdtalpha + 2.d0*(Dr_alpha*Dr_phi + Dz_alpha*Dz_phi)/phi &
                  - 8.d0*smallpi*alpha*phi**4*((boson_omega*complex_phiR/alpha)**2 - complex_V)
 
 !       Extra sources for dtphi.
