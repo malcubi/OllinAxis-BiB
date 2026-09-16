@@ -138,7 +138,6 @@
         if (rank==0) then
            write (*,'(A,ES13.6         )') ' Schwarzschild mass along r direction = ',massr
            write (*,'(A,ES13.6         )') ' Schwarzschild mass along z direction = ',massz
-           write (*,'(A,ES13.6         )') ' Schwarzschild mass along diagonal    = ',massd
            print *
         end if
 
@@ -155,15 +154,16 @@
 ! (with K_ij = 0) the ADM mass can be expressed as the
 ! following volume integral:
 !
-!                      / 
-!    mass_ADM  =  2 pi | rho psi**5 r dr dz
+!                      /             _
+!    mass_ADM  =  2 pi | rho psi**5 dV
 !                      /
 !
-!                      /    i
-!              +  1/8  | [ V  d  phi  +  Q1 - Q2 ] psi r sqrt(hdet) dr dz
+!                      /    i                           _
+!              +  1/8  | [ V  d  phi  +  Q1 - Q2 ] psi dV
 !                      /       i
-!
-! where:
+!        _
+! with  dV = r*sqrt(hdet)*dr*dz  the conformal volume element,
+! and where:
 !
 !     i     i     i
 !    V  =  D  -  Z
@@ -385,10 +385,10 @@
 
         end if
 
-!       Add matter contribution to integrand
+!       Add matter contribution to integrand.
 
         if (mattertype/="vacuum") then
-           auxarray = auxarray + (2.d0*smallpi*r)*rho*psi**5
+           auxarray = auxarray + (2.d0*smallpi)*rho*psi**5*r*sqrt(hdet)
         end if
 
 !       Integrate.
@@ -410,9 +410,8 @@
 ! ***    (ALTERNATIVE VERSIONS)    ***
 ! ************************************
 
-! Here we add two alternative versions of the ADM volume
-! integral.  At the moment they only make sense for
-! conformally flat initial data.
+! Here we add two alternative versions of the ADM volume integral.
+! At the moment they only make sense for conformally flat data.
 
 ! ADM mass version 2.  The ADM mass can also be expressed as
 ! the sum of two terms, one coming from the integral of the
