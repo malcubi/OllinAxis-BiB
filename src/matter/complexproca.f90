@@ -1,12 +1,30 @@
 
   subroutine sources_complexproca
 
-! *******************************************
-! ***   SOURCES FOR COMPLEX PROCA FIELD   ***
-! *******************************************
+! ********************************************
+! ***   SOURCES FOR COMPLEX SCALAR FIELD   ***
+! ********************************************
 
-! This routine calculates the sources for
-! a complex Proca field. 
+! This routine calculates the sources for a complex Proca field.
+! Here varphi is the scalar potential.
+!
+! The Proca equation in 3+1 formalism has the form:
+!
+!                                             i
+! d varphi  -  L  varphi = - nabla (alpha * Ap ) + alpha * varphi * K
+!  t            beta              i
+!
+!
+! d x  -  L    x = - nabla (alpha * varphi) - alpha * Ep
+!  t i     beta i         i                             i
+!
+!     i           i                          i                i              2    i
+! d Ep  -  L    Ep = + [nabla X (alpha * Bp)] + alpha * K * Ep + alpha * mass * Ap
+!  t       beta
+
+!     i           i                          i                i
+! d Bp  -  L    Bp = - [nabla X (alpha * Ep)] + alpha * K * Bp
+!  t       beta
 
 ! Include modules.
 
@@ -39,76 +57,189 @@
 
   sproc_phiR = alpha * proc_phiR * trK                                           &
                - proc_AR_r*Dr_alpha - proc_AR_z*Dz_alpha                         &
-               - alpha*proc_ARu_r * (8.d0*Dr_phi + (1.d0/hdet)*Dr_hdet)          &
-               - alpha*proc_ARu_z * (8.d0*Dz_phi + (1.d0/hdet)*Dz_hdet)          &
+               - alpha*proc_ARu_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet)         &
+               - alpha*proc_ARu_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)         &
                - (alpha/psi4) * ( r * ( proc_AR_r*Dz_g_C + proc_AR_z*Dr_g_C)     &
                      + proc_AR_r*Dr_g_A + proc_AR_z*g_C + proc_AR_z*Dz_g_B)      &
                - (alpha/psi4) * (g_A*Dr_proc_AR_r + r*g_C*Dz_proc_AR_r +         &
                                  g_B*Dz_proc_AR_z + r*g_C*Dr_proc_AR_z )
-               
+
   sproc_phiI = alpha * proc_phiI * trK                                           &
                - proc_AI_r*Dr_alpha - proc_AI_z*Dz_alpha                         &
-               - alpha*proc_AIu_r * (8.d0*Dr_phi + (1.d0/hdet)*Dr_hdet)          &
-               - alpha*proc_AIu_z * (8.d0*Dz_phi + (1.d0/hdet)*Dz_hdet)          &
+               - alpha*proc_AIu_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet)         &
+               - alpha*proc_AIu_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)         &
                - (alpha/psi4) * ( r * ( proc_AI_r*Dz_g_C + proc_AI_z*Dr_g_C)     &
                      + proc_AI_r*Dr_g_A + proc_AI_z*g_C + proc_AI_z*Dz_g_B)      &
                - (alpha/psi4) * (g_A*Dr_proc_AI_r + r*g_C*Dz_proc_AI_r +         &
                                  g_B*Dz_proc_AI_z + r*g_C*Dr_proc_AI_z )
 
-!  Notice that no new terms appear in the case of angular momentum.
+!  Notice that adding angular momentum does not introduce any additional terms.
 
   if (shift/="none") then 
-     sproc_phiR = sproc_phiR + zero   ! Pongo cero provisionalmente
+     sproc_phiR = sproc_phiR + beta_r*DAr_proc_phiR + beta_z*DAz_proc_phiR
+     sproc_phiI = sproc_phiI + beta_r*DAr_proc_phiI + beta_z*DAz_proc_phiI
   end if
 
 ! Source for vector potential.
 
-  sproc_AR_r = - alpha * Dr_proc_phiR - proc_phiR * Dr_alpha      &
-               - alpha * psi4 * (A*proc_ER_r + r*C*proc_ER_z)
+  sproc_AR_r = - alpha * Dr_proc_phiR - proc_phiR * Dr_alpha - alpha * proc_ERd_r
+  sproc_AI_r = - alpha * Dr_proc_phiI - proc_phiI * Dr_alpha - alpha * proc_EId_r
+  sproc_AR_z = - alpha * Dz_proc_phiR - proc_phiR * Dz_alpha - alpha * proc_ERd_z
+  sproc_AI_z = - alpha * Dz_proc_phiI - proc_phiI * Dz_alpha - alpha * proc_EId_z
 
-  sproc_AI_r = - alpha * Dr_proc_phiI - proc_phiI * Dr_alpha      &
-               - alpha * psi4 * (A*proc_EI_r + r*C*proc_EI_z)
+  if (angmom) then
+     sproc_AR_p = - alpha * proc_ERd_p
+     sproc_AI_p = - alpha * proc_EId_p
+  end if
 
-  sproc_AR_z = - alpha * Dz_proc_phiR - proc_phiR * Dz_alpha      &
-               - alpha * psi4 * (r*C*proc_ER_r + B*proc_ER_z)
+  if (shift/="none") then
 
-  sproc_AI_z = - alpha * Dz_proc_phiI - proc_phiI * Dz_alpha      &
-               - alpha * psi4 * (r*C*proc_EI_r + B*proc_EI_z)
+     sproc_AR_r = sproc_AR_r + beta_r*DAr_proc_AR_r + beta_z*DAz_proc_AR_r    &
+                             + proc_AR_r*Dr_beta_r  + proc_AR_z*Dr_beta_z
+     sproc_AI_r = sproc_AI_r + beta_r*DAr_proc_AI_r + beta_z*DAz_proc_AI_r    &
+                             + proc_AI_r*Dr_beta_r  + proc_AI_z*Dr_beta_z
+     sproc_AR_z = sproc_AR_z + beta_r*DAr_proc_AR_z + beta_z*DAz_proc_AR_z    &
+                             + proc_AR_r*Dz_beta_r  + proc_AR_z*Dz_beta_z
+     sproc_AI_z = sproc_AI_z + beta_r*DAr_proc_AI_z + beta_z*DAz_proc_AI_z    &
+                             + proc_AI_r*Dz_beta_r  + proc_AI_z*Dz_beta_z
 
-  if (shift/="none") then 
-     sproc_AR_r = sproc_AR_r + zero   ! Pongo cero provisionalmente
-     sproc_AR_z = sproc_AR_z + zero   ! Pongo cero provisionalmente
+     if (angmom) then
+        sproc_AR_p = sproc_AR_p + beta_r*DAr_proc_AR_p + beta_z*DAz_proc_AR_p
+        sproc_AI_p = sproc_AI_p + beta_r*DAr_proc_AI_p + beta_z*DAz_proc_AI_p
+     end if
+
   end if
 
 ! Source for electric field.
 
-  sproc_ER_r = alpha*trK*proc_ER_r + alpha * proc_mass**2 * (1/ psi4) * &
-                                   ( g_A*proc_AR_r + r*g_C*proc_AR_z )
+  sproc_ER_r = alpha * trK * proc_ER_r + alpha * proc_mass**2 * proc_ARu_r
+  sproc_EI_r = alpha * trK * proc_EI_r + alpha * proc_mass**2 * proc_AIu_r
+  sproc_ER_z = alpha * trK * proc_ER_z + alpha * proc_mass**2 * proc_ARu_z
+  sproc_EI_z = alpha * trK * proc_EI_z + alpha * proc_mass**2 * proc_AIu_z
 
-  sproc_EI_r = alpha*trK*proc_EI_r + alpha * proc_mass**2 * (1/ psi4) * &
-                                   ( g_A*proc_AI_r + r*g_C*proc_AI_z )
+  if (angmom) then
 
-  sproc_ER_z = alpha*trK*proc_ER_z + alpha * proc_mass**2 * (1/ psi4) * &
-                                   ( r*g_C*proc_AR_r + g_B*proc_AR_z )
+     sproc_ER_r = sproc_ER_r - proc_BRd_p * Dz_alpha + alpha *           &
+                  ( r*C*CovDp_proc_BR_r     + B*CovDp_proc_BR_z          &
+                  + r**2*C2*CovDp_proc_BR_p - r**3*C1*CovDz_proc_BR_r    & ! Warning. Remember that CovDp_proc_BR_p contents singular christoffel
+                  - r**2*C2*CovDz_proc_BR_z - r**2*H*CovDz_proc_BR_p )
 
-  sproc_EI_z = alpha*trK*proc_EI_z + alpha * proc_mass**2 * (1/ psi4) * &
-                                   ( r*g_C*proc_AI_r + g_B*proc_AI_z )
+     sproc_EI_r = sproc_EI_r - proc_BId_p * Dz_alpha + alpha *           &
+                  ( r*C*CovDp_proc_BI_r     + B*CovDp_proc_BI_z          &
+                  + r**2*C2*CovDp_proc_BI_p - r**3*C1*CovDz_proc_BI_r    & ! Warning. Remember that CovDp_proc_BI_p contents singular christoffel
+                  - r**2*C2*CovDz_proc_BI_z - r**2*H*CovDz_proc_BI_p )
 
-  if (shift/="none") then 
-     sproc_ER_r = sproc_ER_r + zero   ! Pongo cero provisionalmente
-     sproc_ER_z = sproc_ER_z + zero   ! Pongo cero provisionalmente
+     sproc_ER_z = sproc_ER_z + proc_BRd_p * Dr_alpha + alpha *           &
+                  ( r**3*C1*CovDr_proc_BR_r + r**2*C2*CovDr_proc_BR_z    &
+                  + r**2*H*CovDr_proc_BR_p  - A*CovDp_proc_BR_r          & ! Warning. Remember that CovDr_proc_BR_p contents singular christoffel
+                  - r*C*CovDp_proc_BR_z     - r**3*C1*CovDp_proc_BR_p )    ! Warning. Remember that CovDp_proc_BR_p contents singular christoffel
+
+     sproc_EI_z = sproc_EI_z + proc_BId_p * Dr_alpha + alpha *           &
+                  ( r**3*C1*CovDr_proc_BI_r + r**2*C2*CovDr_proc_BI_z    &
+                  + r**2*H*CovDr_proc_BI_p  - A*CovDp_proc_BI_r          & ! Warning. Remember that CovDr_proc_BI_p contents singular christoffel
+                  - r*C*CovDp_proc_BI_z     - r**3*C1*CovDp_proc_BI_p )    ! Warning. Remember that CovDp_proc_BI_p contents singular christoffel
+
+     sproc_ER_p = alpha*trK*proc_ER_p + alpha*proc_mass**2*proc_ARu_p    &
+                  + proc_BRd_r*Dz_alpha - proc_BRd_z*Dr_alpha + alpha*   &
+                  ( A*CovDz_proc_BR_r       + r*C*CovDz_proc_BR_z        &
+                  + r**3*C1*CovDz_proc_BR_p - r*C*CovDr_proc_BR_r        &
+                  - B*CovDr_proc_BR_z       - r**2*C2*CovDr_proc_BR_p )    ! Warning. Remember that CovDr_proc_BR_p contents singular christoffel
+
+     sproc_EI_p = alpha*trK*proc_EI_p + alpha*proc_mass**2*proc_AIu_p    &
+                  + proc_BId_r*Dz_alpha - proc_BId_z*Dr_alpha + alpha*   &
+                  ( A*CovDz_proc_BI_r       + r*C*CovDz_proc_BI_z        &
+                  + r**3*C1*CovDz_proc_BI_p - r*C*CovDr_proc_BI_r        &
+                  - B*CovDr_proc_BI_z       - r**2*C2*CovDr_proc_BI_p )    ! Warning. Remember that CovDr_proc_BI_p contents singular christoffel
+
+  end if
+
+  if (shift/="none") then
+
+     sproc_ER_r = sproc_ER_r + beta_r*DAr_proc_ER_r + beta_z*DAz_proc_ER_r    &
+                             - proc_ER_r*Dr_beta_r  - proc_ER_z*Dz_beta_r
+
+     sproc_EI_r = sproc_EI_r + beta_r*DAr_proc_EI_r + beta_z*DAz_proc_EI_r    &
+                             - proc_EI_r*Dr_beta_r  - proc_EI_z*Dz_beta_r
+
+     sproc_ER_z = sproc_ER_z + beta_r*DAr_proc_ER_z + beta_z*DAz_proc_ER_z    &
+                             - proc_ER_r*Dr_beta_z  - proc_ER_z*Dz_beta_z
+
+     sproc_EI_z = sproc_EI_z + beta_r*DAr_proc_EI_z + beta_z*DAz_proc_EI_z    &
+                             - proc_EI_r*Dr_beta_z  - proc_EI_z*Dz_beta_z
+
+     if (angmom) then
+        sproc_ER_p = sproc_ER_p + beta_r*DAr_proc_ER_p + beta_z*DAz_proc_ER_p    &
+                                - proc_ER_r*Dr_beta_p  - proc_ER_z*Dz_beta_p
+        sproc_EI_p = sproc_EI_p + beta_r*DAr_proc_EI_p + beta_z*DAz_proc_EI_p    &
+                                - proc_EI_r*Dr_beta_p  - proc_EI_z*Dz_beta_p
+     end if
+
   end if
 
 ! Source for magnetic field.
 
-  sproc_BR_r = alpha*trK*proc_BR_r
-  sproc_BI_r = alpha*trK*proc_BI_r
-  sproc_BR_z = alpha*trK*proc_BR_z
-  sproc_BI_z = alpha*trK*proc_BI_z
+  sproc_BR_r = alpha * trK * proc_BR_r
+  sproc_BI_r = alpha * trK * proc_BI_r
+  sproc_BR_z = alpha * trK * proc_BR_z
+  sproc_BI_z = alpha * trK * proc_BI_z
 
-  if (shift/="none") then 
-     sproc_BR_r = sproc_BR_r + zero   ! Pongo cero provisionalmente
-     sproc_BR_z = sproc_BR_z + zero   ! Pongo cero provisionalmente
+  if (angmom) then
+
+     sproc_BR_r = sproc_BR_r + proc_ERd_p * Dz_alpha - alpha *           &
+                  ( r*C*CovDp_proc_ER_r     + B*CovDp_proc_ER_z          &
+                  + r**2*C2*CovDp_proc_ER_p - r**3*C1*CovDz_proc_ER_r    & ! Warning. Remember that CovDp_proc_ER_p contents  singular christoffel
+                  - r**2*C2*CovDz_proc_ER_z - r**2*H*CovDz_proc_ER_p )
+
+     sproc_BI_r = sproc_BI_r + proc_EId_p * Dz_alpha - alpha *           &
+                  ( r*C*CovDp_proc_EI_r     + B*CovDp_proc_EI_z          &
+                  + r**2*C2*CovDp_proc_EI_p - r**3*C1*CovDz_proc_EI_r    & ! Warning. Remember that CovDp_proc_EI_p contents  singular christoffel
+                  - r**2*C2*CovDz_proc_EI_z - r**2*H*CovDz_proc_EI_p )
+
+     sproc_BR_z = sproc_BR_z - proc_ERd_p * Dr_alpha - alpha *           &
+                  ( r**3*C1*CovDr_proc_ER_r + r**2*C2*CovDr_proc_ER_z    &
+                  + r**2*H*CovDr_proc_ER_p  - A*CovDp_proc_ER_r          & ! Warning. Remember that CovDr_proc_ER_p contents  singular christoffel
+                  - r*C*CovDp_proc_ER_z     - r**3*C1*CovDp_proc_ER_p )    ! Warning. Remember that CovDp_proc_ER_p contents  singular christoffel
+
+     sproc_BI_z = sproc_BI_z - proc_EId_p * Dr_alpha - alpha *           &
+                  ( r**3*C1*CovDr_proc_EI_r + r**2*C2*CovDr_proc_EI_z    &
+                  + r**2*H*CovDr_proc_EI_p  - A*CovDp_proc_EI_r          & ! Warning. Remember that CovDr_proc_EI_p contents  singular christoffel
+                  - r*C*CovDp_proc_EI_z     - r**3*C1*CovDp_proc_EI_p )    ! Warning. Remember that CovDp_proc_EI_p contents  singular christoffel
+
+     sproc_BR_p = alpha*trK*proc_BR_p                                    &
+                  - proc_ERd_r*Dz_alpha + proc_ERd_z*Dr_alpha - alpha*   &
+                  ( A*CovDz_proc_ER_r       + r*C*CovDz_proc_ER_z        &
+                  + r**3*C1*CovDz_proc_ER_p - r*C*CovDr_proc_ER_r        &
+                  - B*CovDr_proc_ER_z       - r**2*C2*CovDr_proc_ER_p )    ! Warning. Remember that CovDr_proc_ER_p contents  singular christoffel
+
+     sproc_BI_p = alpha*trK*proc_BI_p                                    &
+                  - proc_EId_r*Dz_alpha + proc_EId_z*Dr_alpha - alpha*   &
+                  ( A*CovDz_proc_EI_r       + r*C*CovDz_proc_EI_z        &
+                  + r**3*C1*CovDz_proc_EI_p - r*C*CovDr_proc_EI_r        &
+                  - B*CovDr_proc_EI_z       - r**2*C2*CovDr_proc_EI_p )    ! Warning. Remember that CovDr_proc_EI_p contents  singular christoffel
+
+  end if
+
+  if (shift/="none") then
+
+     sproc_BR_r = sproc_BR_r + beta_r*DAr_proc_BR_r + beta_z*DAz_proc_BR_r    &
+                             - proc_BR_r*Dr_beta_r  - proc_BR_z*Dz_beta_r
+
+     sproc_BI_r = sproc_BI_r + beta_r*DAr_proc_BI_r + beta_z*DAz_proc_BI_r    &
+                             - proc_BI_r*Dr_beta_r  - proc_BI_z*Dz_beta_r
+
+     sproc_BR_z = sproc_BR_z + beta_r*DAr_proc_BR_z + beta_z*DAz_proc_BR_z    &
+                             - proc_BR_r*Dr_beta_z  - proc_BR_z*Dz_beta_z
+
+     sproc_BI_z = sproc_BI_z + beta_r*DAr_proc_BI_z + beta_z*DAz_proc_BI_z    &
+                             - proc_BI_r*Dr_beta_z  - proc_BI_z*Dz_beta_z
+
+     if (angmom) then
+        sproc_BR_p = sproc_BR_p + beta_r*DAr_proc_BR_p + beta_z*DAz_proc_BR_p    &
+                                - proc_BR_r*Dr_beta_p  - proc_BR_z*Dz_beta_p
+        sproc_BI_p = sproc_BI_p + beta_r*DAr_proc_BI_p + beta_z*DAz_proc_BI_p    &
+                                - proc_BI_r*Dr_beta_p  - proc_BI_z*Dz_beta_p
+     end if
+
   end if
 
 ! Dissipation.
@@ -181,6 +312,8 @@
 ! ********************************
 ! ***   RADIATIVE BOUNDARIES   ***
 ! ********************************
+
+! Radiative boundaries are only applied to Pi.
 
   vl = one
   var0 = zero
