@@ -41,7 +41,8 @@
 
   logical contains
 
-  real(8) zero,half,one,two
+  real(8) coef
+  real(8) zero,half,one,two,smallpi
 
 
 ! *******************
@@ -52,6 +53,8 @@
   half = 0.5d0
   one  = 1.d0
   two  = 2.d0
+
+  smallpi = acos(-one)
 
 
 ! *************************************************
@@ -272,11 +275,11 @@
 
 !    Corrections for rotating boson stars.
 
-     if (angmom.and.(boson_L>0)) then
+     if (angmom.and.(complex_l>0)) then
 
-        auxarray = half*(g_H*boson_L**2*(complex_phiR**2 + complex_phiI**2)/r**2 &
-                 + two*g_C1*boson_L*(complex_xiI_r*complex_phiR - complex_xiR_r*complex_phiI)*r &
-                 + two*g_C2*boson_L*(complex_xiI_z*complex_phiR - complex_xiR_z*complex_phiI))
+        auxarray = half*(g_H*complex_l**2*(complex_phiR**2 + complex_phiI**2)/r**2 &
+                 + two*g_C1*complex_l*(complex_xiI_r*complex_phiR - complex_xiR_r*complex_phiI)*r &
+                 + two*g_C2*complex_l*(complex_xiI_z*complex_phiR - complex_xiR_z*complex_phiI))
 
 !       Energy density
 
@@ -284,23 +287,23 @@
 
 !       Momentum density.
 
-        J_r = J_r + r*g_C1*boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
-        J_r = J_r +   g_C2*boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
-        J_p = J_p +   g_H *boson_L*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4/r**2
+        J_r = J_r + r*g_C1*complex_l*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
+        J_r = J_r +   g_C2*complex_l*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4
+        J_p = J_p +   g_H *complex_l*(complex_piR*complex_phiI - complex_piI*complex_phiR)/psi4/r**2
 
 !       Stress tensor.
 
         S_A = S_A - A*auxarray
         S_B = S_B - B*auxarray
         S_C = S_C - C*auxarray
-        S_H = S_H - H*auxarray + boson_L**2*(complex_phiR**2 + complex_phiI**2)/r**2
+        S_H = S_H - H*auxarray + complex_l**2*(complex_phiR**2 + complex_phiI**2)/r**2
 
-        S_C1 = S_C1 - C1*auxarray + boson_L*(complex_xiI_r*complex_phiR - complex_xiR_r*complex_phiI)/r**3
-        S_C2 = S_C2 - C2*auxarray + boson_L*(complex_xiI_z*complex_phiR - complex_xiR_z*complex_phiI)/r**2
+        S_C1 = S_C1 - C1*auxarray + complex_l*(complex_xiI_r*complex_phiR - complex_xiR_r*complex_phiI)/r**3
+        S_C2 = S_C2 - C2*auxarray + complex_l*(complex_xiI_z*complex_phiR - complex_xiR_z*complex_phiI)/r**2
 
 !       S_lambda.
 
-        S_lambda = S_lambda - boson_L**2*(complex_phiR**2 + complex_phiI**2)/r**4 - lambda*auxarray
+        S_lambda = S_lambda - complex_l**2*(complex_phiR**2 + complex_phiI**2)/r**4 - lambda*auxarray
 
      end if
 
@@ -334,6 +337,174 @@
 
      complex_Bflux_r = complex_phiI*complex_xiR_r - complex_phiR*complex_xiI_r   ! Index down.
      complex_Bflux_z = complex_phiI*complex_xiR_z - complex_phiR*complex_xiI_z   ! Index down.
+
+  end if
+
+
+! *************************
+! ***   MAXWELL FIELD   ***
+! *************************
+
+  if (contains(mattertype,"electric")) then
+
+     coef = 0.125d0/smallpi
+
+     maxw_A2 = maxw_A_r * maxw_Au_r + maxw_A_z * maxw_Au_z
+     maxw_E2 = maxw_E_r * maxw_Ed_r + maxw_E_z * maxw_Ed_z
+     maxw_B2 = maxw_B_r * maxw_Bd_r + maxw_B_z * maxw_Bd_z
+
+     if (angmom) then
+        maxw_A2 = maxw_A2 + maxw_A_p * maxw_Au_p
+        maxw_E2 = maxw_E2 + maxw_E_p * maxw_Ed_p
+        maxw_B2 = maxw_B2 + maxw_B_p * maxw_Bd_p
+     end if
+
+!    Energy density.
+
+     rho = rho + coef * (maxw_E2 + maxw_B2)
+
+!    Momentum density (index up).
+!    Notice that momentum density is zero without angular momentum.
+
+     if (angmom) then
+        J_r = J_r + 2.d0 * (1/psi2**3) * (1/hdet**0.5) * coef *             &
+                           ( maxw_Ed_p*maxw_Bd_z - maxw_Ed_z*maxw_Bd_p )
+        J_z = J_z + 2.d0 * (1/psi2**3) * (1/hdet**0.5) * coef *             &
+                           ( maxw_Ed_r*maxw_Bd_p - maxw_Ed_p*maxw_Bd_r )
+        J_p = J_p + 2.d0 * (1/psi2**3) * (1/hdet**0.5) * coef *             &
+                           ( maxw_Ed_z*maxw_Bd_r - maxw_Ed_r*maxw_Bd_z )
+     end if
+
+!    Stress tensor.
+
+     S_A = S_A + coef * ( A * psi4 * (maxw_E2 + maxw_B2)                 &
+               - two * (maxw_Ed_r*maxw_Ed_r + maxw_Bd_r*maxw_Bd_r) )
+
+     S_B = S_B + coef * ( B * psi4 * (maxw_E2 + maxw_B2)                 &
+               - two * (maxw_Ed_z*maxw_Ed_z + maxw_Bd_z*maxw_Bd_z) )
+
+     S_H = S_H + coef * ( H * psi4 * (maxw_E2 + maxw_B2) )
+
+     S_C = S_C + coef * ( C * psi4 * (maxw_E2 + maxw_B2)                 &
+               - (two/r) * (maxw_Ed_r*maxw_Ed_z + maxw_Bd_r*maxw_Bd_z) )
+
+     if (angmom) then
+        S_H  = S_H - coef * (two/r**2) * (maxw_Ed_p**2 + maxw_Bd_p**2)         ! Warning 1/r**2
+        S_C1 = S_C1 + coef * (C1 * psi4 * (maxw_E2 + maxw_B2)                &
+               - (two/r**3) * (maxw_Ed_r*maxw_Ed_p + maxw_Bd_r*maxw_Bd_p) )    ! Warning con 1/r**3
+        S_C2 = S_C2 + coef * (C2 * psi4 * (maxw_E2 + maxw_B2)                &
+               - (two/r**2) * (maxw_Ed_z*maxw_Ed_p + maxw_Bd_z*maxw_Bd_p) )    ! Warning con 1/r**2
+     end if
+
+!    S_lambda.
+
+!    if (.not.nolambda) then
+!       S_lambda = S_lambda + (scalar_xi_r/r)**2 + lambda*psi4*auxarray
+!    end if
+
+  end if
+
+
+! *******************************
+! ***   COMPLEX PROCA FIELD   ***
+! *******************************
+
+  if (contains(mattertype,"complexproca")) then
+
+     coef = 0.125d0/smallpi
+
+     proc_phi2 = proc_phiR**2 + proc_phiI**2
+
+     proc_A2   = proc_AR_r * proc_ARu_r + proc_AI_r * proc_AIu_r   &
+               + proc_AR_z * proc_ARu_z + proc_AI_z * proc_AIu_z
+     proc_E2   = proc_ER_r * proc_ERd_r + proc_EI_r * proc_EId_r   &
+               + proc_ER_z * proc_ERd_z + proc_EI_z * proc_EId_z
+     proc_B2   = proc_BR_r * proc_BRd_r + proc_BI_r * proc_BId_r   &
+               + proc_BR_z * proc_BRd_z + proc_BI_z * proc_BId_z
+
+     if (angmom) then
+        proc_A2   = proc_A2 + proc_AR_p * proc_ARu_p + proc_AI_p * proc_AIu_p
+        proc_E2   = proc_E2 + proc_ER_p * proc_ERd_p + proc_EI_p * proc_EId_p
+        proc_B2   = proc_B2 + proc_BR_p * proc_BRd_p + proc_BI_p * proc_BId_p
+     end if
+
+!    Energy density.
+
+     rho = rho + coef * (proc_E2 + proc_B2 + proc_mass**2 * (proc_phi2 + proc_A2))
+
+!    Momentum density (index up).
+
+     J_r = J_r + 2.d0*coef*proc_mass**2 * (proc_ARu_r*proc_phiR + proc_AIu_r*proc_phiI)
+     J_z = J_z + 2.d0*coef*proc_mass**2 * (proc_ARu_z*proc_phiR + proc_AIu_z*proc_phiI)
+
+     if (angmom) then
+        J_r = J_r + 2.d0 * (1/psi2**3) * (1/hdet**0.5) * coef *                 &
+                           ( proc_ERd_p*proc_BRd_z + proc_EId_p*proc_BId_z      &
+                           - proc_ERd_z*proc_BRd_p - proc_EId_z*proc_BId_p )
+        J_z = J_z + 2.d0 * (1/psi2**3) * (1/hdet**0.5) * coef *                 &
+                           ( proc_ERd_r*proc_BRd_p + proc_EId_r*proc_BId_p      &
+                           - proc_ERd_p*proc_BRd_r - proc_EId_p*proc_BId_r )
+        J_p = J_p + 2.d0 * (1/psi2**3) * (1/hdet**0.5) * coef *                 &
+                           ( proc_ERd_z*proc_BRd_r + proc_EId_z*proc_BId_r      &
+                           - proc_ERd_r*proc_BRd_z - proc_EId_r*proc_BId_z )    &
+                  + 2.d0 * proc_mass**2 * coef *                                &
+                           (proc_ARu_p*proc_phiR + proc_AIu_p*proc_phiI)
+     end if
+
+!    Stress tensor.
+
+     S_A = S_A + coef * (A * psi4 * (proc_E2 + proc_B2)                      &
+               - two * (proc_ERd_r*proc_ERd_r + proc_EId_r*proc_EId_r)       &
+               - two * (proc_BRd_r*proc_BRd_r + proc_BId_r*proc_BId_r) )
+
+     S_B = S_B + coef * (B * psi4 * (proc_E2 + proc_B2)                      &
+               - two * (proc_ERd_z*proc_ERd_z + proc_EId_z*proc_EId_z)       &
+               - two * (proc_BRd_z*proc_BRd_z + proc_BId_z*proc_BId_z) )
+
+     S_H = S_H + coef * (H * psi4 * (proc_E2 + proc_B2) )
+
+     S_C = S_C + coef * (C * psi4 * (proc_E2 + proc_B2)                          &
+               - (two/r) * (proc_ERd_r*proc_ERd_z + proc_EId_r*proc_EId_z)       &
+               - (two/r) * (proc_BRd_r*proc_BRd_z + proc_BId_r*proc_BId_z) )  ! Warning 1/r
+
+     if (angmom) then
+        S_H  = S_H - coef * (two/r**2) * (proc_ERd_p**2 + proc_EId_p**2             &  ! Warning 1/r**2
+                                        + proc_BRd_p**2 + proc_BId_p**2)
+        S_C1 = S_C1 + coef * (C1 * psi4 * (proc_E2 + proc_B2)                       &
+               - (two/r**3) * (proc_ERd_r*proc_ERd_p + proc_EId_r*proc_EId_p)       &  ! Warning 1/r**3
+               - (two/r**3) * (proc_BRd_r*proc_BRd_p + proc_BId_r*proc_BId_p) )        ! Warning 1/r**3
+        S_C2 = S_C2 + coef * (C2 * psi4 * (proc_E2 + proc_B2)                       &
+               - (two/r**2) * (proc_ERd_z*proc_ERd_p + proc_EId_z*proc_EId_p)       &  ! Warning 1/r**2
+               - (two/r**2) * (proc_BRd_z*proc_BRd_p + proc_BId_z*proc_BId_p) )        ! Warning 1/r**2
+     end if
+
+!    We add mass terms to the stress tensor.
+
+     S_A = S_A + coef * proc_mass**2 * ( - A*psi4 * (proc_A2 - proc_phi2)    &
+                + two * ( proc_AR_r*proc_AR_r + proc_AI_r*proc_AI_r ) )
+
+     S_B = S_B + coef * proc_mass**2 * ( - B*psi4 * (proc_A2 - proc_phi2)    &
+                + two * ( proc_AR_z*proc_AR_z + proc_AI_z*proc_AI_z ) )
+
+     S_H = S_H + coef * proc_mass**2 * ( - H*psi4 * (proc_A2 - proc_phi2) )
+
+     S_C = S_C + coef * proc_mass**2 * ( - C*psi4 * (proc_A2 - proc_phi2)    &
+                + (two/r) * ( proc_AR_r*proc_AR_z + proc_AI_r*proc_AI_z ) )   ! Warning 1/r
+
+     if (angmom) then
+        S_H  = S_H + coef * proc_mass**2 * (two/r**2)    &                    ! Warning 1/r**2
+                          * (proc_AR_p*proc_AR_p + proc_AI_p*proc_AI_p)
+        S_C1 = S_C1 + coef * proc_mass**2 * ( - C1*psi4 * (proc_A2 - proc_phi2)    &
+                    + (two/r**3) * (proc_AR_r*proc_AR_p + proc_AI_r*proc_AI_p) )  ! Warning 1/r**3
+        S_C2 = S_C2 + coef * proc_mass**2 * ( - C2*psi4 * (proc_A2 - proc_phi2)    &
+                    + (two/r**2) * (proc_AR_z*proc_AR_p + proc_AI_z*proc_AI_p) )  ! Warning 1/r**2
+     end if
+
+!    S_lambda.
+
+!    if (.not.nolambda) then
+!       S_lambda = S_lambda + (scalar_xi_r/r)**2 + lambda*psi4*auxarray
+!    end if
 
   end if
 
