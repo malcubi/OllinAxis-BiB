@@ -543,6 +543,8 @@
 
            call currentgrid(box,level,grid(box,level))
 
+!          Set time derivatives to 0.
+
            dtalpha = 0.d0
            dtphi = 0.d0
            complex_piR = 0.d0
@@ -1578,7 +1580,7 @@
 
 ! If there is a finer grid we need to advance it twice
 ! to catch up.  Notice that here I am calling the
-! current subroutine "wavestep" recursively.
+! current subroutine recursively.
 
   if (level<Nlmax) then
      call bosonstep(level+1,method)
