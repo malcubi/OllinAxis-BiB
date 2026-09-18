@@ -18,12 +18,12 @@
 ! of the metric to be consistent with the paper by Ontañon and Alcubierre:
 ! Class. Quatum. Grav. 38 (2021) 154003.
 !
-! In addition, we need the lapse function "alpha", and since the star is
+! In addition, we also need the lapse function "alpha", and since the star is
 ! rotating we also need a non-zero angular shift component "beta_p" (index up).
 !
-! We assume that the space-time is static so that all metric functions are time
-! independent.  Since there is a non-trivial shift vector this means that no all
-! the extrinsic curvature components vanish.  We find:
+! We assume that the space-time is static so that all metric functions are
+! time independent.  Since there is a non-trivial shift vector this means
+! that not all the extrinsic curvature components vanish.  We find:
 !
 ! KTC1 = H/(2*alpha) Dr_beta_p / r
 ! KTC2 = H/(2*alpha) Dz_beta_p
@@ -33,48 +33,55 @@
 ! For the complex scalar field we use the ansatz (the sign convention here
 ! is opposite to the one in the routine idat_BosonstarCF.f90):
 !
-! Phi(t,r) = phi(r) exp[ - i (omega t - L phi) ]
+! Phi(t,r,z,phi) = phi(r,z) exp[ - i (omega t - L phi) ]
 !
 ! where L is an integer that corresponds to the angular momentum "quantum number".
 ! This ansatz guarantees that the stress-energy tensor is time-independent and
 ! and also independent of the angle, so that the solution will be axi-symmetric.
 !
-! For the case when L is not zero, the amplitude of the scalar field phi(r) has
-! to behave as r**L close to the origin, so in practice we solve for a function
-! F(r) such that:
+! DO NOT CONFUSE the scalar field Phi(r,z) with the angular coordinate "phi".
 !
-!           L
-! phi(r) = r  F(r)
+! For the case when L is not zero, the amplitude of the scalar field Phi(r,z)
+! has to behave as r**L close to the origin, so in practice we solve for a
+! function F(r,z) such that:
 !
-! the parameter "boson_phi0" the will then correspond to the value at r=0 of
-! F(r) (and not of phi(r)).
-!
-! The equation for alpha takes the final form:
+!             L
+! Phi(r,z) = r  F(r,z)
 !
 !
+! the parameter "boson_phi0" the will then correspond to the value at r=z=0 of
+! F(r,z) (and not of Phi(r,z)).
 !
-! where V is the scalar field potential.
+! The equations to be solved are found in the following way (I will not write
+! the full equations here):
 !
-! The equation for beta_p takes the final form:
+! 1) The equation for the scalar field Phi (in fact F) is the Klein-Gordon equation.
 !
+! 2) The equation for alpha it obtained from the maximal slicing condition.
 !
+! 3) The equation for beta_p is ontained from the angular component of the
+!    momentum constraint.
 !
-! The equation for A takes the final form:
+! 4) The equation for the metric function H comes from the angular component
+!    of the ADM evolution equations, by asking for dK_[phi,phi]/dt=0.
 !
+! 5) The equation for the metric function A is obtained from a combination of
+!    the Hamiltonian constraint and the equation for H above.
 !
+! Finally, we meed to introduce a regularization variable "lambda" defined as:
 !
-! The equation for H takes the final form:
+! lambda := (A-H)/r**2
 !
+! This is needed to make sure the system is regular at the axis of symmetry r=0.
 !
-! To solve the system we use the maximal slicing condition for the lapse, the angular
-! momentum constraint for the shift, a combination of the Hamiltonian constraint and
-! the equation dK_pp/dt=0 for A and H, and finally the Klein-Gordon equation for
-! the scalar field "F" (do not confuse the scalar field with the azimuthal angle).
+! 6) The equation for lambda is then obtained from a combination of the ADM
+!    equations for dK_[r,r]/dt=0 and dK_[phi,phi]/dt=0 that is chosen in order
+!    to have purely regular terms.
 !
-! We solve the system by turning the elliptic equations into hyperbolic wave equations
-! and "evolving" to a steady state.
+! We solve the system by turning the elliptic equations into hyperbolic wave
+! equations and "evolving" to a steady state.
 !
-! This method is slow (specially at high resolution), but seems quite robust. 
+! This method is very slow (specially at high resolution), but seems robust. 
 ! It can be improved by using a good initial guess (I'll try this later),
 ! and maybe something like multi-grid since it converges much faster.
 
@@ -1547,7 +1554,9 @@
 !       ***   BOUNDARY CONDITIONS   ***
 !       *******************************
 
-!       Simple radiative boundaries for all three equations.
+!       Radiative boundaries for all equations. However, we use the fact that
+!       asymtotically (alpha,A,H) decay as 1/r, while beta_p decays as 1/r**3
+!       (see paper by Ontañon and Alcubierre).
 
         if (level==0) then
 
@@ -1559,7 +1568,7 @@
               sKTA(i,:)         = - (r(i,:)*Dr_KTA(i,:)         + z(i,:)*Dz_KTA(i,:)         + KTA(i,:))/rr(i,:)
               sKTH(i,:)         = - (r(i,:)*Dr_KTH(i,:)         + z(i,:)*Dz_KTH(i,:)         + KTH(i,:))/rr(i,:)
               sAlambda(i,:)     = - (r(i,:)*Dr_Alambda(i,:)     + z(i,:)*Dz_Alambda(i,:)     + Alambda(i,:))/rr(i,:)
-              sdtbeta_p(i,:)    = - (r(i,:)*Dr_dtbeta_p(i,:)    + z(i,:)*Dz_dtbeta_p(i,:)    + dtbeta_p(i,:))/rr(i,:)
+              sdtbeta_p(i,:)    = - (r(i,:)*Dr_dtbeta_p(i,:)    + z(i,:)*Dz_dtbeta_p(i,:)    + 3.d0*dtbeta_p(i,:))/rr(i,:)
               scomplex_piR(i,:) = - (r(i,:)*Dr_complex_piR(i,:) + z(i,:)*Dz_complex_piR(i,:) + complex_piR(i,:))/rr(i,:)
            end if
 
@@ -1570,13 +1579,19 @@
               sdtalpha(:,j)     = - (r(:,j)*Dr_dtalpha(:,j)     + z(:,j)*Dz_dtalpha(:,j)     + dtalpha(:,j))/rr(:,j)
               sKTA(:,j)         = - (r(:,j)*Dr_KTA(:,j)         + z(:,j)*Dz_KTA(:,j)         + KTA(:,j))/rr(:,j)
               sKTH(:,j)         = - (r(:,j)*Dr_KTH(:,j)         + z(:,j)*Dz_KTH(:,j)         + KTH(:,j))/rr(:,j)
-              sAlambda(:,j)     = - (r(:,j)*Dr_Alambda(:,j)     + z(:,j)*Dz_Alambda(:,j)     + Alambda(:,j  ))/rr(:,j)
-              sdtbeta_p(:,j)    = - (r(:,j)*Dr_dtbeta_p(:,j)    + z(:,j)*Dz_dtbeta_p(:,j)    + dtbeta_p(:,j  ))/rr(:,j)
+              sAlambda(:,j)     = - (r(:,j)*Dr_Alambda(:,j)     + z(:,j)*Dz_Alambda(:,j)     + Alambda(:,j))/rr(:,j)
+              sdtbeta_p(:,j)    = - (r(:,j)*Dr_dtbeta_p(:,j)    + z(:,j)*Dz_dtbeta_p(:,j)    + 3.d0*dtbeta_p(:,j))/rr(:,j)
               scomplex_piR(:,j) = - (r(:,j)*Dr_complex_piR(:,j) + z(:,j)*Dz_complex_piR(:,j) + complex_piR(:,j))/rr(:,j)
            end if
 
            if ((.not.eqsym).and.(rank<nprocr)) then
-
+              j = 1-ghost
+              sdtalpha(:,j)     = - (r(:,j)*Dr_dtalpha(:,j)     + z(:,j)*Dz_dtalpha(:,j)     + dtalpha(:,j))/rr(:,j)
+              sKTA(:,j)         = - (r(:,j)*Dr_KTA(:,j)         + z(:,j)*Dz_KTA(:,j)         + KTA(:,j))/rr(:,j)
+              sKTH(:,j)         = - (r(:,j)*Dr_KTH(:,j)         + z(:,j)*Dz_KTH(:,j)         + KTH(:,j))/rr(:,j)
+              sAlambda(:,j)     = - (r(:,j)*Dr_Alambda(:,j)     + z(:,j)*Dz_Alambda(:,j)     + Alambda(:,j))/rr(:,j)
+              sdtbeta_p(:,j)    = - (r(:,j)*Dr_dtbeta_p(:,j)    + z(:,j)*Dz_dtbeta_p(:,j)    + 3.d0*dtbeta_p(:,j))/rr(:,j)
+              scomplex_piR(:,j) = - (r(:,j)*Dr_complex_piR(:,j) + z(:,j)*Dz_complex_piR(:,j) + complex_piR(:,j))/rr(:,j)
            end if
 
         end if
