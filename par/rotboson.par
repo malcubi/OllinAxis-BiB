@@ -1,0 +1,65 @@
+# Test parameter file
+# 
+# Rotating boson star initial data, 1+log slicing, no shift.
+
+mass_ADM_Vol = .true.      # Calculate ADM mass (volume integral)
+
+eqsym = .true.             # Equatorial symmetry
+angmom = .true.            # Turn on angular momentum
+
+dr0 = 0.1                  # Grid spacing in r
+dz0 = 0.1                  # Grid spacing in z
+
+dtfac = 0.5                # Courant parameter
+
+Nrtotal = 200              # Number of grid points in r
+Nztotal = 200              # Number of grid points in z
+Nt = 0                     # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+slicing = 1+log            # Type of slicing condition
+gauge_f = 2.0              # Coefficient for Bona-Masso slicing
+
+shift = Gammadriver2	   # Shift condition
+drivercsi = 0.75	   # Speed associated with shift propagation
+drivereta = 2.0		   # Damping coefficient (beware it has units and should be rescaled with mass)
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+boundtype = radiative      # Boundary condition
+
+mattertype = complex       # Complex scalar field
+complexpotential = phi2    # Complex field potential
+complex_mass = 1.0         # Complex field mass
+complex_l = 1              # Angular momentum number
+
+idata = rotboson           # Rotating boson star ininital data
+boson_factor = physical    # Normalization factor for boson star (physical,harmonic)
+boson_phi0  = 0.0325       # Central value of scalar field
+
+WE_epsilon = 1.d-9         # Wave elliptic tolerance
+WE_verbose = .true.        # Output information about the elliptic solver iterations
+WE_Noutput = 500           # How often do we output iterations?
+
+complexdiss = 0.01         # Dissipation for scalar field
+geodiss = 0.01             # Dissipation for geometric variables
+
+directory = rotboson       # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 10             # How often do we want 0D output?
+Noutput1D = 100            # How often do we want 1D output?
+Noutput2D = 500            # How often do we want 2D output?
+
+outparallel = fileperproc
+
+outvars0D = alpha,beta_p,trK,psi,phi,A,B,H,C,lambda,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_piR,complex_phiI,complex_xiI_r,complex_xiI_z,complex_piI,rho,mass_sch,strK,sKTA,sKTH
+
+outvars1D = alpha,beta_p,trK,psi,phi,A,B,H,C,lambda,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,complex_phiR,complex_xiR_r,complex_xiR_z,complex_piR,complex_phiI,complex_xiI_r,complex_xiI_z,complex_piI,rho,mass_sch,strK,sKTA,sKTH
+
+outvars2D = alpha,beta_p,trK,psi,A,B,H,C,lambda,ham,mom_r,mom_z,complex_phiR,complex_phiI,rho,mass_sch
+
+checkpointinitial = .false.
