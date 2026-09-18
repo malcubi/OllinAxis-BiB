@@ -30,7 +30,7 @@ mattertype = complex       # Complex scalar field
 complexpotential = phi2    # Complex field potential
 complex_mass = 1.0         # Complex field mass
 
-idata = bosonstar          # Complex field initial data
+idata = bosonstar          # Boson star initial data
 boson_factor = physical    # Normalization factor for boson star (physical,harmonic)
 boson_phi0  = 0.05         # Central value of scalar field
 
