@@ -454,7 +454,7 @@
   if (idata=="rotboson") then
 
      if (.not.angmom) then
-        print *, 'Rotating boson star initial data needs angmon=.true. ...'
+        print *, 'Rotating boson star initial data needs angmom=.true. ...'
         print *, 'Aborting! (subroutine idata_RotBoson)'
         print *
         call die
