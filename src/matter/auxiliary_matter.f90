@@ -116,16 +116,16 @@
      Dz_complex_xiR_r = diff1z(+1)
 
      diffvar => complex_xiR_z
-     Dr_complex_xiR_z = diff1r(-1)
-     Dz_complex_xiR_z = diff1z(+1)
+     Dr_complex_xiR_z = diff1r(+1)
+     Dz_complex_xiR_z = diff1z(-1)
 
      diffvar => complex_xiI_r
      Dr_complex_xiI_r = diff1r(-1)
      Dz_complex_xiI_r = diff1z(+1)
 
      diffvar => complex_xiI_z
-     Dr_complex_xiI_z = diff1r(-1)
-     Dz_complex_xiI_z = diff1z(+1)
+     Dr_complex_xiI_z = diff1r(+1)
+     Dz_complex_xiI_z = diff1z(-1)
 
 !    Advective derivatives.
 
