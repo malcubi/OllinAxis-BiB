@@ -57,16 +57,16 @@
 
 ! Source for scalar potential.
 
-  smaxw_phi = alpha * maxw_phi * trK                                           &
-               - maxw_A_r*Dr_alpha - maxw_A_z*Dz_alpha                         &
-               - alpha*maxw_Au_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet)        &
-               - alpha*maxw_Au_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)        &
-               - (alpha/psi4) * ( r * ( maxw_A_r*Dz_g_C + maxw_A_z*Dr_g_C)     &
-                     + maxw_A_r*Dr_g_A + maxw_A_z*g_C + maxw_A_z*Dz_g_B)       &
-               - (alpha/psi4) * (g_A*Dr_maxw_A_r + r*g_C*Dz_maxw_A_r +         &
-                                 g_B*Dz_maxw_A_z + r*g_C*Dr_maxw_A_z )
+  smaxw_phi = alpha * maxw_phi * trK                                             &
+               - maxw_Au_r*Dr_alpha - maxw_Au_z*Dz_alpha                         &
+               - alpha*maxw_Au_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet + one/r)  &
+               - alpha*maxw_Au_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)          &
+               - (alpha/psi4) * ( r * ( maxw_A_r*Dz_g_C + maxw_A_z*Dr_g_C)       &
+                     + maxw_A_r*Dr_g_A + maxw_A_z*g_C + maxw_A_z*Dz_g_B)         &
+               - (alpha/psi4) * (g_A*Dr_maxw_A_r + r*g_C*Dz_maxw_A_r +           &
+                                 g_B*Dz_maxw_A_z + r*g_C*Dr_maxw_A_z)
 
-  if (shift/="none") then 
+  if (shift/="none") then
      smaxw_phi = smaxw_phi + beta_r*DAr_maxw_phi + beta_z*DAz_maxw_phi
   end if
 
@@ -79,7 +79,7 @@
      smaxw_A_p = - alpha * maxw_Ed_p
   end if
 
-  if (shift/="none") then 
+  if (shift/="none") then
 
      smaxw_A_r = smaxw_A_r + beta_r*DAr_maxw_A_r + beta_z*DAz_maxw_A_r    &
                            + maxw_A_r*Dr_beta_r  + maxw_A_z*Dr_beta_z
@@ -109,7 +109,7 @@
                  + r**2*H*CovDr_maxw_B_p  - A*CovDp_maxw_B_r          & ! Warning. Remember that CovDr_maxw_B_p contents singular christoffel
                  - r*C*CovDp_maxw_B_z     - r**3*C1*CovDp_maxw_B_p )    ! Warning. Remember that CovDp_maxw_B_p contents singular christoffel
 
-     smaxw_E_p = alpha*trK*maxw_E_p                                   &
+     smaxw_E_p = alpha*trK*maxw_E_p - 4.d0*smallpi*alpha*J_p          &
                  + maxw_Bd_r*Dz_alpha - maxw_Bd_z*Dr_alpha + alpha*   &
                  ( A*CovDz_maxw_B_r       + r*C*CovDz_maxw_B_z        &
                  + r**3*C1*CovDz_maxw_B_p - r*C*CovDr_maxw_B_r        &
@@ -117,7 +117,7 @@
 
   end if
 
-  if (shift/="none") then 
+  if (shift/="none") then
 
      smaxw_E_r = smaxw_E_r + beta_r*DAr_maxw_E_r + beta_z*DAz_maxw_E_r    &
                            - maxw_E_r*Dr_beta_r  - maxw_E_z*Dz_beta_r
@@ -159,14 +159,14 @@
 
   if (shift/="none") then
 
-     smaxw_B_r = smaxw_B_r + beta_r*DAr_maxw_B_r + beta_z*DAz_maxw_B_r    &
+     smaxw_B_r = smaxw_B_r + beta_r*DAr_maxw_B_r + beta_z*DAz_maxw_B_r     &
                            - maxw_B_r*Dr_beta_r  - maxw_B_z*Dz_beta_r
 
-     smaxw_B_z = smaxw_B_z + beta_r*DAr_maxw_B_z + beta_z*DAz_maxw_B_z    &
+     smaxw_B_z = smaxw_B_z + beta_r*DAr_maxw_B_z + beta_z*DAz_maxw_B_z     &
                            - maxw_B_r*Dr_beta_z  - maxw_B_z*Dz_beta_z
 
      if (angmom) then
-        smaxw_B_p = smaxw_B_p + beta_r*DAr_maxw_B_p + beta_z*DAz_maxw_B_p &
+        smaxw_B_p = smaxw_B_p + beta_r*DAr_maxw_B_p + beta_z*DAz_maxw_B_p  &
                               - maxw_B_r*Dr_beta_p  - maxw_B_z*Dz_beta_p
      end if
 
