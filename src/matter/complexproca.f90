@@ -35,6 +35,7 @@
 
   implicit none
 
+  logical contains
   real(8) vl,var0
   real(8) zero,half,one,two
 
@@ -55,29 +56,53 @@
 
 ! Source for scalar potential.
 
-  sproc_phiR = alpha * proc_phiR * trK                                           &
-               - proc_AR_r*Dr_alpha - proc_AR_z*Dz_alpha                         &
-               - alpha*proc_ARu_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet)         &
-               - alpha*proc_ARu_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)         &
-               - (alpha/psi4) * ( r * ( proc_AR_r*Dz_g_C + proc_AR_z*Dr_g_C)     &
-                     + proc_AR_r*Dr_g_A + proc_AR_z*g_C + proc_AR_z*Dz_g_B)      &
-               - (alpha/psi4) * (g_A*Dr_proc_AR_r + r*g_C*Dz_proc_AR_r +         &
+  sproc_phiR = alpha * proc_phiR * trK                                             &
+               - proc_ARu_r*Dr_alpha - proc_ARu_z*Dz_alpha                         &
+               - alpha*proc_ARu_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet + one/r)   &
+               - alpha*proc_ARu_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)           &
+               - (alpha/psi4) * ( r * ( proc_AR_r*Dz_g_C + proc_AR_z*Dr_g_C)       &
+                     + proc_AR_r*Dr_g_A + proc_AR_z*g_C + proc_AR_z*Dz_g_B)        &
+               - (alpha/psi4) * (g_A*Dr_proc_AR_r + r*g_C*Dz_proc_AR_r +           &
                                  g_B*Dz_proc_AR_z + r*g_C*Dr_proc_AR_z )
 
-  sproc_phiI = alpha * proc_phiI * trK                                           &
-               - proc_AI_r*Dr_alpha - proc_AI_z*Dz_alpha                         &
-               - alpha*proc_AIu_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet)         &
-               - alpha*proc_AIu_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)         &
-               - (alpha/psi4) * ( r * ( proc_AI_r*Dz_g_C + proc_AI_z*Dr_g_C)     &
-                     + proc_AI_r*Dr_g_A + proc_AI_z*g_C + proc_AI_z*Dz_g_B)      &
-               - (alpha/psi4) * (g_A*Dr_proc_AI_r + r*g_C*Dz_proc_AI_r +         &
+  sproc_phiI = alpha * proc_phiI * trK                                             &
+               - proc_AIu_r*Dr_alpha - proc_AIu_z*Dz_alpha                         &
+               - alpha*proc_AIu_r * (2.d0*Dr_phi + (0.5d0/hdet)*Dr_hdet + one/r)   &
+               - alpha*proc_AIu_z * (2.d0*Dz_phi + (0.5d0/hdet)*Dz_hdet)           &
+               - (alpha/psi4) * ( r * ( proc_AI_r*Dz_g_C + proc_AI_z*Dr_g_C)       &
+                     + proc_AI_r*Dr_g_A + proc_AI_z*g_C + proc_AI_z*Dz_g_B)        &
+               - (alpha/psi4) * (g_A*Dr_proc_AI_r + r*g_C*Dz_proc_AI_r +           &
                                  g_B*Dz_proc_AI_z + r*g_C*Dr_proc_AI_z )
 
-!  Notice that adding angular momentum does not introduce any additional terms.
+! Notice that adding angular momentum does not introduce any additional terms.
 
   if (shift/="none") then 
      sproc_phiR = sproc_phiR + beta_r*DAr_proc_phiR + beta_z*DAz_proc_phiR
      sproc_phiI = sproc_phiI + beta_r*DAr_proc_phiI + beta_z*DAz_proc_phiI
+  end if
+
+! Charge terms if needed. In the case of a charged Proca field we need
+! to add the following terms to the source:
+
+  if (contains(mattertype,"electric")) then
+
+     sproc_phiR = sproc_phiR - cproca_q*alpha*(                                    &
+                  maxw_A_r*proc_AIu_r + maxw_A_z*proc_AIu_z - maxw_phi*proc_phiI   &
+               + (maxw_Bd_r*proc_BI_r + maxw_Bd_z*proc_BI_z                        &
+                - maxw_Ed_r*proc_EI_r - maxw_Ed_z*proc_EI_z) / proc_mass**2 )
+
+     sproc_phiI = sproc_phiI + cproca_q*alpha*(                                    &
+                  maxw_A_r*proc_ARu_r + maxw_A_z*proc_ARu_z - maxw_phi*proc_phiR   &
+               + (maxw_Bd_r*proc_BR_r + maxw_Bd_z*proc_BR_z                        &
+                - maxw_Ed_r*proc_ER_r - maxw_Ed_z*proc_ER_z) / proc_mass**2 )
+
+     if (angmom) then
+        sproc_phiR = sproc_phiR - cproca_q*alpha*( maxw_A_p*proc_AIu_p +           &
+                   ( maxw_Bd_p*proc_BI_p - maxw_Ed_p*proc_EI_p) / proc_mass**2 )
+        sproc_phiI = sproc_phiI - cproca_q*alpha*( maxw_A_p*proc_ARu_p +           &
+                   ( maxw_Bd_p*proc_BR_p - maxw_Ed_p*proc_ER_p) / proc_mass**2 )
+     end if
+
   end if
 
 ! Source for vector potential.
@@ -110,10 +135,35 @@
 
   end if
 
+! Charge terms if needed. In the case of a charged Proca field we need
+! to add the following terms to the source:
+
+  if (contains(mattertype,"electric")) then
+
+     sproc_AR_r = sproc_AR_r - cproca_q*alpha * (                 &
+                  maxw_A_r*proc_phiI - proc_AI_r*maxw_phi )
+     sproc_AI_r = sproc_AI_r + cproca_q*alpha * (                 &
+                  maxw_A_r*proc_phiR - proc_AR_r*maxw_phi )
+
+     sproc_AR_z = sproc_AR_z - cproca_q*alpha * (                 &
+                  maxw_A_z*proc_phiI - proc_AI_z*maxw_phi )
+     sproc_AI_z = sproc_AI_z + cproca_q*alpha * (                 &
+                  maxw_A_z*proc_phiR - proc_AR_z*maxw_phi )
+
+     if (angmom) then
+        sproc_AR_p = sproc_AR_p - cproca_q*alpha * (              &
+                     maxw_A_p*proc_phiI - proc_AI_p*maxw_phi )
+        sproc_AI_p = sproc_AI_p + cproca_q*alpha * (              &
+                     maxw_A_p*proc_phiR - proc_AR_p*maxw_phi )
+     end if
+
+  end if
+
 ! Source for electric field.
 
   sproc_ER_r = alpha * trK * proc_ER_r + alpha * proc_mass**2 * proc_ARu_r
   sproc_EI_r = alpha * trK * proc_EI_r + alpha * proc_mass**2 * proc_AIu_r
+
   sproc_ER_z = alpha * trK * proc_ER_z + alpha * proc_mass**2 * proc_ARu_z
   sproc_EI_z = alpha * trK * proc_EI_z + alpha * proc_mass**2 * proc_AIu_z
 
@@ -122,12 +172,12 @@
      sproc_ER_r = sproc_ER_r - proc_BRd_p * Dz_alpha + alpha *           &
                   ( r*C*CovDp_proc_BR_r     + B*CovDp_proc_BR_z          &
                   + r**2*C2*CovDp_proc_BR_p - r**3*C1*CovDz_proc_BR_r    & ! Warning. Remember that CovDp_proc_BR_p contents singular christoffel
-                  - r**2*C2*CovDz_proc_BR_z - r**2*H*CovDz_proc_BR_p )
+                  - r**2*C2*CovDz_proc_BR_z - r**2*H*CovDz_proc_BR_p ) 
 
      sproc_EI_r = sproc_EI_r - proc_BId_p * Dz_alpha + alpha *           &
                   ( r*C*CovDp_proc_BI_r     + B*CovDp_proc_BI_z          &
                   + r**2*C2*CovDp_proc_BI_p - r**3*C1*CovDz_proc_BI_r    & ! Warning. Remember that CovDp_proc_BI_p contents singular christoffel
-                  - r**2*C2*CovDz_proc_BI_z - r**2*H*CovDz_proc_BI_p )
+                  - r**2*C2*CovDz_proc_BI_z - r**2*H*CovDz_proc_BI_p ) 
 
      sproc_ER_z = sproc_ER_z + proc_BRd_p * Dr_alpha + alpha *           &
                   ( r**3*C1*CovDr_proc_BR_r + r**2*C2*CovDr_proc_BR_z    &
@@ -172,6 +222,49 @@
                                 - proc_ER_r*Dr_beta_p  - proc_ER_z*Dz_beta_p
         sproc_EI_p = sproc_EI_p + beta_r*DAr_proc_EI_p + beta_z*DAz_proc_EI_p    &
                                 - proc_EI_r*Dr_beta_p  - proc_EI_z*Dz_beta_p
+     end if
+
+  end if
+
+! Charge terms if needed. In the case of a charged Proca field we need
+! to add the following terms to the source:
+
+  if (contains(mattertype,"electric")) then
+
+     sproc_ER_r = sproc_ER_r + cproca_q*alpha * ( maxw_phi*proc_EI_r )
+     sproc_EI_r = sproc_EI_r - cproca_q*alpha * ( maxw_phi*proc_ER_r )
+     sproc_ER_z = sproc_ER_z + cproca_q*alpha * ( maxw_phi*proc_EI_z )
+     sproc_EI_z = sproc_EI_z - cproca_q*alpha * ( maxw_phi*proc_ER_z )
+
+     if (angmom) then
+
+!       Extra terms to the previous ones.
+
+        sproc_ER_r = sproc_ER_r + cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_p*proc_BId_z - maxw_A_z*proc_BId_p )
+        sproc_EI_r = sproc_EI_r - cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_p*proc_BRd_z - maxw_A_z*proc_BRd_p )
+
+        sproc_ER_z = sproc_ER_z + cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_r*proc_BId_p - maxw_A_p*proc_BId_r )
+        sproc_EI_z = sproc_EI_z - cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_r*proc_BRd_p - maxw_A_p*proc_BRd_r )
+
+!       Pure angular momentum.
+
+        sproc_ER_p = sproc_ER_p + cproca_q*alpha * ( maxw_phi*proc_EI_p )
+        sproc_EI_p = sproc_EI_p - cproca_q*alpha * ( maxw_phi*proc_ER_p )
+
+        sproc_ER_p = sproc_ER_p + cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_z*proc_BId_r - maxw_A_r*proc_BId_z )
+        sproc_EI_p = sproc_EI_p - cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_z*proc_BRd_r - maxw_A_r*proc_BRd_z )
      end if
 
   end if
@@ -238,6 +331,66 @@
                                 - proc_BR_r*Dr_beta_p  - proc_BR_z*Dz_beta_p
         sproc_BI_p = sproc_BI_p + beta_r*DAr_proc_BI_p + beta_z*DAz_proc_BI_p    &
                                 - proc_BI_r*Dr_beta_p  - proc_BI_z*Dz_beta_p
+     end if
+
+  end if
+
+! Charge terms if needed. In the case of a charged Proca field we need
+! to add the following terms to the source:
+
+  if (contains(mattertype,"electric")) then
+
+     sproc_BR_r = sproc_BR_r - cproca_q*alpha *                            &
+                             ( proc_phiI*maxw_B_r - maxw_phi*proc_BI_r)
+     sproc_BI_r = sproc_BI_r - cproca_q*alpha *                            &
+                             ( proc_phiR*maxw_B_r - maxw_phi*proc_BR_r)
+     sproc_BR_z = sproc_BR_z - cproca_q*alpha *                            &
+                             ( proc_phiI*maxw_B_z - maxw_phi*proc_BI_z)
+     sproc_BI_z = sproc_BI_z - cproca_q*alpha *                            &
+                             ( proc_phiR*maxw_B_z - maxw_phi*proc_BR_z)
+
+     if (angmom) then
+
+        ! Aditional terms to the previous ones.
+
+        sproc_BR_r = sproc_BR_r + cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_p*proc_EId_z - maxw_A_z*proc_EId_p      &
+                                - proc_AI_p*maxw_Ed_z + proc_AI_z*maxw_Ed_p )
+
+        sproc_BI_r = sproc_BI_r - cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_p*proc_ERd_z - maxw_A_z*proc_ERd_p      &
+                                - proc_AR_p*maxw_Ed_z + proc_AR_z*maxw_Ed_p )
+
+        sproc_BR_z = sproc_BR_z + cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_r*proc_EId_p - maxw_A_p*proc_EId_r      &
+                                - proc_AI_r*maxw_Ed_p + proc_AI_p*maxw_Ed_r )
+
+        sproc_BI_z = sproc_BI_z - cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_r*proc_ERd_p - maxw_A_p*proc_ERd_r      &
+                                - proc_AR_r*maxw_Ed_p + proc_AR_p*maxw_Ed_r )
+
+!       Pure angular momentum.
+
+        sproc_BR_p = sproc_BR_p - cproca_q*alpha *                               &
+                                ( proc_phiI*maxw_B_p - maxw_phi*proc_BI_p)
+
+        sproc_BI_p = sproc_BI_p - cproca_q*alpha *                               &
+                                ( proc_phiR*maxw_B_p - maxw_phi*proc_BR_p)
+
+        sproc_BR_p = sproc_BR_p + cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_z*proc_EId_r - maxw_A_r*proc_EId_z      &
+                                - proc_AI_z*maxw_Ed_r + proc_AI_r*maxw_Ed_z )
+
+        sproc_BI_p = sproc_BI_p - cproca_q*alpha *                               &
+                                ( 1/hdet**0.5 ) * ( 1/psi2**3 ) *                &
+                                ( maxw_A_z*proc_ERd_r - maxw_A_r*proc_ERd_z      &
+                                - proc_AR_z*maxw_Ed_r + proc_AR_r*maxw_Ed_z )
+
      end if
 
   end if
