@@ -21,7 +21,7 @@
 
   integer :: box,level
   integer :: i,j,ir     ! Counters
-  integer :: Nrtot,ios              
+  integer :: Nrtot,ios
 
   real(8), allocatable :: metric_g(:), alpha_g(:)  ! radial metric and lapse global arrays.
   real(8), allocatable :: Aphi_g(:), Ar_g(:)       ! Scalar and vector potentials global arrays.
@@ -64,7 +64,7 @@
   dir = "/home/jorge/OllinSphere-BiB/exe/procastar/"
 
   if (contains(mattertype,"electric")) then
-     dir = "/home/jorge/OllinSphere-BiB/exe/chargedprocastar/"
+     dir = "/home/jorge/OllinSphere-BiB/exe/chargedproca/"
   end if
 
 ! Calculate Nrtot.
@@ -103,17 +103,25 @@
   allocate(Ar_g(1-ghost:Nrtot))
   allocate(Er_g(1-ghost:Nrtot))
 
+! If we consider initial data for charged Proca star.
+
+  if (contains(mattertype,"electric")) then
+     allocate(eAphi_g(1-ghost:Nrtot))
+     allocate(eAr_g(1-ghost:Nrtot))
+     allocate(eEr_g(1-ghost:Nrtot))
+  end if
+
 ! Read the file used to save the data.
 
-  open(unit=10, file=trim(dir)//"cprocaPhi_R0.rl", status="old")     
-     read(10, '(A)')               ! Skip header     
+  open(unit=10, file=trim(dir)//"cprocaPhi_R0.rl", status="old")
+     read(10, '(A)')               ! Skip header
      do i = 1-ghost, Nrtot
         read(10, *) col1, col2
         Aphi_g(i) = col2
      end do
   close(10)
-       
-  open(unit=10, file=trim(dir)//"cprocaA_I0.rl", status="old")     
+
+  open(unit=10, file=trim(dir)//"cprocaA_I0.rl", status="old")
      read(10, '(A)')               ! Skip header
      do i = 1-ghost, Nrtot
         read(10, *) col1, col2
@@ -121,7 +129,7 @@
      end do
   close(10)
 
-  open(unit=10, file=trim(dir)//"cprocaE_R0.rl", status="old")     
+  open(unit=10, file=trim(dir)//"cprocaE_R0.rl", status="old")
      read(10, '(A)')               ! Skip header
      do i = 1-ghost, Nrtot
         read(10, *) col1, col2
@@ -129,7 +137,7 @@
      end do
   close(10)
 
-  open(unit=10, file=trim(dir)//"alpha0.rl", status="old")     
+  open(unit=10, file=trim(dir)//"alpha0.rl", status="old")
      read(10, '(A)')               ! Skip header
      do i = 1-ghost, Nrtot
         read(10, *) col1, col2
@@ -137,13 +145,43 @@
      end do
   close(10)
 
-  open(unit=10, file=trim(dir)//"A0.rl", status="old")     
+  open(unit=10, file=trim(dir)//"A0.rl", status="old")
      read(10, '(A)')               ! Skip header
      do i = 1-ghost, Nrtot
         read(10, *) col1, col2
         metric_g(i) = col2
      end do
   close(10)
+
+! If we consider initial data for charged Proca star.
+
+  if (contains(mattertype,"electric")) then
+
+       open(unit=10, file=trim(dir)//"ePhi0.rl", status="old")
+          read(10, '(A)')               ! Skip header
+          do i = 1-ghost, Nrtot
+            read(10, *) col1, col2
+            eAphi_g(i) = col2
+          end do
+       close(10)
+
+       open(unit=10, file=trim(dir)//"eAr0.rl", status="old")
+          read(10, '(A)')               ! Skip header
+          do i = 1-ghost, Nrtot
+             read(10, *) col1, col2
+             eAr_g(i) = col2
+          end do
+       close(10)
+
+       open(unit=10, file=trim(dir)//"electric0.rl", status="old")
+          read(10, '(A)')               ! Skip header
+          do i = 1-ghost, Nrtot
+          read(10, *) col1, col2
+             eEr_g(i) = col2
+          end do
+       close(10)
+
+  end if
 
 
 ! **********************
@@ -190,7 +228,7 @@
 
            dz_dradio = z(i,j)/radio 
            dz_dtheta = -r(i,j)
-           dz_dphi   = 0.d0        
+           dz_dphi   = 0.d0
 
 !          Lagrange cubic interpolation.
 
@@ -228,11 +266,11 @@
                   aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
                   aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
 
-           proc_AR_r(i,j) = 0.d0
-           proc_AR_z(i,j) = 0.d0
+           proc_AR_r(i,j)   = 0.d0
+           proc_AR_z(i,j)   = 0.d0
 
-           proc_AI_r(i,j) = dradio_dr * aux0
-           proc_AI_z(i,j) = dradio_dz * aux0
+           proc_AI_r(i,j)   = dradio_dr * aux0
+           proc_AI_z(i,j)   = dradio_dz * aux0
 
 !          Proca electric field.
 
@@ -246,25 +284,74 @@
                   aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
                   aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
 
-           proc_ER_r(i,j) = dradio_dr * aux0
-           proc_ER_z(i,j) = dradio_dz * aux0
+           proc_ER_r(i,j)   = dradio_dr * aux0
+           proc_ER_z(i,j)   = dradio_dz * aux0
 
-           proc_EI_r(i,j) = 0.d0
-           proc_EI_z(i,j) = 0.d0
+           proc_EI_r(i,j)   = 0.d0
+           proc_EI_z(i,j)   = 0.d0
 
 !          Proca magnetic field.
 
-           proc_BR_r = 0.0d0
-           proc_BR_z = 0.0d0
+           proc_BR_r   = 0.0d0
+           proc_BR_z   = 0.0d0
 
-           proc_BI_r = 0.0d0
-           proc_BI_z = 0.0d0
+           proc_BI_r   = 0.0d0
+           proc_BI_z   = 0.0d0
 
-!          If we consider initial data for charged Proca star
+!          If we consider initial data for charged Proca star.
 
-!          if (contains(mattertype,"electric")) then
-            ! ...Pending
-!          end if
+           if (contains(mattertype,"electric")) then
+
+!             Maxwell scalar potential.
+
+              aux1 = eAphi_g(ir-1)
+              aux2 = eAphi_g(ir  )
+              aux3 = eAphi_g(ir+1)
+              aux4 = eAphi_g(ir+2)
+
+              aux0 = aux1 * ((radio-r2)*(radio-r3)*(radio-r4))/((r1-r2)*(r1-r3)*(r1-r4)) + &
+                     aux2 * ((radio-r1)*(radio-r3)*(radio-r4))/((r2-r1)*(r2-r3)*(r2-r4)) + &
+                     aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
+                     aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
+
+              maxw_phi(i,j) = aux0
+
+!             Maxwell vector potential.
+
+              aux1 = eAr_g(ir-1)
+              aux2 = eAr_g(ir  )
+              aux3 = eAr_g(ir+1)
+              aux4 = eAr_g(ir+2)
+
+              aux0 = aux1 * ((radio-r2)*(radio-r3)*(radio-r4))/((r1-r2)*(r1-r3)*(r1-r4)) + &
+                     aux2 * ((radio-r1)*(radio-r3)*(radio-r4))/((r2-r1)*(r2-r3)*(r2-r4)) + &
+                     aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
+                     aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
+
+              maxw_A_r(i,j)   = dradio_dr * aux0
+              maxw_A_z(i,j)   = dradio_dz * aux0
+
+!             Maxwell electric field.
+
+              aux1 = eEr_g(ir-1)
+              aux2 = eEr_g(ir  )
+              aux3 = eEr_g(ir+1)
+              aux4 = eEr_g(ir+2)
+
+              aux0 = aux1 * ((radio-r2)*(radio-r3)*(radio-r4))/((r1-r2)*(r1-r3)*(r1-r4)) + &
+                     aux2 * ((radio-r1)*(radio-r3)*(radio-r4))/((r2-r1)*(r2-r3)*(r2-r4)) + &
+                     aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
+                     aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
+
+              maxw_E_r(i,j)   = dradio_dr * aux0
+              maxw_E_z(i,j)   = dradio_dz * aux0
+
+!             Maxwell magnetic field.
+
+              maxw_B_r   = 0.0d0
+              maxw_B_z   = 0.0d0
+
+           end if
 
 !          Lapse alpha.
 
@@ -287,11 +374,10 @@
            aux3 = metric_g(ir+1)
            aux4 = metric_g(ir+2)
 
-           aux0 = &
-             aux1 * ((radio-r2)*(radio-r3)*(radio-r4))/((r1-r2)*(r1-r3)*(r1-r4)) + &
-             aux2 * ((radio-r1)*(radio-r3)*(radio-r4))/((r2-r1)*(r2-r3)*(r2-r4)) + &
-             aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
-             aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
+           aux0 = aux1 * ((radio-r2)*(radio-r3)*(radio-r4))/((r1-r2)*(r1-r3)*(r1-r4)) + &
+                  aux2 * ((radio-r1)*(radio-r3)*(radio-r4))/((r2-r1)*(r2-r3)*(r2-r4)) + &
+                  aux3 * ((radio-r1)*(radio-r2)*(radio-r4))/((r3-r1)*(r3-r2)*(r3-r4)) + &
+                  aux4 * ((radio-r1)*(radio-r2)*(radio-r3))/((r4-r1)*(r4-r2)*(r4-r3))
 
            A(i,j) = dradio_dr**2 * aux0 + dtheta_dr**2 * radio**2
 
@@ -309,15 +395,22 @@
            KH(i,j) = 0.d0
            KC(i,j) = 0.d0
 
+
+! ********************
+! ***   END LOOP   ***
+! ********************
+
            end do
         end do
 
-     psi = 1.d0
-!    psi2 = psi**2
-!    psi4 = psi2**2
+!       Conformal factor.
 
-!    phi = log(psi)
-!    chi = one/psi**dble(chipower)
+        psi = 1.d0
+        psi2 = psi**2
+        psi4 = psi2**2
+
+        phi = log(psi)
+!       chi = 1.d0/psi**dble(chipower)
 
 
 ! ********************
