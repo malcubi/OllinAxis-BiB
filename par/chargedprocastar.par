@@ -1,0 +1,47 @@
+# Test parameter file:
+#
+# Charged Proca star, 1+log slicing, no shift.
+
+eqsym =  .true.            # Equatorial symmetry
+angmom = .false.           # Do not allocate angular functions
+
+dr0 = 0.05                 # Grid spacing in r
+dz0 = 0.05                 # Grid spacing in z
+
+dtfac = 0.4                # Courant parameter
+
+Nt = 100000                # Number of time steps
+
+Nl0 = 0                    # Number of refinement levels for box 0 (centered on origin)
+
+Nrtotal = 600              # Number of grid points in r
+Nztotal = 600              # Number of grid points in z
+
+slicing = 1+log            # Type of slicing condition (1+log,maximal)
+gauge_f = 2.0              # Coefficient for Bona-Masso slicing
+
+integrator = rk4           # Type of integration method (icn,rk4)
+order = four               # Order for spatial finite differencing (two,four)
+
+scalardiss = 0.01          # Dissipation for scalar field
+geodiss = 0.01             # Dissipation for geometric variables
+
+boundtype = radiative      # Boundary condition
+
+mattertype = complexproca,electric        # (Charged) Complex Proca field
+proc_mass = 1.0            # Proca field mass
+cproca_q = 0.5             # Charge of Proca field
+
+idata = procastar_ollinsphere     # PS/CPS initial data imported from Ollinsphere
+
+directory = chargedPS      # Name of output directory
+outparallel = fileperproc  # Parallel output (singlefile,fileperproc)
+
+Ninfo = 10                 # How often do we want to output information to screen?
+Noutput0D = 1000             # How often do we want 0D output?
+Noutput1D = 50             # How often do we want 1D output?
+Noutput2D = 50             # How often do we want 2D output?
+
+outvars0D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,proc_phiR,proc_AR_r,maxw_phi,maxw_A_r,maxw_A_z
+outvars1D = alpha,trK,psi,phi,A,B,H,C,KTA,KTB,KTH,KTC,ham,mom_r,mom_z,proc_phiR,proc_AR_r,proc_AR_z,proc_AI_r,maxw_phi,maxw_A_r,maxw_A_z
+outvars2D = alpha,trK,psi,phi,A,B,H,C,ham,mom_r,mom_z,proc_phiR,proc_AR_r,proc_AR_z,proc_AI_r,proc_AI_z,maxw_phi,maxw_A_r,maxw_A_z
