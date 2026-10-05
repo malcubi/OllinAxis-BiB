@@ -709,10 +709,10 @@
 ! ***   COMPLEX PROCA FIELD   ***
 ! ********************************
 
-! proca_mass:   Mass of the complex Proca field.
-! cproca_q:     Charge of the complex Proca field.
+! proc_mass:   Mass of the complex Proca field.
+! cproca_q:    Charge of the complex Proca field.
 
-  real(8) :: proca_mass = 1.0
+  real(8) :: proc_mass = 1.0
   real(8) :: cproca_q = 0.d0
 
 
