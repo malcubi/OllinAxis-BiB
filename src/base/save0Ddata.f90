@@ -181,13 +181,14 @@
   integer i,j
   integer step,box,level
   integer unit
-  integer foundnan
+  !integer foundnan
   integer naux
 
   real(8) vmax,gmax,vmin,gmin,v0
   real(8) nm1,gnm1,nm2,gnm2
   real(8) NN,NNtot
   real(8) tt,interp
+  real(8) foundnan
   real(8) aux
 
   character(len=1) comment
@@ -256,10 +257,10 @@
 
 ! If we found a NaN die.
 
-  naux = foundnan; foundnan = 0
-  call MPI_Allreduce(naux,foundnan,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD,ierr)
+  aux = 0.0d0
+  call MPI_Allreduce(foundnan,aux,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
 
-  if (foundnan>0) then
+  if (aux>0.d0) then
      call die
   end if
 
