@@ -103,11 +103,11 @@
   integer i,j,m,n                ! Counters.
   integer step                   ! Iteration counter.
   integer Nlmax_old              ! Original number of levels.
-  integer NNloc,NNtot            ! Total number of grid points.
   integer miniter                ! Minimum number of iterations.
   integer :: maxiter = 100000    ! Maximum number of iterations.
 
   real(8) lres,gres              ! Local and global residuals.
+  real(8) NNloc,NNtot            ! Total number of grid points.
   real(8) r0,z0,interp           ! For interpolation.
   real(8) cfac                   ! Courant parameter.
   real(8) one,half,smallpi       ! Numbers.
@@ -371,8 +371,8 @@
      lres = 0.d0
      gres = 0.d0
 
-     NNloc = 0
-     NNtot = 0
+     NNloc = 0.d0
+     NNtot = 0.d0
 
      do j=1,Nzl(0,rank)-ghost
         do i=1,Nrl(0,rank)-ghost
@@ -390,13 +390,13 @@
 
      if (size>1) then
         call MPI_Allreduce(lres,gres,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
-        call MPI_Allreduce(NNloc,NNtot,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD,ierr)
+        call MPI_Allreduce(NNloc,NNtot,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
      else
         gres = lres
         NNtot = NNloc
      end if
 
-     gres = gres/dble(NNtot)
+     gres = gres/NNtot
 
 
 !    ******************
