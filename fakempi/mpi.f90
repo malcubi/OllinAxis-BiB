@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/fakempi/mpi.f90,v 1.3 2019/08/28 02:23:20 malcubi Exp $
 
 ! *********************************
 ! ***   MPI FAKE DECLARATIONS   ***
