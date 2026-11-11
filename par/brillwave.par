@@ -36,7 +36,7 @@ brill_a0 = 4.0             # Brill wave amplitude
 
 ELL_solver = wave          # Elliptic solver (wave,sor)
 WE_epsilon = 1.d-8         # Wave elliptic tolerance
-We_verbose = .false.       # Output information about the elliptic solver iterations
+WE_verbose = .false.       # Output information about the elliptic solver iterations
 WE_Noutput = 1000          # How often do we output iterations?
 
 ahfind = .true.            # Look for apparent horizon
