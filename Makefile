@@ -34,13 +34,16 @@ vpath ollinaxis exe
 # Check if we have MPI.
 
 ifeq ($(shell which mpif90 | sed -n "s:.*\/mpif90:mpif90:p"),mpif90)
+
 MPI := mpif90
 WW := COMPILING WITH MPIF90
-else
 
+else
 ifeq ($(shell which mpifort | sed -n "s:.*\/mpifort:mpifort:p"),mpifort)
+
 MPI := mpifort
 WW := COMPILING WITH MPIFORT
+
 else
 
 MPI := nompi
@@ -195,20 +198,24 @@ endif
 # Object files corresponding to Fortran modules. I separate
 # them from the rest to be sure they are compiled first.
 
-MODS = param.o mytypes.o arrays.o procinfo.o derivatives.o derivadvect.o harmonix.o gw_utils.o
+MODS = param.o mytypes.o arrays.o procinfo.o derivatives.o derivadvect.o harmonix.o
 
-ifneq ($(FX),usingmpi)
+ifneq ($(FX),nompi)
 MODS += mpi.o
 endif
+
+MODS += gw_utils.o
 
 # Object files.  This line automatically looks for all f90 files in
 # the "src" directory.  No need to add new files by hand.
 
 FILES += $(patsubst %.f90,%.o,$(wildcard src/*/*.f90))
 
-ifneq ($(FX),usingmpi)
+ifneq ($(FX),nompi)
 FILES += $(patsubst %.f90,%.o,$(wildcard fakempi/*.f90))
 endif
+
+# Object files.
 
 OBJS := $(notdir $(FILES))
 
