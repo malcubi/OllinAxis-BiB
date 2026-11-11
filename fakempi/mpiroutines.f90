@@ -1,4 +1,3 @@
-!$Header: /usr/local/ollincvs/Codes/OllinAxis-BiB/fakempi/mpiroutines.f90,v 1.2 2021/02/23 00:08:08 malcubi Exp $
 
 ! *********************************************
 ! ***   STUBS FOR SOME BASIC MPI ROUTINES   ***
@@ -8,7 +7,6 @@
 ! in the system.  It will just make sure that the code compiles
 ! in serial mode without complaining, basically by bypassing all
 ! MPI calls.
-
 
 ! ***   MPI_INIT   ***
 
@@ -73,6 +71,28 @@
   real(8) buffer(1:N)
   end subroutine MPI_RECV
 
+! ***   MPI_ISEND   ***
+
+  subroutine MPI_ISEND(buffer,N,MPI_TYPE,proc,tag,MPI_COMM_WORLD,request,ierr)
+  implicit none
+  integer MPI_COMM_WORLD
+  integer MPI_TYPE
+  integer N,proc,tag,ierr
+  integer request(:)
+  real(8) buffer(1:N)
+  end subroutine MPI_ISEND
+
+! ***   MPI_ISEND   ***
+
+  subroutine MPI_IRECV(buffer,N,MPI_TYPE,proc,tag,MPI_COMM_WORLD,request,ierr)
+  implicit none
+  integer MPI_COMM_WORLD
+  integer MPI_TYPE
+  integer N,proc,tag,ierr
+  integer request(:)
+  real(8) buffer(1:N)
+  end subroutine MPI_IRECV
+
 ! ***   MPI_BCAST   ***
 
   subroutine MPI_BCAST(buffer,N,MPI_TYPE,proc,MPI_COMM_WORLD,ierr)
@@ -90,3 +110,12 @@
   integer MPI_COMM_WORLD
   integer ierr
   end subroutine MPI_BARRIER
+
+! ***   MPI_WAITALL   ***
+
+  subroutine MPI_WAITALL(N,request,MPI_STATUS,ierr)
+  implicit none
+  integer MPI_STATUS
+  integer N,ierr
+  integer request(1:N)
+  end subroutine MPI_WAITALL
